@@ -10,7 +10,7 @@
 - [x] Chạy build production và kiểm tra lỗi runtime/frontend
 - [x] Kiểm tra giao diện web nội bộ và các luồng dashboard, sản lượng, nhân công, đánh giá tay nghề
 - [ ] Tạo checkpoint hoàn chỉnh trước khi publish
-- [ ] Deploy website nội bộ Cao su CN386 trên Manus WebDev
+- [x] Deploy website nội bộ Cao su CN386 trên Manus WebDev
 - [x] Tạo ứng dụng Expo dùng chung backend WebDev
 - [x] Tích hợp luồng xem dashboard, sản lượng, nhân công và đánh giá tay nghề trên điện thoại
 - [x] Kiểm tra build và cấu hình chạy app Expo
@@ -39,3 +39,20 @@
 - [x] Chuẩn hóa route Expo từ thư mục có dấu nháy thừa sang `mobile/app/(tabs)` và chạy lại check/export
 - [x] Bổ sung test thuần cho formatter và phép tổng hợp dữ liệu mobile
 - [ ] Xác minh runtime app Expo sau đăng nhập Manus trên thiết bị hoặc Expo Go
+
+## Production incident
+
+- [x] Xác định nguyên nhân trang production `caosucn386-hcbqtzyq.manus.space` hiển thị “This page couldn’t load”
+- [x] Kiểm tra log runtime production và phản hồi HTTP của domain team
+- [ ] Sửa lỗi production, chạy lại check/build và xác minh trang đăng nhập tải được
+- [ ] Tạo checkpoint bản sửa và deploy lại visibility team
+- [ ] Kiểm tra sau deploy bằng domain Manus và cập nhật hướng dẫn truy cập
+
+## Android PWA install
+
+- [x] Thêm manifest PWA có tên, biểu tượng, màu giao diện và display standalone
+- [x] Thêm icon PWA đúng kích thước và liên kết trong HTML
+- [x] Thêm service worker/register để đáp ứng điều kiện cài đặt Android
+- [x] Thêm nút cài đặt chủ động khi trình duyệt phát hiện beforeinstallprompt
+- [ ] Kiểm tra manifest, service worker, typecheck/build và deploy lại team
+- [ ] Kiểm tra sau deploy bằng Chrome/Samsung Internet trên Android
