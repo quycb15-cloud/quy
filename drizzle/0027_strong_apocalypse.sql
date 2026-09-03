@@ -1,0 +1,3 @@
+-- The two objects in this migration were provisioned safely before migration reconciliation:
+-- plot_garden_allocations and technical_skill_evaluations.
+-- Existing objects are intentionally preserved; earlier migrations still create the operational tables.

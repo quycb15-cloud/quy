@@ -1,0 +1,1 @@
+-- Baseline users table is provisioned by Manus WebDev.

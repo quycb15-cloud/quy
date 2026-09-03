@@ -1,42 +1,84 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import DashboardLayout from "@/components/DashboardLayout";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { lazy, Suspense } from "react";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+const Home = lazy(() => import("@/pages/Home"));
+const PlotsPage = lazy(() => import("@/pages/PlotsPage"));
+const ImportsPage = lazy(() => import("@/pages/ImportsPage"));
+const ExportsPage = lazy(() => import("@/pages/ExportsPage"));
+const WorkforcePage = lazy(() => import("@/pages/WorkforcePage"));
+const ReportsPage = lazy(() => import("@/pages/ReportsPage"));
+const DataToolsPage = lazy(() => import("@/pages/DataToolsPage"));
+const WarehouseLossPage = lazy(() => import("@/pages/WarehouseLossPage"));
+const CareOperationsPage = lazy(() => import("@/pages/CareOperationsPage"));
+const ProductionChangePage = lazy(() => import("@/pages/ProductionChangePage"));
+const PlotProductionPage = lazy(() => import("@/pages/PlotProductionPage"));
+const TechnicalSkillReportPage = lazy(
+  () => import("@/pages/TechnicalSkillReportPage")
+);
+const AccountsPage = lazy(() => import("@/pages/AccountsPage"));
+const ActivityLogPage = lazy(() => import("@/pages/ActivityLogPage"));
+const InstallAppPage = lazy(() => import("@/pages/InstallAppPage"));
+
+function ScreenLoader() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <div className="grid min-h-[60vh] place-items-center">
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-emerald-700 border-r-transparent" />
+    </div>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+function Router() {
+  const [location] = useLocation();
+  if (location === "/install")
+    return (
+      <Suspense fallback={<ScreenLoader />}>
+        <InstallAppPage />
+      </Suspense>
+    );
+  return (
+    <DashboardLayout>
+      <Suspense fallback={<ScreenLoader />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/plots" component={PlotsPage} />
+          <Route path="/imports" component={ImportsPage} />
+          <Route path="/exports" component={ExportsPage} />
+          <Route path="/care">
+            <Redirect to="/care-operations" />
+          </Route>
+          <Route path="/workforce" component={WorkforcePage} />
+          <Route path="/reports" component={ReportsPage} />
+          <Route path="/data-tools" component={DataToolsPage} />
+          <Route path="/warehouse-loss" component={WarehouseLossPage} />
+          <Route path="/care-operations" component={CareOperationsPage} />
+          <Route path="/production-change" component={ProductionChangePage} />
+          <Route path="/plot-production" component={PlotProductionPage} />
+          <Route path="/technical-skill" component={TechnicalSkillReportPage} />
+          <Route path="/accounts" component={AccountsPage} />
+          <Route path="/activity-log" component={ActivityLogPage} />
+          <Route path="/404" component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+    </DashboardLayout>
+  );
+}
 
-function App() {
+export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <Toaster />
+          <Toaster richColors position="top-right" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
 }
-
-export default App;

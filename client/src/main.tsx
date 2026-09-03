@@ -6,7 +6,13 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { startLogin } from "./const";
+import { startPwaInstallListener } from "./lib/installSupport";
 import "./index.css";
+
+startPwaInstallListener();
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined));
+}
 
 const queryClient = new QueryClient();
 
