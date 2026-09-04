@@ -659,10 +659,26 @@ export type ExcelWorkerPayload = {
   note?: string | null;
 };
 
+export function validateExcelWorkerRows(rows: ExcelWorkerPayload[]) {
+  const seenCodes = new Set<string>();
+  const seenNames = new Set<string>();
+  rows.forEach((row, index) => {
+    const unit = row.unit.trim();
+    const name = row.name.trim();
+    const code = row.employeeCode?.trim() || "";
+    const nameKey = `${unit.toLocaleLowerCase()}::${name.toLocaleLowerCase()}`;
+    if (code && seenCodes.has(code)) throw new Error(`Dòng ${index + 2}: Mã số ${code} bị trùng trong file`);
+    if (seenNames.has(nameKey)) throw new Error(`Dòng ${index + 2}: Nhân công ${name} thuộc ${unit} bị trùng trong file`);
+    if (code) seenCodes.add(code);
+    seenNames.add(nameKey);
+  });
+}
+
 export async function bulkUpsertExcelWorkers(
   rows: ExcelWorkerPayload[],
   userId: number
 ) {
+  validateExcelWorkerRows(rows);
   const db = await getDb();
   if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
   for (const row of rows) {

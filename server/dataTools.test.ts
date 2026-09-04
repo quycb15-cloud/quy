@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 
 const dbMocks = vi.hoisted(() => ({
   getExcelDataSummary: vi.fn(), listTeamImports: vi.fn(), listTeamExports: vi.fn(), getWarehouseLossByTeam: vi.fn(), getInternalAccountByUserId: vi.fn(),
-  bulkUpsertExcelPlots: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
+  bulkUpsertExcelPlots: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMocks);
@@ -14,6 +14,7 @@ function context(role: "admin" | "user"): TrpcContext {
 }
 
 describe("dataToolsRouter", () => {
+  beforeEach(() => vi.clearAllMocks());
   it("chỉ trả về dữ liệu thuộc phạm vi đội của tài khoản", async () => {
     dbMocks.getInternalAccountByUserId.mockResolvedValue({ isActive: 1, scopeUnits: JSON.stringify(["Đội 1"]), permissionProfile: JSON.stringify(["reports:read"]) });
     dbMocks.listTeamImports.mockResolvedValue([{ unit: "Đội 1", totalImport: 100 }, { unit: "Đội 2", totalImport: 200 }]);
@@ -34,8 +35,23 @@ describe("dataToolsRouter", () => {
 
   it("nhận mã số khi quản trị viên import nhân công", async () => {
     const caller = appRouter.createCaller(context("admin"));
-    await expect(caller.dataTools.import.workers({ rows: [{ unit: "Đội 1", name: "Người lao động", employeeCode: "NC-001", phoneticName: "nguoi lao dong", gender: "male", status: "active" }] })).resolves.toEqual({ success: true, imported: 1 });
+    const rows = [{ unit: "Đội 1", name: "Người lao động", employeeCode: "NC-001", phoneticName: "nguoi lao dong", gender: "male" as const, status: "active" as const }];
+    await expect(caller.dataTools.import.workers({ rows })).resolves.toEqual({ success: true, imported: 1 });
+    expect(dbMocks.validateExcelWorkerRows).toHaveBeenCalledWith(rows);
     expect(dbMocks.bulkUpsertExcelWorkers).toHaveBeenCalledWith([expect.objectContaining({ employeeCode: "NC-001" })], 1);
+  });
+
+  it("trả lỗi validator server-side khi file có mã số trùng", async () => {
+    dbMocks.validateExcelWorkerRows.mockImplementationOnce(() => { throw new Error("Mã số NC-001 bị trùng trong file"); });
+    const caller = appRouter.createCaller(context("admin"));
+    const rows = [{ unit: "Đội 1", name: "Người A", employeeCode: "NC-001", gender: "male" as const, status: "active" as const }, { unit: "Đội 2", name: "Người B", employeeCode: "NC-001", gender: "male" as const, status: "active" as const }];
+    await expect(caller.dataTools.import.workers({ rows })).rejects.toThrow("Mã số NC-001 bị trùng trong file");
+    expect(dbMocks.bulkUpsertExcelWorkers).not.toHaveBeenCalled();
+  });
+
+  it("từ chối payload import thiếu tên nhân công", async () => {
+    const caller = appRouter.createCaller(context("admin"));
+    await expect(caller.dataTools.import.workers({ rows: [{ unit: "Đội 1", name: "", gender: "male", status: "active" }] })).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
   it("chỉ cho admin cập nhật mã số nhân công hàng loạt", async () => {
