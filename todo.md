@@ -90,3 +90,11 @@
 - [ ] Kiểm tra điều kiện quyền admin/nhóm khiến nút bị ẩn
 - [ ] Sửa, kiểm thử, tạo checkpoint và deploy lại bản có nút import
 - [ ] Xác minh nút import hiển thị sau deploy
+
+## Import Lô từ Excel
+
+- [x] Xác định các cột Lô cần import, chưa phân loại vườn
+- [x] Kiểm tra API tRPC và quy tắc trùng mã Lô hiện có
+- [x] Thêm mẫu Excel, chọn file, xem trước và hiển thị lỗi
+- [x] Kết nối xác nhận import với backend và làm mới danh sách Lô
+- [x] Bổ sung test parser/API và kiểm tra giao diện Quản lý vườn

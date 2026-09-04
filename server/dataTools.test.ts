@@ -3,7 +3,7 @@ import type { TrpcContext } from "./_core/context";
 
 const dbMocks = vi.hoisted(() => ({
   getExcelDataSummary: vi.fn(), listTeamImports: vi.fn(), listTeamExports: vi.fn(), getWarehouseLossByTeam: vi.fn(), getInternalAccountByUserId: vi.fn(),
-  bulkUpsertExcelPlots: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
+  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMocks);
@@ -20,6 +20,22 @@ describe("dataToolsRouter", () => {
     dbMocks.listTeamImports.mockResolvedValue([{ unit: "Đội 1", totalImport: 100 }, { unit: "Đội 2", totalImport: 200 }]);
     await expect(appRouter.createCaller(context("user")).dataTools.teamImports()).resolves.toEqual([{ unit: "Đội 1", totalImport: 100 }]);
   });
+  it("cho phép admin import Lô chưa phân loại Vườn", async () => {
+    const caller = appRouter.createCaller(context("admin"));
+    const rows = [{ code: "LO-001", name: "Lô 1", unit: "Đội 1", areaHa: 12.345, gardenType: null }];
+    await expect(caller.dataTools.import.plots({ rows })).resolves.toEqual({ success: true, imported: 1 });
+    expect(dbMocks.validateExcelPlotRows).toHaveBeenCalledWith(rows);
+    expect(dbMocks.bulkUpsertExcelPlots).toHaveBeenCalledWith(rows, 1);
+  });
+
+  it("từ chối import Lô khi validator phát hiện mã trùng", async () => {
+    dbMocks.validateExcelPlotRows.mockImplementationOnce(() => { throw new Error("Mã lô LO-001 bị trùng trong file"); });
+    const caller = appRouter.createCaller(context("admin"));
+    const rows = [{ code: "LO-001", name: "Lô 1", unit: "Đội 1", areaHa: 1, gardenType: null }, { code: "LO-001", name: "Lô 2", unit: "Đội 1", areaHa: 1, gardenType: null }];
+    await expect(caller.dataTools.import.plots({ rows })).rejects.toThrow("Mã lô LO-001 bị trùng trong file");
+    expect(dbMocks.bulkUpsertExcelPlots).not.toHaveBeenCalled();
+  });
+
   it("cho phép admin import dữ liệu nhập mủ theo đội", async () => {
     const caller = appRouter.createCaller(context("admin"));
     const recordDate = new Date("2026-07-07T12:00:00.000Z");

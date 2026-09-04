@@ -599,10 +599,21 @@ export type ExcelPlotPayload = PlotPayload & {
   plotRank?: string | null;
 };
 
+export function validateExcelPlotRows(rows: ExcelPlotPayload[]) {
+  const seenCodes = new Set<string>();
+  rows.forEach((row, index) => {
+    const code = row.code.trim().toLocaleLowerCase();
+    if (seenCodes.has(code)) throw new Error(`Dòng ${index + 2}: Mã lô ${row.code.trim()} bị trùng trong file`);
+    if (row.rowStart != null && row.rowEnd != null && row.rowStart > row.rowEnd) throw new Error(`Dòng ${index + 2}: Từ hàng phải nhỏ hơn hoặc bằng Đến hàng`);
+    seenCodes.add(code);
+  });
+}
+
 export async function bulkUpsertExcelPlots(
   rows: ExcelPlotPayload[],
   userId: number
 ) {
+  validateExcelPlotRows(rows);
   const db = await getDb();
   if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
   for (const row of rows)
