@@ -74,3 +74,19 @@
 - [x] Bổ sung test tRPC backend cho import mới, import lại/update, trùng mã và validation
 - [ ] Kiểm tra trực tiếp WorkforcePage sau khi thêm dialog import Excel
 - [ ] Kiểm tra production PWA assets sau deploy trả đúng loại tài nguyên
+
+## Login incident
+
+- [ ] Xác định bước OAuth bị lỗi khi đăng nhập production
+- [ ] Kiểm tra redirect URI, callback và session cookie sau OAuth
+- [ ] Sửa lỗi đăng nhập và bổ sung test hồi quy
+- [ ] Lưu checkpoint và deploy bản sửa với visibility team
+- [ ] Xác minh đăng nhập sau deploy bằng trình duyệt người dùng
+
+## Import button production incident
+
+- [ ] Xác định vì sao nút Import nhân công Excel chưa xuất hiện trên production
+- [ ] Kiểm tra bản deploy hiện tại có chứa WorkerImportDialog và tích hợp WorkforcePage
+- [ ] Kiểm tra điều kiện quyền admin/nhóm khiến nút bị ẩn
+- [ ] Sửa, kiểm thử, tạo checkpoint và deploy lại bản có nút import
+- [ ] Xác minh nút import hiển thị sau deploy
