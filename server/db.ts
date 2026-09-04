@@ -373,6 +373,13 @@ export type PlotPayload = {
   rowStart?: number | null;
   rowEnd?: number | null;
   tappingTrees?: number | null;
+  immatureTrees?: number | null;
+  nonproductiveTrees?: number | null;
+  diseasedTrees?: number | null;
+  dryTappingTrees?: number | null;
+  emptyPits?: number | null;
+  tappingDensity?: number | null;
+  plotRank?: string | null;
   areaHa: number;
   note?: string | null;
 };
@@ -527,6 +534,7 @@ export async function createPlot(input: PlotPayload, userId: number) {
   await db.insert(plantationPlots).values({
     ...input,
     areaHa: asArea(input.areaHa),
+    tappingDensity: input.tappingDensity == null ? null : asQuantity(input.tappingDensity),
     note: input.note?.trim() || null,
     createdBy: userId,
   });
@@ -540,6 +548,7 @@ export async function updatePlot(id: number, input: PlotPayload) {
     .set({
       ...input,
       areaHa: asArea(input.areaHa),
+      tappingDensity: input.tappingDensity == null ? null : asQuantity(input.tappingDensity),
       note: input.note?.trim() || null,
     })
     .where(eq(plantationPlots.id, id));
@@ -632,6 +641,11 @@ export async function bulkUpsertExcelPlots(
         inventoryPits: row.inventoryPits ?? null,
         inventoryTrees: row.inventoryTrees ?? null,
         tappingTrees: row.tappingTrees ?? null,
+        immatureTrees: row.immatureTrees ?? null,
+        nonproductiveTrees: row.nonproductiveTrees ?? null,
+        diseasedTrees: row.diseasedTrees ?? null,
+        dryTappingTrees: row.dryTappingTrees ?? null,
+        emptyPits: row.emptyPits ?? null,
         tappingDensity:
           row.tappingDensity == null ? null : asQuantity(row.tappingDensity),
         plotRank: row.plotRank?.trim() || null,
@@ -652,6 +666,11 @@ export async function bulkUpsertExcelPlots(
           inventoryPits: row.inventoryPits ?? null,
           inventoryTrees: row.inventoryTrees ?? null,
           tappingTrees: row.tappingTrees ?? null,
+          immatureTrees: row.immatureTrees ?? null,
+          nonproductiveTrees: row.nonproductiveTrees ?? null,
+          diseasedTrees: row.diseasedTrees ?? null,
+          dryTappingTrees: row.dryTappingTrees ?? null,
+          emptyPits: row.emptyPits ?? null,
           tappingDensity:
             row.tappingDensity == null ? null : asQuantity(row.tappingDensity),
           plotRank: row.plotRank?.trim() || null,

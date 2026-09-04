@@ -98,3 +98,19 @@
 - [x] Thêm mẫu Excel, chọn file, xem trước và hiển thị lỗi
 - [x] Kết nối xác nhận import với backend và làm mới danh sách Lô
 - [x] Bổ sung test parser/API và kiểm tra giao diện Quản lý vườn
+
+## Website access incident
+
+- [ ] Kiểm tra URL domain và URL deployment hiện tại bằng HTTP
+- [ ] Kiểm tra runtime logs và trạng thái OAuth redirect
+- [ ] Xác định, sửa và kiểm thử nguyên nhân không truy cập được website
+- [ ] Lưu checkpoint bản sửa nếu có thay đổi mã nguồn
+- [ ] Xác minh người dùng có thể mở website trước khi yêu cầu publish lại
+
+## Sửa Import Lô theo mẫu bảng kiểm kê cây
+
+- [x] Đối chiếu toàn bộ cột mẫu Excel với các cột schema plantation_plots hiện có
+- [x] Bổ sung mapping cho kiểm kê hố/cây, cây cạo và các nhóm cây theo mẫu
+- [x] Bổ sung phần trăm hoặc quy tắc tính phần trăm từ số lượng khi cần
+- [x] Sửa file mẫu, parser, xem trước và API Import Lô theo mẫu mới
+- [x] Bổ sung test và kiểm tra build trước checkpoint
