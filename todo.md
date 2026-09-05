@@ -131,9 +131,11 @@
 - [x] Xác định nguồn cộng diện tích và nguyên nhân 1.582,72 thay vì 1.582,71 ha
 - [x] Chuẩn hóa phép cộng/định dạng diện tích để không cộng sai số floating point
 - [x] Bổ sung test giá trị 1.582,71 ha và kiểm tra giao diện Tổng quan
-- [ ] Lưu checkpoint bản sửa; chưa publish nếu chưa có xác nhận riêng
+- [x] Lưu checkpoint bản sửa; chưa publish nếu chưa có xác nhận riêng
 
 ## Rà soát Tổng diện tích bổ sung
 
 - [ ] Mở trang Tổng quan và xác minh thẻ Tổng diện tích hiển thị 1.582,71 ha
 - [x] Bổ sung test tích hợp getDashboard totalArea cho dữ liệu 1582.715
+
+- [ ] Bổ sung test dashboard dùng tập bản ghi Lô mô phỏng tổng 1582.715 và assert kết quả totalArea 1582.71 trước checkpoint kế tiếp
