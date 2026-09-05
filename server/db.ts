@@ -38,6 +38,7 @@ import {
   WorkforceTeamTarget,
 } from "./workforceSummary";
 import { comparePeriodLabel, TEAM_ORDER } from "../shared/teamOrder";
+import { getDashboardTotalArea } from "./dashboardMath";
 
 const MANAGEMENT_GROUPS = [
   { groupType: "board" as const, label: "Ban Giám đốc" },
@@ -2611,7 +2612,7 @@ export async function getDashboard(
     : null;
   return {
     plotCount: scopedPlots.length,
-    totalArea: scopedPlots.reduce((sum, plot) => sum + plot.areaHa, 0),
+    totalArea: getDashboardTotalArea(scopedPlots),
     totalHarvested: totalImport,
     totalProduction,
     workforceCount: scopedWorkers.filter(worker => worker.status === "active")

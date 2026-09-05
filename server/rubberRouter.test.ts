@@ -135,6 +135,12 @@ describe("rubberRouter authorization and business procedures", () => {
     expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 1", undefined);
   });
 
+  it("trả totalArea đã cắt xuống 2 chữ số qua rubber.dashboard", async () => {
+    dbMocks.getDashboard.mockResolvedValue({ totalArea: 1582.71, plotCount: 208 });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    await expect(caller.rubber.dashboard({ periodLabel: "Đợt 1" })).resolves.toMatchObject({ totalArea: 1582.71, plotCount: 208 });
+  });
+
   it("chỉ cho phép admin tạo vườn", async () => {
     const caller = appRouter.createCaller(makeContext("user"));
     await expect(caller.rubber.plots.create({ code: "VA-01", name: "Vườn A", unit: "Đội 1", areaHa: 12.5 })).rejects.toMatchObject({ code: "FORBIDDEN" });

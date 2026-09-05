@@ -125,3 +125,15 @@
 - [x] Trong cùng Năm trồng, xếp số thuần trước, hậu tố chữ như 14A/14B tiếp theo, rồi hậu tố dạng 3-2012/4-2012
 
 - [x] Với các Lô trùng Tên lô, ưu tiên Năm trồng tăng dần trước khi so các trường phụ
+
+## Sửa sai số Tổng diện tích
+
+- [x] Xác định nguồn cộng diện tích và nguyên nhân 1.582,72 thay vì 1.582,71 ha
+- [x] Chuẩn hóa phép cộng/định dạng diện tích để không cộng sai số floating point
+- [x] Bổ sung test giá trị 1.582,71 ha và kiểm tra giao diện Tổng quan
+- [ ] Lưu checkpoint bản sửa; chưa publish nếu chưa có xác nhận riêng
+
+## Rà soát Tổng diện tích bổ sung
+
+- [ ] Mở trang Tổng quan và xác minh thẻ Tổng diện tích hiển thị 1.582,71 ha
+- [x] Bổ sung test tích hợp getDashboard totalArea cho dữ liệu 1582.715
