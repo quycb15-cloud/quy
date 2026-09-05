@@ -139,3 +139,33 @@
 - [x] Bổ sung test tích hợp getDashboard totalArea cho dữ liệu 1582.715
 
 - [ ] Bổ sung test dashboard dùng tập bản ghi Lô mô phỏng tổng 1582.715 và assert kết quả totalArea 1582.71 trước checkpoint kế tiếp
+
+## Lọc Lô theo Đội khi nhập sản lượng
+
+- [ ] Thêm combobox Đội vào màn hình Nhập sản lượng theo Lô
+- [ ] Lọc danh sách Lô theo Đội đã chọn, giữ quyền/phạm vi hiện có
+- [ ] Reset Lô đã chọn khi đổi Đội và hiển thị trạng thái chưa chọn
+- [ ] Bổ sung test lọc và kiểm tra giao diện responsive
+
+## Sửa hiển thị phân bổ Vườn A/B
+
+- [x] Đối chiếu dữ liệu phân bổ Lô 7 với dữ liệu hiển thị Vườn A/B
+- [x] Xác định lỗi mapping hoặc bộ lọc làm mất chi tiết phân bổ
+- [x] Sửa hiển thị để Vườn A/B hiện đúng diện tích và số cây đã phân bổ
+- [x] Bổ sung test phân bổ nhiều phần và kiểm tra giao diện
+
+## Rà soát UI phân bổ A/B
+
+- [ ] Kiểm tra trực quan Quản lý vườn sau sửa để xác nhận Lô 7 hiện ở cả Vườn A và Vườn B
+- [x] Bổ sung test render cho nhóm Vườn để khóa hiển thị nhiều allocation trên UI
+
+## Allocation data incident
+
+- [x] Kiểm tra bản ghi allocation thực tế của Lô 7 và payload khi chọn Vườn B
+- [x] Xác định vì sao allocation A/B bị dồn thành Vườn A 6,37 ha
+- [ ] Sửa procedure/API để mỗi Vườn giữ bản ghi riêng và không tự gộp sai
+- [ ] Bổ sung test lưu A rồi B cho cùng một Lô và kiểm tra lại UI/modal
+- [ ] Ghi nhận payload `gardenType: B` khi thao tác phân bổ Vườn B
+- [x] Đối chiếu log activity để xác định nguồn dồn allocation vào Vườn A
+
+- [x] Áp dụng logic hiển thị allocation theo phần cho tất cả các Lô có phân bổ A/B/C; Lô 7 chỉ là ca kiểm thử, không sửa dữ liệu riêng

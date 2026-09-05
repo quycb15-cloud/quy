@@ -1,0 +1,1 @@
+Kiểm tra screenshot route /plots sau sửa: trang Quản lý vườn tải đúng, nút Import Lô Excel, bộ lọc Vườn A/B/C và nút Phân bổ lô hiển thị đúng. Preview chưa có phiên đăng nhập/dữ liệu nên danh sách hiện trạng thái Không có lô phù hợp; chưa thể xác nhận trực quan riêng Lô 7 trên preview. Regression test helper cho Lô 7 đã pass.

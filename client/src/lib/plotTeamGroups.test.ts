@@ -28,4 +28,27 @@ describe("groupPlotsByTeam", () => {
       { gardenType: "unclassified", areaHa: 1, codes: ["D1-4"] },
     ]);
   });
+
+  it("hiển thị cùng một Lô trong cả Vườn A và B theo từng phần đã phân bổ", () => {
+    const groups = groupPlotsByGarden([
+      {
+        unit: "Đội 1",
+        name: "Lô 7",
+        code: "D1-7",
+        plantedYear: 2011,
+        areaHa: 6.37,
+        gardenType: null,
+        gardenAllocations: [
+          { gardenType: "A", areaHa: 4.52 },
+          { gardenType: "B", areaHa: 1.81 },
+        ],
+      },
+    ]);
+
+    expect(groups.map(group => ({ gardenType: group.gardenType, areaHa: group.areaHa, codes: group.plots.map(plot => plot.code) }))).toEqual([
+      { gardenType: "A", areaHa: 4.52, codes: ["D1-7"] },
+      { gardenType: "B", areaHa: 1.81, codes: ["D1-7"] },
+      { gardenType: "unclassified", areaHa: 0.04, codes: ["D1-7"] },
+    ]);
+  });
 });
