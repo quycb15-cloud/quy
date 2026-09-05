@@ -114,3 +114,14 @@
 - [x] Bổ sung phần trăm hoặc quy tắc tính phần trăm từ số lượng khi cần
 - [x] Sửa file mẫu, parser, xem trước và API Import Lô theo mẫu mới
 - [x] Bổ sung test và kiểm tra build trước checkpoint
+
+## Sắp xếp Lô theo năm trồng
+
+- [x] Sắp xếp danh sách Lô theo Năm trồng tăng dần
+- [x] Sắp xếp Tên lô theo thứ tự tự nhiên trong từng năm: 1, 2, 3, 3A, 3B...
+- [x] Giữ ổn định các Lô chưa có năm hoặc tên lô không chuẩn
+- [x] Bổ sung test sort và kiểm tra giao diện Quản lý vườn
+
+- [x] Trong cùng Năm trồng, xếp số thuần trước, hậu tố chữ như 14A/14B tiếp theo, rồi hậu tố dạng 3-2012/4-2012
+
+- [x] Với các Lô trùng Tên lô, ưu tiên Năm trồng tăng dần trước khi so các trường phụ

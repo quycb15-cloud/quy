@@ -23,6 +23,27 @@ describe("comparePlotsByYearAndName", () => {
     expect(rows.sort(comparePlotsByYearAndName).map(row => row.code)).toEqual(["L1", "L4", "L20", "L3-2012", "L4-2012", "L1-2012"]);
   });
 
+  it("xếp số thuần, hậu tố chữ rồi hậu tố năm trong cùng năm trồng", () => {
+    const rows = [
+      { code: "2011-3-2012", name: "3-2012", plantedYear: 2011 },
+      { code: "2011-14B", name: "14B", plantedYear: 2011 },
+      { code: "2011-2", name: "2", plantedYear: 2011 },
+      { code: "2011-14A", name: "14A", plantedYear: 2011 },
+      { code: "2011-20", name: "20", plantedYear: 2011 },
+      { code: "2011-4-2012", name: "4-2012", plantedYear: 2011 },
+    ];
+    expect(rows.sort(comparePlotsByYearAndName).map(row => row.code)).toEqual(["2011-2", "2011-14A", "2011-14B", "2011-20", "2011-3-2012", "2011-4-2012"]);
+  });
+
+  it("ưu tiên năm trồng khi hai Lô trùng tên", () => {
+    const rows = [
+      { code: "6-2012", name: "6", plantedYear: 2012 },
+      { code: "6-2011", name: "6", plantedYear: 2011 },
+      { code: "6-2013", name: "6", plantedYear: 2013 },
+    ];
+    expect(rows.sort(comparePlotsByYearAndName).map(row => row.code)).toEqual(["6-2011", "6-2012", "6-2013"]);
+  });
+
   it("hiển thị hết Lô của Đội 1 trước khi chuyển sang Đội 2", () => {
     const rows = [
       { code: "D2-L1", name: "Lô 1 (2011)", plantedYear: 2011, unit: "Đội 2" },
