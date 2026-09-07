@@ -188,4 +188,4 @@
 - [x] Bổ sung các cột TT, Mã công nhân, Tổng diện tích, Tổng cây cạo và Ghi chú trong mẫu
 - [x] Giữ nguyên hoặc cập nhật parser/validation để đọc được mẫu mới nếu người dùng nạp lại
 - [x] Bổ sung test mẫu Excel và chạy typecheck, toàn bộ test, build production
-- [ ] Lưu checkpoint cho mẫu Excel mới
+- [x] Lưu checkpoint cho mẫu Excel mới
