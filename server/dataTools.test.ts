@@ -96,6 +96,16 @@ describe("dataToolsRouter", () => {
     expect(dbMocks.getWarehouseLossByTeam).toHaveBeenCalledWith("Đợt 1-7", "7/2026");
   });
 
+  it("nhận mẫu phân chia mới chỉ có Mã công nhân và Tổng cây cạo", async () => {
+    dbMocks.bulkUpsertWorkerPlotAllocations.mockResolvedValue(2);
+    const rows = [
+      { employeeCode: "NC-002", gardenType: "A" as const, plotCode: "LO-A", rowStart: 1, rowEnd: 12, areaHa: 2.35, tappingTrees: 1200 },
+      { employeeCode: "NC-002", gardenType: "B" as const, plotCode: "LO-B", rowStart: 13, rowEnd: 25, areaHa: 3.4, tappingTrees: 1500 },
+    ];
+    await expect(appRouter.createCaller(context("admin")).dataTools.import.workerPlotAllocations({ rows })).resolves.toEqual({ success: true, imported: 2 });
+    expect(dbMocks.bulkUpsertWorkerPlotAllocations).toHaveBeenCalledWith(rows, 1);
+  });
+
   it("chỉ cho admin import phân chia nhân công vườn cây", async () => {
     dbMocks.bulkUpsertWorkerPlotAllocations.mockResolvedValue(1);
     const rows = [{ unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", gardenType: "A" as const, plotCode: "LO-DOI-2-2012-7A", rowStart: 1, rowEnd: 12, areaHa: 2.35 }];

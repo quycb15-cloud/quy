@@ -180,3 +180,12 @@
 - [x] Bổ sung test API, UI và build production
 - [x] Bổ sung test UI PlotsPage cho tên Lô kèm năm trồng
 - [x] Bổ sung test UI danh sách allocation cho nút Sửa/Xóa và điền lại form
+
+## Mẫu Excel phân bổ công nhân theo Vườn A/B/C
+
+- [x] Cập nhật nút Tải mẫu Excel để tạo đúng bố cục bảng phân bổ công nhân theo mẫu người dùng gửi
+- [x] Tạo tiêu đề nhóm Vườn A, Vườn B, Vườn C với các cột Lô, Hàng-hàng, Diện tích, Tổng cây cạo
+- [x] Bổ sung các cột TT, Mã công nhân, Tổng diện tích, Tổng cây cạo và Ghi chú trong mẫu
+- [x] Giữ nguyên hoặc cập nhật parser/validation để đọc được mẫu mới nếu người dùng nạp lại
+- [x] Bổ sung test mẫu Excel và chạy typecheck, toàn bộ test, build production
+- [ ] Lưu checkpoint cho mẫu Excel mới

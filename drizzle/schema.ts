@@ -577,6 +577,7 @@ export const workerPlotAllocations = mysqlTable(
     rowStart: int("rowStart").notNull(),
     rowEnd: int("rowEnd").notNull(),
     areaHa: decimal("areaHa", { precision: 12, scale: 3 }).notNull(),
+    tappingTrees: int("tappingTrees").default(0).notNull(),
     createdBy: int("createdBy").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

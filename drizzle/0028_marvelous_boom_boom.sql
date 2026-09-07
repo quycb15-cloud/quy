@@ -1,0 +1,1 @@
+ALTER TABLE `worker_plot_allocations` ADD `tappingTrees` int DEFAULT 0 NOT NULL;

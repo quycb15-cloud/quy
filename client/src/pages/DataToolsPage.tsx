@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { comparePlotsByYearAndName } from "@/lib/plotOrder";
 import { formatQuantity, STANDARD_PERIODS } from "@/lib/rubber";
 import { parseWorkerPlotAllocationRows } from "@/lib/workerPlotAllocationImport";
+import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "@/lib/workerPlotAllocationWorkbook";
 import { trpc } from "@/lib/trpc";
 import { compareTeamName } from "@shared/teamOrder";
 import { Archive, CheckCircle2, Download, FileSpreadsheet, Loader2, TriangleAlert, Upload, UploadCloud } from "lucide-react";
@@ -133,17 +134,16 @@ export default function DataToolsPage() {
   const downloadTemplate = async () => {
     const XLSX = await import("xlsx");
     const book = XLSX.utils.book_new();
-    const allocationHeaders = [
-      ["STT", "Đội", "Nhân công (tên La tinh)", "Mã số nhân công", "Vườn A", "", "", "", "", "", "Vườn B", "", "", "", "", "", "Vườn C", "", "", "", "", ""],
-      ["", "", "", "", "Mã lô", "Tên lô", "Năm trồng", "Từ hàng", "Đến hàng", "Diện tích (ha)", "Mã lô", "Tên lô", "Năm trồng", "Từ hàng", "Đến hàng", "Diện tích (ha)", "Mã lô", "Tên lô", "Năm trồng", "Từ hàng", "Đến hàng", "Diện tích (ha)"],
-      [1, "Đội 1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-    ];
-    const sheet = dataset === "workerPlotAllocations" ? XLSX.utils.aoa_to_sheet(allocationHeaders) : XLSX.utils.json_to_sheet([samples[dataset]]);
-    if (dataset === "workerPlotAllocations") sheet["!merges"] = ["A1:A2", "B1:B2", "C1:C2", "D1:D2", "E1:J1", "K1:P1", "Q1:V1"].map(XLSX.utils.decode_range);
+    const sheet = dataset === "workerPlotAllocations" ? XLSX.utils.aoa_to_sheet(buildWorkerPlotAllocationTemplateMatrix()) : XLSX.utils.json_to_sheet([samples[dataset]]);
+    if (dataset === "workerPlotAllocations") {
+      sheet["!merges"] = workerPlotAllocationMerges.map(XLSX.utils.decode_range);
+      sheet["!cols"] = [8, 18, 14, 14, 14, 16, 14, 14, 14, 16, 14, 14, 14, 16, 16, 16, 28].map(wch => ({ wch }));
+      sheet["!rows"] = [{ hpt: 24 }, { hpt: 36 }, { hpt: 22 }];
+    }
     XLSX.utils.book_append_sheet(book, sheet, labels[dataset]);
     const guide = XLSX.utils.aoa_to_sheet([
       [`MẪU IMPORT ${labels[dataset].toUpperCase()}`],
-      [dataset === "workerPlotAllocations" ? "Điền Mã lô, Từ hàng, Đến hàng và Diện tích trong nhóm Vườn A/B/C; hệ thống kiểm tra theo từng Đội." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
+      [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
       ["Các bản ghi trùng khóa sẽ được cập nhật, không tạo bản sao."],
     ]);
     XLSX.utils.book_append_sheet(book, guide, "Hướng dẫn");
@@ -163,7 +163,7 @@ export default function DataToolsPage() {
       ["Nhập mủ đội", (teamImports ?? []).map(row => ({ Đợt: row.periodLabel, Ngày: row.recordDate, Đội: row.unit, Vườn: row.gardenName, "Mủ đông, tạp (kg)": row.frozenLatex, "Mủ dây (kg)": row.latexThread, "Cộng nhập (kg)": row.totalImport }))],
       ["Xuất mủ đội", (teamExports ?? []).map(row => ({ Đợt: row.periodLabel, Ngày: row.recordDate, Đội: row.unit, "Mủ đông, tạp (kg)": row.frozenContaminatedLatex, "Mủ dây (kg)": row.latexThread, "Cộng xuất (kg)": row.totalExport }))],
       ["Sản lượng theo lô", orderedPlotProductions.map(row => ({ Ngày: row.recordDate, Đội: row.unit, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Năm trồng": row.plantedYear ?? "", "Diện tích (ha)": row.areaHa, "Mủ đông, tạp (kg)": row.frozenContaminatedLatex, "Quy khô (kg)": row.dryRubber, "Ghi chú": row.note ?? "", Nguồn: row.source }))],
-      ["Phân công nhân công", allocations.map(row => ({ Đội: row.unit ?? "", "Nhân công": row.workerName, "Mã số nhân công": row.employeeCode ?? "", "Vườn A/B/C": row.gardenType, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Từ hàng": row.rowStart, "Đến hàng": row.rowEnd, "Diện tích (ha)": row.areaHa }))],
+      ["Phân công nhân công", allocations.map(row => ({ Đội: row.unit ?? "", "Nhân công": row.workerName, "Mã số nhân công": row.employeeCode ?? "", "Vườn A/B/C": row.gardenType, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Từ hàng": row.rowStart, "Đến hàng": row.rowEnd, "Diện tích (ha)": row.areaHa, "Tổng cây cạo": row.tappingTrees ?? 0 }))],
     ];
     sheets.forEach(([name, data]) => XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(data), name));
     XLSX.writeFile(book, "du-lieu-cao-su-chi-nhanh-386.xlsx");
@@ -180,7 +180,7 @@ export default function DataToolsPage() {
       const book = XLSX.read(await selected.arrayBuffer(), { type: "array", cellDates: false });
       const sheet = book.Sheets[book.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" });
-      const isAllocation = text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô");
+      const isAllocation = (text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô")) || (text(matrix[0]?.[1]).toLowerCase().includes("mã công nhân") && text(matrix[1]?.[2]).toLowerCase() === "lô");
       if (isAllocation) {
         const allocation = parseWorkerPlotAllocationRows(matrix);
         if (!allocation.parsed.length) throw new Error(`Không có dòng phân chia hợp lệ. ${allocation.issues[0] ?? "Hãy điền Mã lô, hàng và diện tích."}`);

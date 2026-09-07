@@ -2190,14 +2190,15 @@ export async function listAssignments() {
 }
 
 export type WorkerPlotAllocationImportRow = {
-  unit: string;
-  workerName: string;
+  unit?: string;
+  workerName?: string;
   employeeCode?: string | null;
   gardenType: "A" | "B" | "C";
   plotCode: string;
   rowStart: number;
   rowEnd: number;
   areaHa: number;
+  tappingTrees?: number;
 };
 
 export async function bulkUpsertWorkerPlotAllocations(
@@ -2206,57 +2207,43 @@ export async function bulkUpsertWorkerPlotAllocations(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
-  const units = Array.from(new Set(rows.map(row => row.unit)));
-  const [workerRows, plotRows] = await Promise.all([
-    db
-      .select({
-        id: workers.id,
-        unit: workers.unit,
-        name: workers.name,
-        employeeCode: workers.employeeCode,
-      })
-      .from(workers)
-      .where(inArray(workers.unit, units)),
-    db
-      .select({
-        id: plantationPlots.id,
-        unit: plantationPlots.unit,
-        code: plantationPlots.code,
-        gardenType: plantationPlots.gardenType,
-      })
-      .from(plantationPlots)
-      .where(inArray(plantationPlots.unit, units)),
-  ]);
-  const workersByUnitAndName = new Map(
-    workerRows.map(worker => [
-      `${worker.unit}::${worker.name.toLowerCase()}`,
-      worker,
-    ])
-  );
-  const workersByUnitAndCode = new Map(
-    workerRows
-      .filter(worker => worker.employeeCode)
-      .map(worker => [`${worker.unit}::${worker.employeeCode}`, worker])
-  );
+  const units = Array.from(new Set(rows.map(row => row.unit).filter((unit): unit is string => Boolean(unit))));
+  const workerQuery = db
+    .select({
+      id: workers.id,
+      unit: workers.unit,
+      name: workers.name,
+      employeeCode: workers.employeeCode,
+    })
+    .from(workers);
+  const workerRows = units.length ? await workerQuery.where(inArray(workers.unit, units)) : await workerQuery;
+  const workersByCode = new Map(workerRows.filter(worker => worker.employeeCode).map(worker => [worker.employeeCode!.trim(), worker]));
+  const resolvedWorkers = rows.map((row, index) => {
+    const worker = row.employeeCode?.trim()
+      ? workersByCode.get(row.employeeCode.trim())
+      : workerRows.find(item => item.unit === row.unit && item.name.toLowerCase() === row.workerName?.trim().toLowerCase());
+    if (!worker) throw new Error(`Dòng ${index + 2}: Không tìm thấy nhân công ${row.employeeCode ?? row.workerName ?? ""}`);
+    return { row, worker };
+  });
+  const resolvedUnits = Array.from(new Set(resolvedWorkers.map(item => item.worker.unit).filter((unit): unit is string => Boolean(unit))));
+  const plotRows = await db
+    .select({
+      id: plantationPlots.id,
+      unit: plantationPlots.unit,
+      code: plantationPlots.code,
+      gardenType: plantationPlots.gardenType,
+    })
+    .from(plantationPlots)
+    .where(inArray(plantationPlots.unit, resolvedUnits));
+
   const plotsByUnitAndCode = new Map(
     plotRows.map(plot => [`${plot.unit}::${plot.code}`, plot])
   );
   const desiredGardenType = new Map<number, "A" | "B" | "C">();
-  const resolved = rows.map((row, index) => {
+  const resolved = resolvedWorkers.map(({ row, worker }, index) => {
     if (row.rowStart > row.rowEnd)
-      throw new Error(
-        `Dòng ${index + 2}: Hàng từ phải nhỏ hơn hoặc bằng Hàng đến`
-      );
-    const worker = row.employeeCode?.trim()
-      ? workersByUnitAndCode.get(`${row.unit}::${row.employeeCode.trim()}`)
-      : workersByUnitAndName.get(
-          `${row.unit}::${row.workerName.trim().toLowerCase()}`
-        );
-    if (!worker)
-      throw new Error(
-        `Dòng ${index + 2}: Không tìm thấy nhân công ${row.workerName} thuộc ${row.unit}`
-      );
-    const plot = plotsByUnitAndCode.get(`${row.unit}::${row.plotCode.trim()}`);
+      throw new Error(`Dòng ${index + 2}: Hàng từ phải nhỏ hơn hoặc bằng Hàng đến`);
+    const plot = plotsByUnitAndCode.get(`${worker.unit}::${row.plotCode.trim()}`);
     if (!plot)
       throw new Error(
         `Dòng ${index + 2}: Không tìm thấy Mã lô ${row.plotCode} thuộc ${row.unit}`
@@ -2270,7 +2257,7 @@ export async function bulkUpsertWorkerPlotAllocations(
         `Dòng ${index + 2}: Lô ${row.plotCode} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
       );
     desiredGardenType.set(plot.id, row.gardenType);
-    return { row, workerId: worker.id, plotId: plot.id };
+    return { row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };
   });
   for (const [plotId, gardenType] of Array.from(desiredGardenType.entries()))
     await db
@@ -2287,12 +2274,14 @@ export async function bulkUpsertWorkerPlotAllocations(
         rowStart: item.row.rowStart,
         rowEnd: item.row.rowEnd,
         areaHa: String(item.row.areaHa),
+        tappingTrees: item.row.tappingTrees ?? 0,
         createdBy: userId,
       })
       .onDuplicateKeyUpdate({
         set: {
           gardenType: item.row.gardenType,
           areaHa: String(item.row.areaHa),
+          tappingTrees: item.row.tappingTrees ?? 0,
           createdBy: userId,
         },
       });
@@ -2313,6 +2302,7 @@ export async function listWorkerPlotAllocations() {
       rowStart: workerPlotAllocations.rowStart,
       rowEnd: workerPlotAllocations.rowEnd,
       areaHa: workerPlotAllocations.areaHa,
+      tappingTrees: workerPlotAllocations.tappingTrees,
     })
     .from(workerPlotAllocations)
     .innerJoin(workers, eq(workerPlotAllocations.workerId, workers.id))
