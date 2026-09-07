@@ -517,6 +517,37 @@ export async function allocatePlotGardenPortion(
   };
 }
 
+export async function updatePlotGardenAllocation(
+  input: { id: number; areaHa: number; tappingTrees: number },
+  userId: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  const allocation = (await db.select().from(plotGardenAllocations).where(eq(plotGardenAllocations.id, input.id)).limit(1))[0];
+  if (!allocation) throw new Error("Không tìm thấy phần phân bổ");
+  const plot = (await db.select().from(plantationPlots).where(eq(plantationPlots.id, allocation.plotId)).limit(1))[0];
+  if (!plot) throw new Error("Không tìm thấy Lô");
+  const others = await db.select().from(plotGardenAllocations).where(eq(plotGardenAllocations.plotId, allocation.plotId));
+  const otherAreaHa = others.filter(item => item.id !== input.id).reduce((sum, item) => sum + numberValue(item.areaHa), 0);
+  const otherTappingTrees = others.filter(item => item.id !== input.id).reduce((sum, item) => sum + Number(item.tappingTrees ?? 0), 0);
+  const totalAreaHa = numberValue(plot.areaHa);
+  const totalTappingTrees = plot.tappingTrees == null ? null : Number(plot.tappingTrees);
+  if (otherAreaHa + input.areaHa > totalAreaHa + 0.0005) throw new Error(`Diện tích vượt quá diện tích Lô (${Math.max(0, totalAreaHa - otherAreaHa).toFixed(3)} ha còn lại)`);
+  if (totalTappingTrees == null) throw new Error("Lô chưa có tổng số cây cạo; hãy cập nhật số cây cạo của Lô trước");
+  if (otherTappingTrees + input.tappingTrees > totalTappingTrees) throw new Error(`Số cây vượt quá số cây cạo của Lô (${Math.max(0, totalTappingTrees - otherTappingTrees)} cây còn lại)`);
+  await db.update(plotGardenAllocations).set({ areaHa: asArea(input.areaHa), tappingTrees: input.tappingTrees, createdBy: userId }).where(eq(plotGardenAllocations.id, input.id));
+  return { success: true as const, id: input.id, plotId: allocation.plotId, gardenType: allocation.gardenType, areaHa: input.areaHa, tappingTrees: input.tappingTrees };
+}
+
+export async function removePlotGardenAllocation(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  const allocation = (await db.select().from(plotGardenAllocations).where(eq(plotGardenAllocations.id, id)).limit(1))[0];
+  if (!allocation) throw new Error("Không tìm thấy phần phân bổ");
+  await db.delete(plotGardenAllocations).where(eq(plotGardenAllocations.id, id));
+  return { success: true as const, id, plotId: allocation.plotId, gardenType: allocation.gardenType, areaHa: numberValue(allocation.areaHa), tappingTrees: Number(allocation.tappingTrees ?? 0) };
+}
+
 export async function getPlotById(id: number) {
   const db = await getDb();
   if (!db) return undefined;

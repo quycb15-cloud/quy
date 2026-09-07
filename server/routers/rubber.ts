@@ -352,6 +352,20 @@ export const rubberRouter = router({
         });
         return { success: true, ...result };
       }),
+    updateGardenPortion: adminProcedure
+      .input(z.object({ id: z.number().int().positive(), areaHa: z.coerce.number().positive("Diện tích phải lớn hơn 0").max(999999), tappingTrees: z.coerce.number().int().min(0).max(99999999) }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await db.updatePlotGardenAllocation(input, ctx.user.id);
+        await db.logActivity(ctx.user.id, { eventType: "plot.garden_portion.update", entityType: "plot_garden_allocation", entityId: result.plotId, summary: `Sửa phân bổ Lô ${result.plotId} vào Vườn ${result.gardenType}`, metadata: result });
+        return result;
+      }),
+    removeGardenPortion: adminProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await db.removePlotGardenAllocation(input.id);
+        await db.logActivity(ctx.user.id, { eventType: "plot.garden_portion.remove", entityType: "plot_garden_allocation", entityId: result.plotId, summary: `Xóa phân bổ Lô ${result.plotId} khỏi Vườn ${result.gardenType}`, metadata: result });
+        return result;
+      }),
     remove: adminProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ input, ctx }) => {

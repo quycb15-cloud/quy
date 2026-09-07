@@ -36,6 +36,8 @@ const dbMocks = vi.hoisted(() => ({
   getTechnicalSkillSummary: vi.fn(),
   saveTechnicalSkillEvaluation: vi.fn(),
   listWorkers: vi.fn(),
+  updatePlotGardenAllocation: vi.fn(),
+  removePlotGardenAllocation: vi.fn(),
 }));
 
 const storageMocks = vi.hoisted(() => ({ storagePut: vi.fn() }));
@@ -51,6 +53,8 @@ vi.mock("./db", () => ({
   createCareActivity: vi.fn(),
   listCareActivities: vi.fn(),
   listWorkers: dbMocks.listWorkers,
+  updatePlotGardenAllocation: dbMocks.updatePlotGardenAllocation,
+  removePlotGardenAllocation: dbMocks.removePlotGardenAllocation,
   createWorker: vi.fn(),
   createAssignment: vi.fn(),
   listAssignments: vi.fn(),
@@ -163,6 +167,23 @@ describe("rubberRouter authorization and business procedures", () => {
     const caller = appRouter.createCaller(makeContext("admin"));
     await expect(caller.rubber.plots.update({ id: 8, data: { code: "VA-01", name: "Vườn A", unit: "Đội 1", areaHa: 13 } })).resolves.toEqual({ success: true });
     expect(dbMocks.logActivity).toHaveBeenCalledWith(1, expect.objectContaining({ eventType: "plot.update", entityId: 8 }));
+  });
+
+  it("admin có thể sửa và xóa từng phần phân bổ, đồng thời ghi lịch sử", async () => {
+    dbMocks.updatePlotGardenAllocation.mockResolvedValue({ success: true, id: 21, plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 });
+    dbMocks.removePlotGardenAllocation.mockResolvedValue({ success: true, id: 21, plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    await expect(caller.rubber.plots.updateGardenPortion({ id: 21, areaHa: 1.81, tappingTrees: 931 })).resolves.toMatchObject({ gardenType: "B", areaHa: 1.81 });
+    expect(dbMocks.updatePlotGardenAllocation).toHaveBeenCalledWith({ id: 21, areaHa: 1.81, tappingTrees: 931 }, 1);
+    await expect(caller.rubber.plots.removeGardenPortion({ id: 21 })).resolves.toMatchObject({ gardenType: "B", plotId: 144 });
+    expect(dbMocks.removePlotGardenAllocation).toHaveBeenCalledWith(21);
+    expect(dbMocks.logActivity).toHaveBeenCalledWith(1, expect.objectContaining({ eventType: "plot.garden_portion.remove", entityId: 144 }));
+  });
+
+  it("chỉ user quản trị được sửa và xóa từng phần phân bổ", async () => {
+    const caller = appRouter.createCaller(makeContext("user"));
+    await expect(caller.rubber.plots.updateGardenPortion({ id: 21, areaHa: 1.81, tappingTrees: 931 })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(caller.rubber.plots.removeGardenPortion({ id: 21 })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
   it("chỉ admin được phân bổ hàng loạt lô vào một loại vườn và phải ghi nhật ký", async () => {

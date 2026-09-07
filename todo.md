@@ -169,3 +169,14 @@
 - [x] Đối chiếu log activity để xác định nguồn dồn allocation vào Vườn A
 
 - [x] Áp dụng logic hiển thị allocation theo phần cho tất cả các Lô có phân bổ A/B/C; Lô 7 chỉ là ca kiểm thử, không sửa dữ liệu riêng
+
+## Năm trồng và chỉnh sửa phân bổ
+
+- [x] Hiển thị năm trồng ngay sau tên/số Lô trong danh sách Quản lý vườn
+- [x] Thêm API cập nhật từng allocation A/B/C với kiểm tra tổng diện tích và số cây
+- [x] Thêm API xóa từng allocation khi nhập sai
+- [x] Thêm nút sửa/xóa cho từng phần phân bổ trong danh sách
+- [x] Bổ sung dialog chỉnh sửa và xác nhận xóa an toàn
+- [x] Bổ sung test API, UI và build production
+- [x] Bổ sung test UI PlotsPage cho tên Lô kèm năm trồng
+- [x] Bổ sung test UI danh sách allocation cho nút Sửa/Xóa và điền lại form
