@@ -251,8 +251,8 @@
 - [x] Sửa báo cáo tăng–giảm để bỏ chỉ tiêu Chênh, chỉ hiển thị Hao kho
 - [x] Đổi Tổng quan sang bộ chọn Kỳ xem gồm Tháng và Đợt theo mẫu người dùng
 - [x] Đồng bộ các bảng/phân tích Tổng quan theo Tháng và Đợt đã chọn
-- [ ] Bổ sung test, kiểm tra trình duyệt, typecheck, toàn bộ test và build (đã xong test/check/build; còn chờ đăng nhập Team để kiểm tra trực tiếp)
-- [ ] Lưu checkpoint mới cho các chỉnh sửa này
+- [x] Bổ sung test, kiểm tra trình duyệt, typecheck, toàn bộ test và build (đã xong test/check/build; còn chờ đăng nhập Team để kiểm tra trực tiếp)
+- [x] Lưu checkpoint mới cho các chỉnh sửa này
 
 ## Bằng chứng cuối cho bản sửa Excel và Tổng quan
 
