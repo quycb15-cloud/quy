@@ -286,4 +286,4 @@
 - [x] Cập nhật parser và mẫu tải xuống theo đúng file thật, không làm mất tương thích hợp lý
 - [x] Cập nhật import/API và Tổng quan dùng dữ liệu kế hoạch/tay nghề sau import
 - [x] Bổ sung test bằng cấu trúc thực tế của hai file, chạy check/test/build
-- [ ] Lưu checkpoint mới và xin xác nhận triển khai Team
+- [x] Lưu checkpoint mới và xin xác nhận triển khai Team
