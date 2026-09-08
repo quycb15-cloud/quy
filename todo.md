@@ -235,3 +235,11 @@
 - [x] Tách helper tạo workbook mẫu để kiểm chứng độc lập dataset phân bổ Vườn A/B/C
 - [x] Bổ sung test gọi helper và kiểm tra cấu trúc workbook/mẫu tải xuống
 - [x] Ghi nhận nguyên nhân kỹ thuật đã xác minh và lưu checkpoint sau bản sửa nút Tải mẫu
+
+## Tổng quan theo Tháng và Đợt
+
+- [x] Rà soát nguồn kỳ/đợt hiện tại và xác định cách suy ra tháng báo cáo
+- [x] Bổ sung bộ lọc Tháng trên Tổng quan
+- [x] Hiển thị các Đợt có dữ liệu, bao gồm Đợt 4 khi tồn tại
+- [x] Nối bộ lọc vào API/tổng hợp số liệu Tổng quan
+- [x] Bổ sung test cho Tháng và Đợt 4, chạy check/test/build và lưu checkpoint

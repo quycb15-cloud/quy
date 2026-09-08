@@ -31,6 +31,8 @@ import {
   technicalSkillMonthlySummaries,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
+import { sortReportPeriods } from "../shared/reportPeriod";
+import { filterProductionRows } from "../shared/productionPeriod";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import * as XLSX from "xlsx";
 import { calculateLatexTotals } from "./rubberMath";
@@ -2611,7 +2613,7 @@ export async function getDashboard(
 }
 
 export async function getLatexProductionManagement(
-  input: { year?: number; month?: number; unit?: string },
+  input: { year?: number; month?: number; periodLabel?: string; unit?: string },
   scopeUnits?: string[]
 ) {
   const [plotImports, plotExports, teamImports, teamExports] =
@@ -2628,10 +2630,14 @@ export async function getLatexProductionManagement(
     !hasScope || Boolean(unit && scopeUnits?.includes(unit));
   const scopedImports = imports.filter(row => inScope(row.unit));
   const scopedExports = exports.filter(row => inScope(row.unit));
+  const availablePeriods = sortReportPeriods(scopedImports.map(row => row.periodLabel));
+  const selectedPeriod = input.periodLabel && availablePeriods.includes(input.periodLabel) ? input.periodLabel : undefined;
+  const periodImports = selectedPeriod ? scopedImports.filter(row => row.periodLabel === selectedPeriod) : scopedImports;
+  const periodExports = selectedPeriod ? scopedExports.filter(row => row.periodLabel === selectedPeriod) : scopedExports;
   const getYear = (date: Date) => date.getUTCFullYear();
   const getMonth = (date: Date) => date.getUTCMonth() + 1;
   const availableYears = Array.from(
-    new Set(scopedImports.map(row => getYear(row.recordDate)))
+    new Set(periodImports.map(row => getYear(row.recordDate)))
   ).sort((a, b) => b - a);
   const selectedYear =
     input.year && availableYears.includes(input.year)
@@ -2639,7 +2645,7 @@ export async function getLatexProductionManagement(
       : (availableYears[0] ?? new Date().getUTCFullYear());
   const availableMonths = Array.from(
     new Set(
-      scopedImports
+      periodImports
         .filter(row => getYear(row.recordDate) === selectedYear)
         .map(row => getMonth(row.recordDate))
     )
@@ -2653,28 +2659,18 @@ export async function getLatexProductionManagement(
     input.unit && TEAM_ORDER.includes(input.unit as (typeof TEAM_ORDER)[number])
       ? input.unit
       : undefined;
-  const importsForView = scopedImports.filter(
-    row =>
-      getYear(row.recordDate) === selectedYear &&
-      getMonth(row.recordDate) === selectedMonth &&
-      (!selectedUnit || row.unit === selectedUnit)
-  );
-  const exportsForView = scopedExports.filter(
-    row =>
-      getYear(row.recordDate) === selectedYear &&
-      getMonth(row.recordDate) === selectedMonth &&
-      (!selectedUnit || row.unit === selectedUnit)
-  );
+  const importsForView = filterProductionRows(periodImports, { year: selectedYear, month: selectedMonth, periodLabel: selectedPeriod, unit: selectedUnit });
+  const exportsForView = filterProductionRows(periodExports, { year: selectedYear, month: selectedMonth, periodLabel: selectedPeriod, unit: selectedUnit });
   const previousDate = new Date(Date.UTC(selectedYear, selectedMonth - 2, 1));
   const previousYear = previousDate.getUTCFullYear();
   const previousMonth = previousDate.getUTCMonth() + 1;
-  const previousImports = scopedImports.filter(
+  const previousImports = periodImports.filter(
     row =>
       getYear(row.recordDate) === previousYear &&
       getMonth(row.recordDate) === previousMonth &&
       (!selectedUnit || row.unit === selectedUnit)
   );
-  const yearImports = scopedImports.filter(row => getYear(row.recordDate) === selectedYear && (!selectedUnit || row.unit === selectedUnit));
+  const yearImports = periodImports.filter(row => getYear(row.recordDate) === selectedYear && (!selectedUnit || row.unit === selectedUnit));
   const planSummary = await getLatexProductionPlanSummary(selectedYear, selectedMonth, selectedUnit ? [selectedUnit] : scopeUnits);
   const frozenLatex = importsForView.reduce(
     (sum, row) => sum + row.frozenLatex,
@@ -2697,7 +2693,7 @@ export async function getLatexProductionManagement(
     unit => !hasScope || scopeUnits?.includes(unit)
   );
   const teamComparisons = availableUnits.map(unit => {
-    const currentTotalImport = scopedImports
+    const currentTotalImport = periodImports
       .filter(
         row =>
           getYear(row.recordDate) === selectedYear &&
@@ -2705,7 +2701,7 @@ export async function getLatexProductionManagement(
           row.unit === unit
       )
       .reduce((sum, row) => sum + row.totalImport, 0);
-    const previousTotal = scopedImports
+    const previousTotal = periodImports
       .filter(
         row =>
           getYear(row.recordDate) === previousYear &&
@@ -2728,6 +2724,8 @@ export async function getLatexProductionManagement(
     year: selectedYear,
     month: selectedMonth,
     unit: selectedUnit ?? "all",
+    periodLabel: selectedPeriod ?? "all",
+    availablePeriods,
     availableYears,
     availableMonths,
     availableUnits,
@@ -2746,8 +2744,8 @@ export async function getLatexProductionManagement(
       ...planSummary,
       rows: planSummary.rows.map(row => ({
         ...row,
-        actualMonthTotalImport: scopedImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear && getMonth(item.recordDate) === selectedMonth).reduce((sum, item) => sum + item.totalImport, 0),
-        actualYearTotalImport: scopedImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalImport, 0),
+        actualMonthTotalImport: periodImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear && getMonth(item.recordDate) === selectedMonth).reduce((sum, item) => sum + item.totalImport, 0),
+        actualYearTotalImport: periodImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalImport, 0),
       })),
       actualMonthTotalImport: totalImport,
       actualYearTotalImport: yearTotalImport,
