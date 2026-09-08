@@ -297,3 +297,21 @@
 - [x] Sửa import kế hoạch để dòng Tháng = 0 nhận đúng Kế hoạch năm
 - [x] Sửa import tổng hợp tay nghề nhận đúng tháng 08/2026 và ngày báo cáo tương ứng
 - [x] Bổ sung test lọc kỳ, import tháng=0, ngày 08/2026, chạy check/test/build và lưu checkpoint
+
+## Sửa monthKey và thẻ kế hoạch Tổng quan
+
+- [x] Sửa lỗi validation monthKey khi import tổng hợp tay nghề, hỗ trợ dữ liệu tháng 08/2026 đúng định dạng
+- [x] Chuyển thẻ Kế hoạch năm 2026 sang vị trí bên phải theo hình mẫu
+- [x] Đổi nhãn/thẻ Kế hoạch tháng thành Kế hoạch TT
+- [x] Tính lại tỷ lệ theo Kế hoạch TT và sản lượng Xuất mủ sau hao hụt kho
+- [x] Bỏ hiển thị phần % thừa trong thẻ kế hoạch
+- [x] Bổ sung test, chạy check/test/build và lưu checkpoint; chưa publish khi chưa có xác nhận mới
+
+## Quy tắc hiển thị kế hoạch theo Tháng/Cả năm
+
+- [x] Khi chọn Tháng có dữ liệu, vẫn hiển thị thẻ Kế hoạch tháng và số thực hiện tháng
+- [x] Khi chọn Cả năm, hiển thị Kế hoạch TT theo sản lượng Xuất mủ và Kế hoạch năm
+- [x] Sửa fallback TypeScript cho các trường xuất mủ của Tổng quan
+- [x] Bổ sung test điều kiện hiển thị theo Tháng/Cả năm, chạy check/test/build và lưu checkpoint
+
+- [x] Ẩn hoàn toàn nội dung Kế hoạch TT khi Kỳ xem là một Tháng; chỉ hiển thị Kế hoạch tháng và Kế hoạch năm

@@ -2694,6 +2694,9 @@ export async function getLatexProductionManagement(
     0
   );
   const yearTotalImport = yearImports.reduce((sum, row) => sum + row.totalImport, 0);
+  const totalExport = exportsForView.reduce((sum, row) => sum + row.totalExport, 0);
+  const yearExports = periodExports.filter(row => getYear(row.recordDate) === selectedYear && (!selectedUnit || row.unit === selectedUnit));
+  const yearTotalExport = yearExports.reduce((sum, row) => sum + row.totalExport, 0);
   const availableUnits = TEAM_ORDER.filter(
     unit => !hasScope || scopeUnits?.includes(unit)
   );
@@ -2745,15 +2748,21 @@ export async function getLatexProductionManagement(
     exportRecordCount: exportsForView.length,
     teamComparisons,
     actualYearTotalImport: yearTotalImport,
+    actualMonthOutput: totalExport,
+    actualYearOutput: yearTotalExport,
     planSummary: {
       ...planSummary,
       rows: planSummary.rows.map(row => ({
         ...row,
         actualMonthTotalImport: selectedMonth === 0 ? periodImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalImport, 0) : periodImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear && getMonth(item.recordDate) === selectedMonth).reduce((sum, item) => sum + item.totalImport, 0),
         actualYearTotalImport: periodImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalImport, 0),
+        actualMonthOutput: selectedMonth === 0 ? periodExports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalExport, 0) : periodExports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear && getMonth(item.recordDate) === selectedMonth).reduce((sum, item) => sum + item.totalExport, 0),
+        actualYearOutput: periodExports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalExport, 0),
       })),
       actualMonthTotalImport: totalImport,
       actualYearTotalImport: yearTotalImport,
+      actualMonthOutput: totalExport,
+      actualYearOutput: yearTotalExport,
     },
   };
 }
