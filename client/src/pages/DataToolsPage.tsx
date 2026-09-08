@@ -10,7 +10,8 @@ import { comparePlotsByYearAndName } from "@/lib/plotOrder";
 import { formatQuantity, STANDARD_PERIODS } from "@/lib/rubber";
 import { parseWorkerPlotAllocationRows } from "@/lib/workerPlotAllocationImport";
 import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "@/lib/workerPlotAllocationWorkbook";
-import { buildProductionPlanTemplateMatrix, buildTechnicalSkillTemplateMatrix, parseProductionPlanMatrix, parseTechnicalSkillMatrix, productionPlanMerges, technicalSkillMerges } from "@/lib/reportImportWorkbook";
+import { parseProductionPlanMatrix, parseTechnicalSkillMatrix } from "@/lib/reportImportWorkbook";
+import { createImportTemplateWorkbook } from "@/lib/dataToolsTemplate";
 import { trpc } from "@/lib/trpc";
 import { compareTeamName } from "@shared/teamOrder";
 import { Archive, CheckCircle2, Download, FileSpreadsheet, Loader2, TriangleAlert, Upload, UploadCloud } from "lucide-react";
@@ -141,25 +142,14 @@ export default function DataToolsPage() {
   };
 
   const downloadTemplate = async () => {
-    const XLSX = await import("xlsx");
-    const book = XLSX.utils.book_new();
-    const isGroupedTemplate = dataset === "workerPlotAllocations" || dataset === "productionPlans" || dataset === "technicalSkillMonthly";
-    const matrix = dataset === "workerPlotAllocations" ? buildWorkerPlotAllocationTemplateMatrix() : dataset === "productionPlans" ? buildProductionPlanTemplateMatrix() : dataset === "technicalSkillMonthly" ? buildTechnicalSkillTemplateMatrix() : null;
-    const sheet = matrix ? XLSX.utils.aoa_to_sheet(matrix) : XLSX.utils.json_to_sheet([samples[dataset]]);
-    if (isGroupedTemplate) {
-      const merges = dataset === "workerPlotAllocations" ? workerPlotAllocationMerges : dataset === "productionPlans" ? productionPlanMerges : technicalSkillMerges;
-      sheet["!merges"] = merges.map(XLSX.utils.decode_range);
-      sheet["!cols"] = Array.from({ length: (matrix?.[0]?.length ?? 13) }, (_, index) => ({ wch: index === 1 ? 18 : index === 2 ? 12 : 15 }));
-      sheet["!rows"] = [{ hpt: 24 }, { hpt: 32 }, { hpt: 42 }, { hpt: 22 }];
+    try {
+      const XLSX = await import("xlsx");
+      const { book, fileName } = createImportTemplateWorkbook(XLSX, dataset, labels, samples);
+      XLSX.writeFile(book, fileName);
+      toast.success(`Đã tải mẫu ${labels[dataset]}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? `Không thể tạo mẫu Excel: ${error.message}` : "Không thể tạo mẫu Excel. Vui lòng thử lại.");
     }
-    XLSX.utils.book_append_sheet(book, sheet, labels[dataset]);
-    const guide = XLSX.utils.aoa_to_sheet([
-      [`MẪU IMPORT ${labels[dataset].toUpperCase()}`],
-      [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Năm, Tháng (0 nếu là kế hoạch năm), Diện tích, kế hoạch mủ đông/tạp và kế hoạch mủ quy khô." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một tháng dạng YYYY-MM; nhập quân số, số thợ theo cấp tay nghề và số thợ hao dăm." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
-      ["Các bản ghi trùng khóa sẽ được cập nhật, không tạo bản sao."],
-    ]);
-    XLSX.utils.book_append_sheet(book, guide, "Hướng dẫn");
-    XLSX.writeFile(book, `mau-import-${dataset}.xlsx`);
   };
 
   const downloadExport = async () => {

@@ -192,10 +192,10 @@
 
 ## Lỗi tải mẫu Excel
 
-- [ ] Xác định nguyên nhân nút Tải mẫu Excel không tạo hoặc không tải được file
-- [ ] Sửa luồng tạo workbook/mẫu phân bổ Vườn A/B/C và xử lý lỗi rõ ràng trên giao diện
-- [ ] Bổ sung test hồi quy cho thao tác tạo mẫu Excel
-- [ ] Chạy typecheck, test, build và lưu checkpoint sửa lỗi trước khi triển khai lại
+- [x] Xác định nguyên nhân nút Tải mẫu Excel không tạo hoặc không tải được file
+- [x] Sửa luồng tạo workbook/mẫu phân bổ Vườn A/B/C và xử lý lỗi rõ ràng trên giao diện
+- [x] Bổ sung test hồi quy cho thao tác tạo mẫu Excel
+- [x] Chạy typecheck, test, build và lưu checkpoint sửa lỗi trước khi triển khai lại
 
 ## Mở rộng báo cáo sản lượng, kho và tay nghề
 
@@ -229,3 +229,9 @@
 - [x] Tách helper export tiến độ team-only và kiểm tra không có cột Vườn/Lô
 - [x] Tách helper export tăng giảm và kiểm tra Chênh = Xuất - Nhập, có Hao kho
 - [x] Tạo helper tính dòng tay nghề có số thợ, tỷ lệ và biến động tháng trước để kiểm thử độc lập
+
+## Xác minh thực tế nút Tải mẫu Excel
+
+- [x] Tách helper tạo workbook mẫu để kiểm chứng độc lập dataset phân bổ Vườn A/B/C
+- [x] Bổ sung test gọi helper và kiểm tra cấu trúc workbook/mẫu tải xuống
+- [x] Ghi nhận nguyên nhân kỹ thuật đã xác minh và lưu checkpoint sau bản sửa nút Tải mẫu
