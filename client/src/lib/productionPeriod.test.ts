@@ -19,6 +19,11 @@ describe("production period filters", () => {
     expect(result.reduce((sum, row) => sum + row.totalImport, 0)).toBe(70);
   });
 
+  it("lọc Cả năm với All và giữ cả các tháng có dữ liệu", () => {
+    const result = filterProductionRows(rows, { year: 2026, periodLabel: "all" });
+    expect(result.map(row => row.totalImport)).toEqual([40, 30, 20]);
+  });
+
   it("không đưa bản ghi khác Năm vào Tổng sản lượng", () => {
     const result = filterProductionRows([{ recordDate: new Date("2025-08-03T00:00:00Z"), periodLabel: "Đợt 4", unit: "Đội 1", totalImport: 999 }, ...rows], { year: 2026, month: 8, periodLabel: "Đợt 4" });
     expect(result.reduce((sum, row) => sum + row.totalImport, 0)).toBe(40);

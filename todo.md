@@ -287,3 +287,13 @@
 - [x] Cập nhật import/API và Tổng quan dùng dữ liệu kế hoạch/tay nghề sau import
 - [x] Bổ sung test bằng cấu trúc thực tế của hai file, chạy check/test/build
 - [x] Lưu checkpoint mới và xin xác nhận triển khai Team
+
+## Sửa kỳ Tổng quan và import kỳ báo cáo
+
+- [x] Thêm lựa chọn Tháng = Cả năm và lọc đúng toàn bộ năm đã chọn
+- [x] Thêm lựa chọn Đợt = All và tự nhận diện Đợt 4 khi có phát sinh
+- [x] Đặt kỳ mặc định theo tổng đến thời kỳ hiện tại, không hiển thị dữ liệu ngoài kỳ mặc định
+- [x] Chỉ hiển thị các tháng có dữ liệu trong danh sách lựa chọn
+- [x] Sửa import kế hoạch để dòng Tháng = 0 nhận đúng Kế hoạch năm
+- [x] Sửa import tổng hợp tay nghề nhận đúng tháng 08/2026 và ngày báo cáo tương ứng
+- [x] Bổ sung test lọc kỳ, import tháng=0, ngày 08/2026, chạy check/test/build và lưu checkpoint

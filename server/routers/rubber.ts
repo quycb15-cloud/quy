@@ -125,7 +125,7 @@ const mapExtension = (mimeType: (typeof allowedMapTypes)[number]) =>
 
 export const rubberRouter = router({
   dashboard: protectedProcedure
-    .input(z.object({ periodLabel: z.string().max(80).optional(), month: z.coerce.number().int().min(1).max(12).optional(), year: z.coerce.number().int().min(2000).max(2200).optional() }).optional())
+    .input(z.object({ periodLabel: z.string().max(80).optional(), month: z.coerce.number().int().min(0).max(12).optional(), year: z.coerce.number().int().min(2000).max(2200).optional() }).optional())
     .query(async ({ input, ctx }) => {
       const profile = await requirePermission(ctx, "dashboard:read");
       return db.getDashboard(
@@ -140,7 +140,7 @@ export const rubberRouter = router({
       z
         .object({
           year: z.coerce.number().int().min(2000).max(2200).optional(),
-          month: z.coerce.number().int().min(1).max(12).optional(),
+          month: z.coerce.number().int().min(0).max(12).optional(),
           periodLabel: z.string().max(80).optional(),
           unit: z.string().max(120).optional(),
         })

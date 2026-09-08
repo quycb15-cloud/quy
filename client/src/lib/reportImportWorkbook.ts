@@ -63,8 +63,10 @@ const monthKey = (value: unknown) => {
     return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
   }
   const raw = String(value ?? "").trim();
-  const match = raw.match(/(\d{4})[-/]?(\d{1,2})/);
-  return match ? `${match[1]}-${String(Number(match[2])).padStart(2, "0")}` : raw;
+  const yearMonth = raw.match(/^(\d{4})[-\/]?(\d{1,2})$/);
+  if (yearMonth) return `${yearMonth[1]}-${String(Number(yearMonth[2])).padStart(2, "0")}`;
+  const monthYear = raw.match(/^(\d{1,2})[-\/]?(\d{4})$/);
+  return monthYear ? `${monthYear[2]}-${String(Number(monthYear[1])).padStart(2, "0")}` : raw;
 };
 
 export function parseProductionPlanMatrix(matrix: unknown[][]) {

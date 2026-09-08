@@ -146,6 +146,13 @@ describe("rubberRouter authorization and business procedures", () => {
     expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 4", undefined, 8, undefined);
   });
 
+  it("truyền Cả năm, All và Năm vào dashboard theo bộ chọn Kỳ xem", async () => {
+    dbMocks.getDashboard.mockResolvedValue({ totalArea: 0 });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    await caller.rubber.dashboard({ periodLabel: "all", month: 0, year: 2026 });
+    expect(dbMocks.getDashboard).toHaveBeenCalledWith("all", undefined, 0, 2026);
+  });
+
   it("trả totalArea đã cắt xuống 2 chữ số qua rubber.dashboard", async () => {
     dbMocks.getDashboard.mockResolvedValue({ totalArea: 1582.71, plotCount: 208 });
     const caller = appRouter.createCaller(makeContext("admin"));

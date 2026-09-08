@@ -52,6 +52,12 @@ describe("report import workbooks", () => {
       [1, "Đội 1", 46265, 57, 0, 0, 13, 0, 40, 0, 4, 0, 0, 0, 93, 3, 42, 73.68, 37, 5, 13.51, "", "", ""],
     ]);
     expect(serialDate.rows[0]?.monthKey).toBe("2026-08");
+    const slashMonth = parseTechnicalSkillMatrix([
+      ["TT", "Nội dung", "Tháng/năm báo cáo", "Quân số"], [], [],
+      [1, "Đội 1", "08/2026", 57, 0, 0, 13, 0, 40, 0, 4, 0, 0, 0, 93, 3, 42, 73.68, 37, 5, 13.51, "", "", ""],
+    ]);
+    expect(slashMonth.issues).toEqual([]);
+    expect(slashMonth.rows[0]?.monthKey).toBe("2026-08");
   });
 
   it("từ chối tổng số cấp tay nghề vượt quân số", () => {
