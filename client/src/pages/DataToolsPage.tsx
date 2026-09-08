@@ -183,8 +183,8 @@ export default function DataToolsPage() {
       const sheet = book.Sheets[book.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" });
       const isAllocation = (text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô")) || (text(matrix[0]?.[1]).toLowerCase().includes("mã công nhân") && text(matrix[1]?.[2]).toLowerCase() === "lô");
-      const isProductionPlan = text(matrix[0]?.[1]) === "Đơn vị" && text(matrix[0]?.[2]) === "Năm" && text(matrix[2]?.[6]).includes("Kế hoạch");
-      const isTechnicalSkill = text(matrix[0]?.[1]) === "Nội dung" && text(matrix[0]?.[2]) === "Tháng báo cáo" && text(matrix[1]?.[4]).includes("Xuất sắc");
+      const isProductionPlan = text(matrix[0]?.[1]) === "Đơn vị" && (text(matrix[0]?.[2]).toLowerCase().includes("kế hoạch năm") || text(matrix[0]?.[2]) === "Năm") && (text(matrix[0]?.[4]).toLowerCase().includes("kế hoạch giao") || text(matrix[2]?.[6]).includes("Kế hoạch"));
+      const isTechnicalSkill = text(matrix[0]?.[1]) === "Nội dung" && (text(matrix[0]?.[2]) === "Tháng báo cáo" || text(matrix[0]?.[2]).toLowerCase().includes("tháng/năm báo cáo")) && text(matrix[1]?.[4]).includes("Xuất sắc");
       if (isProductionPlan || isTechnicalSkill) {
         const parsed = isProductionPlan ? parseProductionPlanMatrix(matrix) : parseTechnicalSkillMatrix(matrix);
         if (!parsed.rows.length) throw new Error(`Không có dòng hợp lệ. ${parsed.issues[0] ?? "Hãy kiểm tra đúng bố cục mẫu."}`);

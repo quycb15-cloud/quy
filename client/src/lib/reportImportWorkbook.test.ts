@@ -9,15 +9,25 @@ import {
 } from "./reportImportWorkbook";
 
 describe("report import workbooks", () => {
-  it("creates the production plan template with grouped headers and annual/monthly fields", () => {
+  it("tạo mẫu kế hoạch đúng bố cục file thật", () => {
     const matrix = buildProductionPlanTemplateMatrix();
-    expect(matrix[0]).toContain("Đơn vị");
-    expect(matrix[0]).toContain("Năm");
-    expect(matrix[0]).toContain("Tháng");
-    expect(productionPlanMerges).toContain("G1:L1");
+    expect(matrix[0]).toEqual(["TT", "Đơn vị", "Kế hoạch năm", "Kế hoạch tháng", "Kế hoạch Giao Sản lượng", "", "", "", "Ghi chú"]);
+    expect(productionPlanMerges).toContain("E1:H1");
+    expect(productionPlanMerges).toContain("G2:H2");
   });
 
-  it("parses a production plan row", () => {
+  it("đọc kế hoạch năm/tháng và cộng hai nguồn quy khô", () => {
+    const result = parseProductionPlanMatrix([
+      ["TT", "Đơn vị", "Kế hoạch năm", "Kế hoạch tháng", "Kế hoạch Giao Sản lượng", "", "", "", "Ghi chú"],
+      ["", "", "", "", "Mủ đông, tạp", "", "Mủ quy khô", "", ""],
+      ["", "", "", "", "Kế hoạch Mủ đông, tạp (kg)", "Kế hoạch Mủ dây (kg)", "Kế hoạch từ mủ đông, tạp (kg)", "Kế hoạch từ mủ dây (kg)", ""],
+      [1, "Đội 1", 2026, 8, "50.524", 17, 25262, "=F4/2", ""],
+    ]);
+    expect(result.issues).toEqual([]);
+    expect(result.rows[0]).toMatchObject({ unit: "Đội 1", year: 2026, month: 8, planFrozenLatex: 50524, planThreadLatex: 17, planDryRubber: 25270.5 });
+  });
+
+  it("vẫn đọc mẫu kế hoạch cũ có cột Năm/Tháng riêng", () => {
     const result = parseProductionPlanMatrix([
       ["TT", "Đơn vị", "Năm", "Tháng", "ĐVT", "Diện tích", "Sản lượng"],
       [],
@@ -28,23 +38,32 @@ describe("report import workbooks", () => {
     expect(result.rows[0]).toMatchObject({ unit: "Đội 1", year: 2026, month: 0, areaHa: 283.13, planFrozenLatex: 842071 });
   });
 
-  it("parses skill and hao dam counts and rejects over-allocation", () => {
-    const valid = parseTechnicalSkillMatrix([
-      ["TT", "Nội dung", "Tháng báo cáo", "Quân số", "Loại tay nghề"],
+  it("đọc mẫu tay nghề thật với ngày báo cáo và Hao dăm tháng hiện tại", () => {
+    const result = parseTechnicalSkillMatrix([
+      ["TT", "Nội dung", "Tháng/năm báo cáo", "Quân số", "Loại tay nghề"],
       ["", "", "", "", "Xuất sắc"],
       ["", "", "", "", "Số thợ"],
-      [1, "Đội 1", "2026-08", 57, 0, 0, 13, 0, 40, 0, 4, 0, 93, 3, 42, 73.68, 37, 5, ""],
+      [1, "Đội 1", new Date("2026-08-31"), 57, "", "", 13, 22.81, 40, 70.18, 4, 7.02, 0, 0, 93, 3, 42, 73.68, 37, 5, 13.51, "", "", ""],
     ]);
-    expect(valid.issues).toEqual([]);
-    expect(valid.rows[0]).toMatchObject({ unit: "Đội 1", monthKey: "2026-08", workerCount: 57, goodCount: 13, fairCount: 40, haoDamWorkers: 42 });
+    expect(result.issues).toEqual([]);
+    expect(result.rows[0]).toMatchObject({ unit: "Đội 1", monthKey: "2026-08", workerCount: 57, goodCount: 13, fairCount: 40, haoDamWorkers: 42, previousHaoDamWorkers: 37, haoDamChangeWorkers: 5 });
+    const serialDate = parseTechnicalSkillMatrix([
+      ["TT", "Nội dung", "Tháng/năm báo cáo", "Quân số", "Loại tay nghề"], [], [],
+      [1, "Đội 1", 46265, 57, 0, 0, 13, 0, 40, 0, 4, 0, 0, 0, 93, 3, 42, 73.68, 37, 5, 13.51, "", "", ""],
+    ]);
+    expect(serialDate.rows[0]?.monthKey).toBe("2026-08");
+  });
+
+  it("từ chối tổng số cấp tay nghề vượt quân số", () => {
     const invalid = parseTechnicalSkillMatrix([
-      ["TT", "Nội dung", "Tháng báo cáo", "Quân số", "Loại tay nghề"],
+      ["TT", "Nội dung", "Tháng/năm báo cáo", "Quân số", "Loại tay nghề"],
       [],
       [],
-      [1, "Đội 1", "2026-08", 2, 2, 0, 2, 0, 0, 0, 0, 0],
+      [1, "Đội 1", new Date("2026-08-31"), 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0],
     ]);
     expect(invalid.rows).toHaveLength(0);
     expect(invalid.issues[0]).toContain("không vượt quân số");
-    expect(technicalSkillMerges).toContain("O1:R1");
+    expect(technicalSkillMerges).toContain("Q1:U1");
+    expect(technicalSkillMerges).toContain("T2:U2");
   });
 });

@@ -278,3 +278,12 @@
 - [x] Sản lượng từng kỳ dùng đúng tập dữ liệu Năm/Tháng/Đợt
 - [x] Tổng quan theo 6 đội dùng đúng tổng và diễn biến kỳ đang xem
 - [x] Bổ sung test cho tổng, diễn biến, lọc kỳ và độ chính xác nguồn
+
+## Đối chiếu hai file Excel mẫu mới
+
+- [x] Đọc cấu trúc sheet, dòng tiêu đề và cột dữ liệu của mẫu tổng hợp tay nghề 08/2026
+- [x] Đọc cấu trúc sheet, dòng tiêu đề và cột dữ liệu của mẫu kế hoạch năm/tháng
+- [x] Cập nhật parser và mẫu tải xuống theo đúng file thật, không làm mất tương thích hợp lý
+- [x] Cập nhật import/API và Tổng quan dùng dữ liệu kế hoạch/tay nghề sau import
+- [x] Bổ sung test bằng cấu trúc thực tế của hai file, chạy check/test/build
+- [ ] Lưu checkpoint mới và xin xác nhận triển khai Team

@@ -2970,7 +2970,10 @@ export type LatexProductionPlanImportRow = {
   month?: number;
   areaHa?: number;
   planFrozenLatex: number;
+  planThreadLatex?: number;
   planDryRubber: number;
+  planDryFromFrozen?: number;
+  planDryFromThread?: number;
   note?: string | null;
 };
 
@@ -2989,7 +2992,10 @@ export async function bulkUpsertLatexProductionPlans(
         month: row.month ?? 0,
         areaHa: String(row.areaHa ?? 0),
         planFrozenLatex: String(row.planFrozenLatex),
+        planThreadLatex: String(row.planThreadLatex ?? 0),
         planDryRubber: String(row.planDryRubber),
+        planDryFromFrozen: String(row.planDryFromFrozen ?? row.planDryRubber),
+        planDryFromThread: String(row.planDryFromThread ?? 0),
         note: row.note?.trim() || null,
         createdBy: userId,
       })
@@ -2997,7 +3003,10 @@ export async function bulkUpsertLatexProductionPlans(
         set: {
           areaHa: String(row.areaHa ?? 0),
           planFrozenLatex: String(row.planFrozenLatex),
+          planThreadLatex: String(row.planThreadLatex ?? 0),
           planDryRubber: String(row.planDryRubber),
+          planDryFromFrozen: String(row.planDryFromFrozen ?? row.planDryRubber),
+          planDryFromThread: String(row.planDryFromThread ?? 0),
           note: row.note?.trim() || null,
           createdBy: userId,
         },
@@ -3014,7 +3023,10 @@ export async function listLatexProductionPlans() {
     ...row,
     areaHa: numberValue(row.areaHa),
     planFrozenLatex: numberValue(row.planFrozenLatex),
+    planThreadLatex: numberValue(row.planThreadLatex),
     planDryRubber: numberValue(row.planDryRubber),
+    planDryFromFrozen: numberValue(row.planDryFromFrozen),
+    planDryFromThread: numberValue(row.planDryFromThread),
   }));
 }
 
@@ -3041,10 +3053,16 @@ export async function getLatexProductionPlanSummary(
     ...row,
     planMonthFrozenLatex:
       row.month === month ? row.planFrozenLatex : 0,
+    planMonthThreadLatex: row.month === month ? row.planThreadLatex : 0,
     planMonthDryRubber: row.month === month ? row.planDryRubber : 0,
+    planMonthDryFromFrozen: row.month === month ? row.planDryFromFrozen : 0,
+    planMonthDryFromThread: row.month === month ? row.planDryFromThread : 0,
     planYearFrozenLatex:
       row.month === 0 ? row.planFrozenLatex : 0,
+    planYearThreadLatex: row.month === 0 ? row.planThreadLatex : 0,
     planYearDryRubber: row.month === 0 ? row.planDryRubber : 0,
+    planYearDryFromFrozen: row.month === 0 ? row.planDryFromFrozen : 0,
+    planYearDryFromThread: row.month === 0 ? row.planDryFromThread : 0,
   }));
   return {
     year,
@@ -3054,11 +3072,17 @@ export async function getLatexProductionPlanSummary(
       (sum, row) => ({
         areaHa: sum.areaHa + row.areaHa,
         planMonthFrozenLatex: sum.planMonthFrozenLatex + row.planMonthFrozenLatex,
+        planMonthThreadLatex: sum.planMonthThreadLatex + row.planMonthThreadLatex,
         planMonthDryRubber: sum.planMonthDryRubber + row.planMonthDryRubber,
+        planMonthDryFromFrozen: sum.planMonthDryFromFrozen + row.planMonthDryFromFrozen,
+        planMonthDryFromThread: sum.planMonthDryFromThread + row.planMonthDryFromThread,
         planYearFrozenLatex: sum.planYearFrozenLatex + row.planYearFrozenLatex,
+        planYearThreadLatex: sum.planYearThreadLatex + row.planYearThreadLatex,
         planYearDryRubber: sum.planYearDryRubber + row.planYearDryRubber,
+        planYearDryFromFrozen: sum.planYearDryFromFrozen + row.planYearDryFromFrozen,
+        planYearDryFromThread: sum.planYearDryFromThread + row.planYearDryFromThread,
       }),
-      { areaHa: 0, planMonthFrozenLatex: 0, planMonthDryRubber: 0, planYearFrozenLatex: 0, planYearDryRubber: 0 }
+      { areaHa: 0, planMonthFrozenLatex: 0, planMonthThreadLatex: 0, planMonthDryRubber: 0, planMonthDryFromFrozen: 0, planMonthDryFromThread: 0, planYearFrozenLatex: 0, planYearThreadLatex: 0, planYearDryRubber: 0, planYearDryFromFrozen: 0, planYearDryFromThread: 0 }
     ),
   };
 }
@@ -3073,6 +3097,7 @@ export type TechnicalSkillMonthlySummaryImportRow = {
   averageCount: number;
   weakCount: number;
   haoDamWorkers: number;
+  previousHaoDamWorkers?: number;
   note?: string | null;
 };
 
@@ -3099,6 +3124,7 @@ export async function bulkUpsertTechnicalSkillMonthlySummaries(
           averageCount: row.averageCount,
           weakCount: row.weakCount,
           haoDamWorkers: row.haoDamWorkers,
+          previousHaoDamWorkers: row.previousHaoDamWorkers ?? 0,
           note: row.note?.trim() || null,
           createdBy: userId,
         },
@@ -3142,10 +3168,10 @@ export async function getTechnicalSkillMonthlySummary(
       averagePercent: (row.averageCount / denominator) * 100,
       weakPercent: (row.weakCount / denominator) * 100,
       favorablePercent: (favorableCount / denominator) * 100,
-      previousHaoDamWorkers: previous?.haoDamWorkers ?? null,
-      previousHaoDamRate,
-      haoDamChangeWorkers: previous ? row.haoDamWorkers - previous.haoDamWorkers : null,
-      haoDamChangePercent: previousHaoDamRate == null ? null : currentHaoDamRate - previousHaoDamRate,
+      previousHaoDamWorkers: previous ? previous.haoDamWorkers : (row.previousHaoDamWorkers || null),
+      previousHaoDamRate: previous ? previousHaoDamRate : (row.previousHaoDamWorkers ? (row.previousHaoDamWorkers / Math.max(row.workerCount, 1)) * 100 : null),
+      haoDamChangeWorkers: previous ? row.haoDamWorkers - previous.haoDamWorkers : (row.previousHaoDamWorkers ? row.haoDamWorkers - row.previousHaoDamWorkers : null),
+      haoDamChangePercent: (previousHaoDamRate == null && !row.previousHaoDamWorkers) ? null : currentHaoDamRate - (previous ? previousHaoDamRate! : (row.previousHaoDamWorkers / Math.max(row.workerCount, 1)) * 100),
       previousExceptionalPercent: previous ? (previous.exceptionalCount / Math.max(previous.workerCount, 1)) * 100 : null,
       previousGoodPercent: previous ? (previous.goodCount / Math.max(previous.workerCount, 1)) * 100 : null,
       previousFairPercent: previous ? (previous.fairCount / Math.max(previous.workerCount, 1)) * 100 : null,

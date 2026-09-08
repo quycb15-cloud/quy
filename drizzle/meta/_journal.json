@@ -211,6 +211,20 @@
       "when": 1788839424213,
       "tag": "0029_free_jigsaw",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1788860784429,
+      "tag": "0030_brown_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1788860932577,
+      "tag": "0031_wonderful_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

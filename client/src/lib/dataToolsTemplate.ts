@@ -19,7 +19,7 @@ export function createImportTemplateWorkbook(XLSX: any, dataset: TemplateDataset
   XLSX.utils.book_append_sheet(book, sheet, sheetName);
   const guide = XLSX.utils.aoa_to_sheet([
     [`MẪU IMPORT ${labels[dataset].toUpperCase()}`],
-    [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Năm, Tháng (0 nếu là kế hoạch năm), Diện tích, kế hoạch mủ đông/tạp và kế hoạch mủ quy khô." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một tháng dạng YYYY-MM; nhập quân số, số thợ theo cấp tay nghề và số thợ hao dăm." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
+    [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Kế hoạch năm, Kế hoạch tháng (0 nếu là kế hoạch năm), kế hoạch mủ đông/tạp, mủ dây, quy khô từ mủ đông/tạp và quy khô từ mủ dây." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một ngày thuộc tháng báo cáo; nhập quân số, số thợ theo năm cấp tay nghề, Hao dăm tháng hiện tại, tháng trước và chênh lệch nếu có." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
     ["Các bản ghi trùng khóa sẽ được cập nhật, không tạo bản sao."],
   ]);
   XLSX.utils.book_append_sheet(book, guide, "Hướng dẫn");

@@ -1,0 +1,1 @@
+ALTER TABLE `technical_skill_monthly_summaries` ADD `previousHaoDamWorkers` int DEFAULT 0 NOT NULL;
