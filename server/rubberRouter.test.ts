@@ -136,14 +136,14 @@ describe("rubberRouter authorization and business procedures", () => {
     });
     const caller = appRouter.createCaller(makeContext("admin"));
     await expect(caller.rubber.dashboard({ periodLabel: "Đợt 1" })).resolves.toMatchObject({ quarterlyYearComparison: { currentLabel: "Quý 3/2026", previousLabel: "Quý 3/2025", hasPreviousData: false } });
-    expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 1", undefined, undefined);
+    expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 1", undefined, undefined, undefined);
   });
 
   it("truyền Tháng cùng Đợt vào dashboard theo bộ chọn Kỳ xem", async () => {
     dbMocks.getDashboard.mockResolvedValue({ totalArea: 0 });
     const caller = appRouter.createCaller(makeContext("admin"));
     await caller.rubber.dashboard({ periodLabel: "Đợt 4", month: 8 });
-    expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 4", undefined, 8);
+    expect(dbMocks.getDashboard).toHaveBeenCalledWith("Đợt 4", undefined, 8, undefined);
   });
 
   it("trả totalArea đã cắt xuống 2 chữ số qua rubber.dashboard", async () => {

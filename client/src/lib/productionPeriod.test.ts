@@ -13,8 +13,14 @@ describe("production period filters", () => {
     expect(result.map(row => row.totalImport)).toEqual([40]);
   });
 
-  it("lọc theo Tháng khi chọn tất cả Đợt", () => {
+  it("lọc theo Tháng khi chọn tất cả Đợt và giữ nguyên tổng nguồn", () => {
     const result = filterProductionRows(rows, { year: 2026, month: 8 });
     expect(result.map(row => row.totalImport)).toEqual([40, 30]);
+    expect(result.reduce((sum, row) => sum + row.totalImport, 0)).toBe(70);
+  });
+
+  it("không đưa bản ghi khác Năm vào Tổng sản lượng", () => {
+    const result = filterProductionRows([{ recordDate: new Date("2025-08-03T00:00:00Z"), periodLabel: "Đợt 4", unit: "Đội 1", totalImport: 999 }, ...rows], { year: 2026, month: 8, periodLabel: "Đợt 4" });
+    expect(result.reduce((sum, row) => sum + row.totalImport, 0)).toBe(40);
   });
 });

@@ -260,3 +260,21 @@
 - [ ] Xác minh trình duyệt hai nút Tải mẫu Excel và UI Tổng quan/Báo cáo Hao kho (đang chờ đăng nhập Team)
 - [x] Đồng bộ các truy vấn dashboard khác theo cùng Tháng/Đợt hoặc ghi rõ phạm vi chỉ áp dụng cho panel sản lượng
 - [x] Chạy lại check/test/build sau các test xác minh và chỉ đánh dấu hoàn tất sau đó
+
+## Đồng bộ bốn phần Tổng quan theo Kỳ xem
+
+- [x] Đối chiếu bốn phần Tổng quan với bộ lọc năm, tháng, đợt hiện tại
+- [x] Sửa tổng sản lượng không còn cộng mọi kỳ khi đang chọn Kỳ xem
+- [x] Sửa diễn biến sản lượng theo đúng năm, tháng, đợt đã chọn
+- [x] Sửa tổng hợp theo Đội và các biểu đồ liên quan theo cùng kỳ
+- [x] Bổ sung test đối chiếu dữ liệu kỳ và độ chính xác số nguồn
+- [x] Chạy check/test/build, lưu checkpoint và chờ xác nhận trước publish
+
+## Đồng bộ Tổng quan theo ảnh Kỳ xem
+
+- [x] Bộ chọn Kỳ xem hiển thị rõ Năm, Tháng và Đợt
+- [x] Quản lý sản lượng mủ dùng đúng tập dữ liệu Năm/Tháng/Đợt
+- [x] Phân tích sản lượng dùng đúng tập dữ liệu Năm/Tháng/Đợt
+- [x] Sản lượng từng kỳ dùng đúng tập dữ liệu Năm/Tháng/Đợt
+- [x] Tổng quan theo 6 đội dùng đúng tổng và diễn biến kỳ đang xem
+- [x] Bổ sung test cho tổng, diễn biến, lọc kỳ và độ chính xác nguồn

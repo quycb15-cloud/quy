@@ -2390,7 +2390,8 @@ export async function listPeriods() {
 export async function getDashboard(
   periodLabel?: string,
   scopeUnits?: string[],
-  month?: number
+  month?: number,
+  year?: number
 ) {
   const selectedPeriod = periodLabel || "Đợt 1";
   const db = await getDb();
@@ -2463,11 +2464,12 @@ export async function getDashboard(
     { staffingTarget: 0, currentCount: 0, shortageCount: 0, surplusCount: 0 }
   );
   const selectedMonth = month && month >= 1 && month <= 12 ? month : undefined;
+  const selectedYear = year && year >= 2000 && year <= 2200 ? year : undefined;
   const selectedImports = scopedImports.filter(
-    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth)
+    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth) && (!selectedYear || row.recordDate.getUTCFullYear() === selectedYear)
   );
   const selectedExports = scopedExports.filter(
-    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth)
+    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth) && (!selectedYear || row.recordDate.getUTCFullYear() === selectedYear)
   );
   const totalImport = selectedImports.reduce(
     (sum, row) => sum + row.totalImport,

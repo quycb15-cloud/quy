@@ -125,13 +125,14 @@ const mapExtension = (mimeType: (typeof allowedMapTypes)[number]) =>
 
 export const rubberRouter = router({
   dashboard: protectedProcedure
-    .input(z.object({ periodLabel: z.string().max(80).optional(), month: z.coerce.number().int().min(1).max(12).optional() }).optional())
+    .input(z.object({ periodLabel: z.string().max(80).optional(), month: z.coerce.number().int().min(1).max(12).optional(), year: z.coerce.number().int().min(2000).max(2200).optional() }).optional())
     .query(async ({ input, ctx }) => {
       const profile = await requirePermission(ctx, "dashboard:read");
       return db.getDashboard(
         input?.periodLabel,
         profile.fullAccess || !profile.scopeUnits.length ? undefined : profile.scopeUnits,
-        input?.month
+        input?.month,
+        input?.year
       );
     }),
   latexProductionManagement: protectedProcedure
