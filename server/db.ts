@@ -2389,7 +2389,8 @@ export async function listPeriods() {
 
 export async function getDashboard(
   periodLabel?: string,
-  scopeUnits?: string[]
+  scopeUnits?: string[],
+  month?: number
 ) {
   const selectedPeriod = periodLabel || "Đợt 1";
   const db = await getDb();
@@ -2461,11 +2462,12 @@ export async function getDashboard(
     }),
     { staffingTarget: 0, currentCount: 0, shortageCount: 0, surplusCount: 0 }
   );
+  const selectedMonth = month && month >= 1 && month <= 12 ? month : undefined;
   const selectedImports = scopedImports.filter(
-    row => row.periodLabel === selectedPeriod
+    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth)
   );
   const selectedExports = scopedExports.filter(
-    row => row.periodLabel === selectedPeriod
+    row => row.periodLabel === selectedPeriod && (!selectedMonth || row.recordDate.getUTCMonth() + 1 === selectedMonth)
   );
   const totalImport = selectedImports.reduce(
     (sum, row) => sum + row.totalImport,
@@ -2475,7 +2477,7 @@ export async function getDashboard(
     (sum, row) => sum + row.totalExport,
     0
   );
-  const totalProduction = scopedImports.reduce(
+  const totalProduction = selectedImports.reduce(
     (sum, row) => sum + row.totalImport,
     0
   );
@@ -2495,7 +2497,7 @@ export async function getDashboard(
         .entries()
     ).map(([label, value]) => ({ label, value }));
   const periodProduction = aggregate(
-    scopedImports,
+    selectedImports,
     row => row.periodLabel,
     row => row.totalImport
   ).sort((left, right) => comparePeriodLabel(left.label, right.label));
@@ -2510,7 +2512,7 @@ export async function getDashboard(
   const teamOverview = unitList.map(unit => {
     const teamPlots = scopedPlots.filter(plot => plot.unit === unit);
     const teamWorkers = scopedWorkers.filter(worker => worker.unit === unit);
-    const teamImports = scopedImports.filter(row => row.unit === unit);
+    const teamImports = selectedImports.filter(row => row.unit === unit);
     return {
       unit,
       areaHa: teamPlots.reduce((sum, plot) => sum + plot.areaHa, 0),
@@ -2531,7 +2533,7 @@ export async function getDashboard(
     teamMonthlyMap.set(month, entry);
   });
   const teamQuarterlyMap = new Map<string, Record<string, string | number>>();
-  scopedImports.forEach(row => {
+  selectedImports.forEach(row => {
     const month = row.recordDate.getUTCMonth() + 1;
     const quarter = Math.ceil(month / 3);
     const year = row.recordDate.getUTCFullYear();

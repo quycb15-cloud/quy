@@ -33,7 +33,6 @@ export function buildProductionChangeExportRows(rows: ProductionChangeExportInpu
     Đội: row.unit,
     "Cộng nhập": Number(row.totalImport.toFixed(2)),
     "Cộng xuất": Number(row.totalExport.toFixed(2)),
-    "Chênh (Xuất - Nhập)": Number((row.totalExport - row.totalImport).toFixed(2)),
     "Hao kho": Number((row.totalImport - row.totalExport).toFixed(2)),
   }));
 }

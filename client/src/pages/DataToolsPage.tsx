@@ -11,7 +11,7 @@ import { formatQuantity, STANDARD_PERIODS } from "@/lib/rubber";
 import { parseWorkerPlotAllocationRows } from "@/lib/workerPlotAllocationImport";
 import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "@/lib/workerPlotAllocationWorkbook";
 import { parseProductionPlanMatrix, parseTechnicalSkillMatrix } from "@/lib/reportImportWorkbook";
-import { createImportTemplateWorkbook } from "@/lib/dataToolsTemplate";
+import { createImportTemplateWorkbook, downloadWorkbookFile } from "@/lib/dataToolsTemplate";
 import { trpc } from "@/lib/trpc";
 import { compareTeamName } from "@shared/teamOrder";
 import { Archive, CheckCircle2, Download, FileSpreadsheet, Loader2, TriangleAlert, Upload, UploadCloud } from "lucide-react";
@@ -145,7 +145,7 @@ export default function DataToolsPage() {
     try {
       const XLSX = await import("xlsx");
       const { book, fileName } = createImportTemplateWorkbook(XLSX, dataset, labels, samples);
-      XLSX.writeFile(book, fileName);
+      downloadWorkbookFile(XLSX, book, fileName);
       toast.success(`Đã tải mẫu ${labels[dataset]}`);
     } catch (error) {
       toast.error(error instanceof Error ? `Không thể tạo mẫu Excel: ${error.message}` : "Không thể tạo mẫu Excel. Vui lòng thử lại.");
@@ -168,7 +168,7 @@ export default function DataToolsPage() {
       ["Phân công nhân công", allocations.map(row => ({ Đội: row.unit ?? "", "Nhân công": row.workerName, "Mã số nhân công": row.employeeCode ?? "", "Vườn A/B/C": row.gardenType, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Từ hàng": row.rowStart, "Đến hàng": row.rowEnd, "Diện tích (ha)": row.areaHa, "Tổng cây cạo": row.tappingTrees ?? 0 }))],
     ];
     sheets.forEach(([name, data]) => XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(data), name));
-    XLSX.writeFile(book, "du-lieu-cao-su-chi-nhanh-386.xlsx");
+    downloadWorkbookFile(XLSX, book, "du-lieu-cao-su-chi-nhanh-386.xlsx");
   };
 
   const parseFile = async (event: ChangeEvent<HTMLInputElement>) => {

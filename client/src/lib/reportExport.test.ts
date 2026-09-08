@@ -9,8 +9,10 @@ describe("report export helpers", () => {
     expect(rows[0]).not.toHaveProperty("Lô");
   });
 
-  it("export tăng giảm dùng Xuất - Nhập và thêm Hao kho", () => {
-    expect(buildProductionChangeExportRows([{ periodLabel: "Kỳ 1", monthLabel: "8", unit: "Đội 1", totalImport: 100.126, totalExport: 80.124 }])).toEqual([{ Kỳ: "Kỳ 1", Tháng: "8", Đội: "Đội 1", "Cộng nhập": 100.13, "Cộng xuất": 80.12, "Chênh (Xuất - Nhập)": -20, "Hao kho": 20 }]);
+  it("export tăng giảm chỉ có Hao kho, không có Chênh", () => {
+    const row = buildProductionChangeExportRows([{ periodLabel: "Kỳ 1", monthLabel: "8", unit: "Đội 1", totalImport: 100.126, totalExport: 80.124 }])[0];
+    expect(row).toEqual({ Kỳ: "Kỳ 1", Tháng: "8", Đội: "Đội 1", "Cộng nhập": 100.13, "Cộng xuất": 80.12, "Hao kho": 20 });
+    expect(row).not.toHaveProperty("Chênh (Xuất - Nhập)");
   });
 
   it("tổng hợp tay nghề có số thợ, tỷ lệ và biến động tháng trước", () => {

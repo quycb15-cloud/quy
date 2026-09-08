@@ -243,3 +243,20 @@
 - [x] Hiển thị các Đợt có dữ liệu, bao gồm Đợt 4 khi tồn tại
 - [x] Nối bộ lọc vào API/tổng hợp số liệu Tổng quan
 - [x] Bổ sung test cho Tháng và Đợt 4, chạy check/test/build và lưu checkpoint
+
+## Sửa mẫu Excel, báo cáo tăng giảm và Kỳ xem Tổng quan
+
+- [x] Khôi phục tải mẫu Excel cho Vườn/Lô và kiểm tra lỗi tạo/tải file
+- [x] Khôi phục tải mẫu Excel kế hoạch sản lượng tháng/năm và kiểm tra lỗi tạo/tải file
+- [x] Sửa báo cáo tăng–giảm để bỏ chỉ tiêu Chênh, chỉ hiển thị Hao kho
+- [x] Đổi Tổng quan sang bộ chọn Kỳ xem gồm Tháng và Đợt theo mẫu người dùng
+- [x] Đồng bộ các bảng/phân tích Tổng quan theo Tháng và Đợt đã chọn
+- [ ] Bổ sung test, kiểm tra trình duyệt, typecheck, toàn bộ test và build (đã xong test/check/build; còn chờ đăng nhập Team để kiểm tra trực tiếp)
+- [ ] Lưu checkpoint mới cho các chỉnh sửa này
+
+## Bằng chứng cuối cho bản sửa Excel và Tổng quan
+
+- [x] Bổ sung test trực tiếp downloadWorkbookFile cho mẫu Vườn/Lô và Kế hoạch sản lượng
+- [ ] Xác minh trình duyệt hai nút Tải mẫu Excel và UI Tổng quan/Báo cáo Hao kho (đang chờ đăng nhập Team)
+- [x] Đồng bộ các truy vấn dashboard khác theo cùng Tháng/Đợt hoặc ghi rõ phạm vi chỉ áp dụng cho panel sản lượng
+- [x] Chạy lại check/test/build sau các test xác minh và chỉ đánh dấu hoàn tất sau đó
