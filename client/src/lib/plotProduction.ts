@@ -16,6 +16,9 @@ export type PlotProductionEntry = {
 
 export type PlotProductionFilters = { year?: number; month?: number; unit?: string };
 export type TeamPlotProduction = { unit: string; frozenContaminatedLatex: number; dryRubber: number };
+export type PlotProductionComparison = { current: { frozen: number; dry: number; total: number }; previousMonth: { frozen: number; dry: number; total: number } | null; previousYear: { frozen: number; dry: number; total: number } | null };
+const roundQuantity = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+const totalsOf = (rows: ReturnType<typeof aggregatePlotProduction>) => { const frozen = roundQuantity(rows.reduce((sum, row) => sum + row.frozenContaminatedLatex, 0)); const dry = roundQuantity(rows.reduce((sum, row) => sum + row.dryRubber, 0)); return { frozen, dry, total: roundQuantity(frozen + dry) }; };
 
 const dateOf = (value: Date | string) => new Date(value);
 
@@ -29,6 +32,15 @@ export function aggregatePlotProduction(entries: PlotProductionEntry[], filters:
     else grouped.set(entry.plotId, { ...entry });
   });
   return Array.from(grouped.values()).sort((left, right) => compareTeamName(left.unit, right.unit) || comparePlotsByYearAndName({ plantedYear: left.plantedYear, name: left.plotName, code: left.plotCode }, { plantedYear: right.plantedYear, name: right.plotName, code: right.plotCode }));
+}
+
+export function comparePlotProduction(entries: PlotProductionEntry[], filters: PlotProductionFilters): PlotProductionComparison {
+  const current = totalsOf(aggregatePlotProduction(entries, filters));
+  if (!filters.year || !filters.month) return { current, previousMonth: null, previousYear: null };
+  const previousMonthDate = new Date(Date.UTC(filters.year, filters.month - 2, 1));
+  const previousYear = totalsOf(aggregatePlotProduction(entries, { ...filters, year: filters.year - 1 }));
+  const previousMonth = totalsOf(aggregatePlotProduction(entries, { ...filters, year: previousMonthDate.getUTCFullYear(), month: previousMonthDate.getUTCMonth() + 1 }));
+  return { current, previousMonth, previousYear };
 }
 
 export function aggregatePlotProductionByTeam(rows: ReturnType<typeof aggregatePlotProduction>): TeamPlotProduction[] {

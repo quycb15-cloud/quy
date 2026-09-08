@@ -189,3 +189,43 @@
 - [x] Giữ nguyên hoặc cập nhật parser/validation để đọc được mẫu mới nếu người dùng nạp lại
 - [x] Bổ sung test mẫu Excel và chạy typecheck, toàn bộ test, build production
 - [x] Lưu checkpoint cho mẫu Excel mới
+
+## Lỗi tải mẫu Excel
+
+- [ ] Xác định nguyên nhân nút Tải mẫu Excel không tạo hoặc không tải được file
+- [ ] Sửa luồng tạo workbook/mẫu phân bổ Vườn A/B/C và xử lý lỗi rõ ràng trên giao diện
+- [ ] Bổ sung test hồi quy cho thao tác tạo mẫu Excel
+- [ ] Chạy typecheck, test, build và lưu checkpoint sửa lỗi trước khi triển khai lại
+
+## Mở rộng báo cáo sản lượng, kho và tay nghề
+
+- [x] Bổ sung Kết quả thực hiện so với Kế hoạch tháng/năm ở Tổng quan cho Chi nhánh và từng Đội
+- [x] Làm tròn số và thêm so sánh tăng/giảm theo cùng kỳ năm và tháng trước trong tổng hợp sản lượng
+- [x] Cho phép nhập mủ theo Vườn A/B/C/tất cả, không bắt buộc Lô; vẫn hỗ trợ nhập theo Lô cho đội sản xuất
+- [x] Báo cáo tiến độ xuất nhập chỉ hiển thị theo Đội và nhận dữ liệu từ import nhập/xuất mủ
+- [x] Bổ sung tổng hợp hao hụt kho theo từng Đội và hiển thị Kỳ/Tháng
+- [x] Sửa báo cáo tăng giảm: Xuất đúng số liệu, Chênh = Xuất - Nhập và bổ sung Hao kho
+- [x] Xây dựng tổng hợp đánh giá tay nghề theo Đội, quân số, tỷ lệ cấp tay nghề, tăng/giảm và hao dăm
+- [x] Rà soát, bổ sung test, chạy check/test/build và lưu checkpoint cho toàn bộ phạm vi
+
+## Mẫu kế hoạch và tổng hợp tay nghề mới
+
+- [x] Định nghĩa mẫu import kế hoạch theo Đội, đơn vị, diện tích, kế hoạch mủ đông/tạp và kế hoạch mủ quy khô năm
+- [x] Lưu kế hoạch tháng/năm và tỷ lệ thực hiện vào dữ liệu có kiểm tra trùng kỳ/Đội
+- [x] Hiển thị Tổng quan thực hiện so với kế hoạch tháng/năm cho Chi nhánh và từng Đội
+- [x] Định nghĩa mẫu tổng hợp tay nghề theo cấp Xuất sắc/Giỏi/Khá/Trung bình/Yếu và hao dăm tháng hiện tại/tháng trước
+- [x] Lưu hoặc import dữ liệu hao dăm theo Đội/tháng và tính chênh lệch, tỷ lệ phần trăm, xếp hạng
+- [x] Cập nhật trang tổng hợp tay nghề theo mẫu, gồm quân số, số thợ, tỷ lệ và biến động
+
+## Hoàn thiện nhất quán báo cáo trước checkpoint
+
+- [x] Chuyển ReportsPage và file export tiến độ sang team-only, bỏ nhãn/cột Vườn
+- [x] Chuyển ProductionChangePage và export sang team-only, Chênh = Xuất - Nhập, thêm Hao kho
+- [x] Hiển thị số thợ và tỷ lệ cho từng mức tay nghề, kèm biến động tháng trước của Xuất sắc/Giỏi/Khá
+- [x] Bổ sung test hồi quy cho export tiến độ, báo cáo tăng giảm và tổng hợp tay nghề theo mẫu
+
+## Test hồi quy báo cáo
+
+- [x] Tách helper export tiến độ team-only và kiểm tra không có cột Vườn/Lô
+- [x] Tách helper export tăng giảm và kiểm tra Chênh = Xuất - Nhập, có Hao kho
+- [x] Tạo helper tính dòng tay nghề có số thợ, tỷ lệ và biến động tháng trước để kiểm thử độc lập

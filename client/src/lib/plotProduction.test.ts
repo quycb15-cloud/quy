@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aggregatePlotProduction, aggregatePlotProductionByTeam, plotProductionExcelRows, type PlotProductionEntry } from "./plotProduction";
+import { aggregatePlotProduction, aggregatePlotProductionByTeam, comparePlotProduction, plotProductionExcelRows, type PlotProductionEntry } from "./plotProduction";
 
 const entries: PlotProductionEntry[] = [
   { id: 1, plotId: 2, recordDate: "2026-08-01T12:00:00.000Z", frozenContaminatedLatex: 10, dryRubber: 8, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
@@ -17,6 +17,17 @@ describe("plot production summary", () => {
       { STT: 1, Đội: "Đội 1", Lô: "Lô 02", "Năm trồng": 2011, "Diện tích (ha)": 2.5, "Mủ đông, tạp (kg)": 15, "Quy khô (kg)": 12 },
       { STT: "", Đội: "", Lô: "Tổng khối lượng", "Năm trồng": "", "Diện tích (ha)": "", "Mủ đông, tạp (kg)": 15, "Quy khô (kg)": 12 },
     ]);
+  });
+
+  it("so sánh được tháng trước và cùng kỳ năm trước, có làm tròn hai chữ số", () => {
+    const comparison = comparePlotProduction([
+      ...entries,
+      { id: 4, plotId: 2, recordDate: "2026-07-01T12:00:00.000Z", frozenContaminatedLatex: 2.345, dryRubber: 1.115, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
+      { id: 5, plotId: 2, recordDate: "2025-08-01T12:00:00.000Z", frozenContaminatedLatex: 4, dryRubber: 3, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
+    ], { year: 2026, month: 8, unit: "Đội 1" });
+    expect(comparison.current).toEqual({ frozen: 15, dry: 12, total: 27 });
+    expect(comparison.previousMonth).toEqual({ frozen: 2.35, dry: 1.12, total: 3.47 });
+    expect(comparison.previousYear).toEqual({ frozen: 4, dry: 3, total: 7 });
   });
 
   it("so sánh được Mủ đông/tạp và Quy khô theo từng Đội", () => {

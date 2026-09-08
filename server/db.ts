@@ -10,6 +10,7 @@ import {
   internalAccounts,
   latexExports,
   latexImports,
+  latexProductionPlans,
   managementGroupTargets,
   plantationPlots,
   plotGardenAllocations,
@@ -27,6 +28,7 @@ import {
   workforceTeamMonthlySnapshots,
   workforceTeamTargets,
   technicalSkillEvaluations,
+  technicalSkillMonthlySummaries,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { storageGetSignedUrl, storagePut } from "./storage";
@@ -1182,78 +1184,25 @@ export async function listDailyCareRecords(
 }
 
 export async function getProductionChangeReport() {
-  const [imports, exports] = await Promise.all([
-    listTeamImports(),
-    listTeamExports(),
-  ]);
-  const exportByTeamPeriod = new Map(
-    exports.map(row => [`${row.unit}::${row.periodLabel}`, row.totalExport])
-  );
-  const groups = new Map<
-    string,
-    {
-      unit: string;
-      gardenName: string;
-      periodLabel: string;
-      monthLabel: string;
-      recordDate: Date;
-      totalImport: number;
-    }
-  >();
+  const [imports, exports] = await Promise.all([listTeamImports(), listTeamExports()]);
+  type ChangeRow = { unit: string; gardenName: string; periodLabel: string; monthLabel: string; recordDate: Date; totalImport: number; totalExport: number; changeKg: number; changePercent: number; warehouseLoss: number; };
+  const groups = new Map<string, ChangeRow>();
   imports.forEach(row => {
-    const key = `${row.unit}::${row.gardenName}::${row.periodLabel}`;
-    const value = groups.get(key) ?? {
-      unit: row.unit,
-      gardenName: row.gardenName,
-      periodLabel: row.periodLabel,
-      monthLabel: `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`,
-      recordDate: row.recordDate,
-      totalImport: 0,
-    };
+    const key = `${row.unit}::${row.periodLabel}`;
+    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel: `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
     value.totalImport += row.totalImport;
     if (row.recordDate > value.recordDate) value.recordDate = row.recordDate;
     groups.set(key, value);
   });
-  const byGarden = new Map<
-    string,
-    Array<typeof groups extends Map<string, infer T> ? T : never>
-  >();
-  Array.from(groups.values()).forEach(row => {
-    const key = `${row.unit}::${row.gardenName}`;
-    const list = byGarden.get(key) ?? [];
-    list.push(row);
-    byGarden.set(key, list);
+  exports.forEach(row => {
+    const key = `${row.unit}::${row.periodLabel}`;
+    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel: `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
+    value.totalExport += row.totalExport;
+    if (row.recordDate > value.recordDate) value.recordDate = row.recordDate;
+    groups.set(key, value);
   });
-  const rows = Array.from(byGarden.values())
-    .flatMap(list =>
-      list
-        .sort((a, b) => a.recordDate.getTime() - b.recordDate.getTime())
-        .map((row, index) => {
-          const previous = list[index - 1];
-          const changeKg = previous
-            ? row.totalImport - previous.totalImport
-            : 0;
-          return {
-            ...row,
-            totalExport:
-              exportByTeamPeriod.get(`${row.unit}::${row.periodLabel}`) ?? 0,
-            changeKg,
-            changePercent: previous?.totalImport
-              ? (changeKg / previous.totalImport) * 100
-              : 0,
-          };
-        })
-    )
-    .sort(
-      (a, b) =>
-        b.recordDate.getTime() - a.recordDate.getTime() ||
-        a.unit.localeCompare(b.unit, "vi")
-    );
-  return {
-    rows,
-    periods: Array.from(new Set(rows.map(row => row.periodLabel))),
-    months: Array.from(new Set(rows.map(row => row.monthLabel))),
-  };
+  const rows = Array.from(groups.values()).map(row => ({ ...row, changeKg: row.totalExport - row.totalImport, changePercent: row.totalImport > 0 ? ((row.totalExport - row.totalImport) / row.totalImport) * 100 : 0, warehouseLoss: row.totalImport - row.totalExport })).sort((a, b) => b.recordDate.getTime() - a.recordDate.getTime() || a.unit.localeCompare(b.unit, "vi", { numeric: true }));
+  return { rows, periods: Array.from(new Set(rows.map(row => row.periodLabel))), months: Array.from(new Set(rows.map(row => row.monthLabel))) };
 }
 
 export async function removePlot(id: number) {
@@ -2725,6 +2674,8 @@ export async function getLatexProductionManagement(
       getMonth(row.recordDate) === previousMonth &&
       (!selectedUnit || row.unit === selectedUnit)
   );
+  const yearImports = scopedImports.filter(row => getYear(row.recordDate) === selectedYear && (!selectedUnit || row.unit === selectedUnit));
+  const planSummary = await getLatexProductionPlanSummary(selectedYear, selectedMonth, selectedUnit ? [selectedUnit] : scopeUnits);
   const frozenLatex = importsForView.reduce(
     (sum, row) => sum + row.frozenLatex,
     0
@@ -2741,6 +2692,7 @@ export async function getLatexProductionManagement(
     (sum, row) => sum + row.totalImport,
     0
   );
+  const yearTotalImport = yearImports.reduce((sum, row) => sum + row.totalImport, 0);
   const availableUnits = TEAM_ORDER.filter(
     unit => !hasScope || scopeUnits?.includes(unit)
   );
@@ -2789,69 +2741,43 @@ export async function getLatexProductionManagement(
     importRecordCount: importsForView.length,
     exportRecordCount: exportsForView.length,
     teamComparisons,
+    actualYearTotalImport: yearTotalImport,
+    planSummary: {
+      ...planSummary,
+      rows: planSummary.rows.map(row => ({
+        ...row,
+        actualMonthTotalImport: scopedImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear && getMonth(item.recordDate) === selectedMonth).reduce((sum, item) => sum + item.totalImport, 0),
+        actualYearTotalImport: scopedImports.filter(item => item.unit === row.unit && getYear(item.recordDate) === selectedYear).reduce((sum, item) => sum + item.totalImport, 0),
+      })),
+      actualMonthTotalImport: totalImport,
+      actualYearTotalImport: yearTotalImport,
+    },
   };
 }
 
 export async function getProgressReport(periodLabel: string) {
-  const db = await getDb();
-  if (!db) return [];
-  const [plots, imports, exports] = await Promise.all([
-    listPlots(),
-    listLatexImports(periodLabel),
-    listLatexExports(periodLabel),
+  const [imports, exports] = await Promise.all([
+    listTeamImports(),
+    listTeamExports(),
   ]);
-  const byPlot = new Map<
-    number,
-    {
-      frozenLatex: number;
-      latexThreadImport: number;
-      frozenContaminatedLatex: number;
-      latexThreadExport: number;
-      dailyImports: {
-        recordDate: Date;
-        frozenLatex: number;
-        latexThread: number;
-        totalImport: number;
-      }[];
-    }
-  >();
-  plots.forEach(plot =>
-    byPlot.set(plot.id, {
-      frozenLatex: 0,
-      latexThreadImport: 0,
-      frozenContaminatedLatex: 0,
-      latexThreadExport: 0,
-      dailyImports: [],
-    })
-  );
-  imports.forEach(item => {
-    const summary = byPlot.get(item.plotId);
-    if (!summary) return;
+  const byUnit = new Map<string, { unit: string; frozenLatex: number; latexThreadImport: number; frozenContaminatedLatex: number; latexThreadExport: number; dailyImports: { recordDate: Date; frozenLatex: number; latexThread: number; totalImport: number }[] }>();
+  imports.filter(item => item.periodLabel === periodLabel).forEach(item => {
+    const summary = byUnit.get(item.unit) ?? { unit: item.unit, frozenLatex: 0, latexThreadImport: 0, frozenContaminatedLatex: 0, latexThreadExport: 0, dailyImports: [] };
     summary.frozenLatex += item.frozenLatex;
     summary.latexThreadImport += item.latexThread;
-    summary.dailyImports.push({
-      recordDate: item.recordDate,
-      frozenLatex: item.frozenLatex,
-      latexThread: item.latexThread,
-      totalImport: item.totalImport,
-    });
+    summary.dailyImports.push({ recordDate: item.recordDate, frozenLatex: item.frozenLatex, latexThread: item.latexThread, totalImport: item.totalImport });
+    byUnit.set(item.unit, summary);
   });
-  exports.forEach(item => {
-    const summary = byPlot.get(item.plotId);
-    if (!summary) return;
+  exports.filter(item => item.periodLabel === periodLabel).forEach(item => {
+    const summary = byUnit.get(item.unit) ?? { unit: item.unit, frozenLatex: 0, latexThreadImport: 0, frozenContaminatedLatex: 0, latexThreadExport: 0, dailyImports: [] };
     summary.frozenContaminatedLatex += item.frozenContaminatedLatex;
     summary.latexThreadExport += item.latexThread;
+    byUnit.set(item.unit, summary);
   });
-  return plots.map(plot => {
-    const summary = byPlot.get(plot.id)!;
+  return Array.from(byUnit.values()).sort((left, right) => left.unit.localeCompare(right.unit, "vi", { numeric: true })).map(summary => {
     const totalImport = summary.frozenLatex + summary.latexThreadImport;
-    const totalExport =
-      summary.frozenContaminatedLatex + summary.latexThreadExport;
-    return {
-      ...plot,
-      ...summary,
-      ...calculateLatexTotals(totalImport, totalExport),
-    };
+    const totalExport = summary.frozenContaminatedLatex + summary.latexThreadExport;
+    return { code: summary.unit, name: summary.unit, ...summary, ...calculateLatexTotals(totalImport, totalExport) };
   });
 }
 
@@ -3034,4 +2960,246 @@ export async function getTechnicalSkillSummary(
     teams,
     workers: workerRows,
   };
+}
+
+export type LatexProductionPlanImportRow = {
+  unit: string;
+  year: number;
+  month?: number;
+  areaHa?: number;
+  planFrozenLatex: number;
+  planDryRubber: number;
+  note?: string | null;
+};
+
+export async function bulkUpsertLatexProductionPlans(
+  rows: LatexProductionPlanImportRow[],
+  userId: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  for (const row of rows) {
+    await db
+      .insert(latexProductionPlans)
+      .values({
+        unit: row.unit.trim(),
+        year: row.year,
+        month: row.month ?? 0,
+        areaHa: String(row.areaHa ?? 0),
+        planFrozenLatex: String(row.planFrozenLatex),
+        planDryRubber: String(row.planDryRubber),
+        note: row.note?.trim() || null,
+        createdBy: userId,
+      })
+      .onDuplicateKeyUpdate({
+        set: {
+          areaHa: String(row.areaHa ?? 0),
+          planFrozenLatex: String(row.planFrozenLatex),
+          planDryRubber: String(row.planDryRubber),
+          note: row.note?.trim() || null,
+          createdBy: userId,
+        },
+      });
+  }
+  return rows.length;
+}
+
+export async function listLatexProductionPlans() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select().from(latexProductionPlans);
+  return rows.map(row => ({
+    ...row,
+    areaHa: numberValue(row.areaHa),
+    planFrozenLatex: numberValue(row.planFrozenLatex),
+    planDryRubber: numberValue(row.planDryRubber),
+  }));
+}
+
+export async function getLatexProductionPlanSummary(
+  year: number,
+  month: number,
+  scopeUnits?: string[]
+) {
+  const plans = await listLatexProductionPlans();
+  const inScope = (unit: string) =>
+    !scopeUnits?.length || scopeUnits.includes(unit);
+  const selected = plans.filter(
+    row =>
+      inScope(row.unit) &&
+      row.year === year &&
+      (row.month === month || row.month === 0)
+  );
+  const byUnit = new Map<string, (typeof selected)[number]>();
+  selected.forEach(row => {
+    const existing = byUnit.get(row.unit);
+    if (!existing || row.month === month) byUnit.set(row.unit, row);
+  });
+  const rows = Array.from(byUnit.values()).map(row => ({
+    ...row,
+    planMonthFrozenLatex:
+      row.month === month ? row.planFrozenLatex : 0,
+    planMonthDryRubber: row.month === month ? row.planDryRubber : 0,
+    planYearFrozenLatex:
+      row.month === 0 ? row.planFrozenLatex : 0,
+    planYearDryRubber: row.month === 0 ? row.planDryRubber : 0,
+  }));
+  return {
+    year,
+    month,
+    rows,
+    totals: rows.reduce(
+      (sum, row) => ({
+        areaHa: sum.areaHa + row.areaHa,
+        planMonthFrozenLatex: sum.planMonthFrozenLatex + row.planMonthFrozenLatex,
+        planMonthDryRubber: sum.planMonthDryRubber + row.planMonthDryRubber,
+        planYearFrozenLatex: sum.planYearFrozenLatex + row.planYearFrozenLatex,
+        planYearDryRubber: sum.planYearDryRubber + row.planYearDryRubber,
+      }),
+      { areaHa: 0, planMonthFrozenLatex: 0, planMonthDryRubber: 0, planYearFrozenLatex: 0, planYearDryRubber: 0 }
+    ),
+  };
+}
+
+export type TechnicalSkillMonthlySummaryImportRow = {
+  unit: string;
+  monthKey: string;
+  workerCount: number;
+  exceptionalCount: number;
+  goodCount: number;
+  fairCount: number;
+  averageCount: number;
+  weakCount: number;
+  haoDamWorkers: number;
+  note?: string | null;
+};
+
+export async function bulkUpsertTechnicalSkillMonthlySummaries(
+  rows: TechnicalSkillMonthlySummaryImportRow[],
+  userId: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  for (const row of rows) {
+    const totalSkill = row.exceptionalCount + row.goodCount + row.fairCount + row.averageCount + row.weakCount;
+    if (totalSkill > row.workerCount) {
+      throw new Error(`Đội ${row.unit} tháng ${row.monthKey}: tổng số thợ theo loại tay nghề vượt quân số`);
+    }
+    await db
+      .insert(technicalSkillMonthlySummaries)
+      .values({ ...row, unit: row.unit.trim(), note: row.note?.trim() || null, createdBy: userId })
+      .onDuplicateKeyUpdate({
+        set: {
+          workerCount: row.workerCount,
+          exceptionalCount: row.exceptionalCount,
+          goodCount: row.goodCount,
+          fairCount: row.fairCount,
+          averageCount: row.averageCount,
+          weakCount: row.weakCount,
+          haoDamWorkers: row.haoDamWorkers,
+          note: row.note?.trim() || null,
+          createdBy: userId,
+        },
+      });
+  }
+  return rows.length;
+}
+
+export async function listTechnicalSkillMonthlySummaries() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(technicalSkillMonthlySummaries);
+}
+
+export async function getTechnicalSkillMonthlySummary(
+  monthKey?: string,
+  scopeUnits?: string[]
+) {
+  const rows = (await listTechnicalSkillMonthlySummaries()).filter(
+    row => !scopeUnits?.length || scopeUnits.includes(row.unit)
+  );
+  const availableMonths = Array.from(new Set(rows.map(row => row.monthKey))).sort().reverse();
+  const selectedMonth = monthKey && availableMonths.includes(monthKey) ? monthKey : (availableMonths[0] ?? monthKey ?? "");
+  const [yearText, monthText] = selectedMonth.split("-");
+  const previousMonthDate = selectedMonth ? new Date(Date.UTC(Number(yearText), Number(monthText) - 2, 1)) : new Date();
+  const previousMonth = `${previousMonthDate.getUTCFullYear()}-${String(previousMonthDate.getUTCMonth() + 1).padStart(2, "0")}`;
+  const currentRows = rows.filter(row => row.monthKey === selectedMonth);
+  const previousByUnit = new Map(rows.filter(row => row.monthKey === previousMonth).map(row => [row.unit, row]));
+  const teams = currentRows.map(row => {
+    const previous = previousByUnit.get(row.unit);
+    const denominator = Math.max(row.workerCount, 1);
+    const currentHaoDamRate = (row.haoDamWorkers / denominator) * 100;
+    const previousHaoDamRate = previous ? (previous.haoDamWorkers / Math.max(previous.workerCount, 1)) * 100 : null;
+    const favorableCount = row.exceptionalCount + row.goodCount + row.fairCount;
+    const previousFavorableCount = previous ? previous.exceptionalCount + previous.goodCount + previous.fairCount : null;
+    return {
+      ...row,
+      exceptionalPercent: (row.exceptionalCount / denominator) * 100,
+      goodPercent: (row.goodCount / denominator) * 100,
+      fairPercent: (row.fairCount / denominator) * 100,
+      averagePercent: (row.averageCount / denominator) * 100,
+      weakPercent: (row.weakCount / denominator) * 100,
+      favorablePercent: (favorableCount / denominator) * 100,
+      previousHaoDamWorkers: previous?.haoDamWorkers ?? null,
+      previousHaoDamRate,
+      haoDamChangeWorkers: previous ? row.haoDamWorkers - previous.haoDamWorkers : null,
+      haoDamChangePercent: previousHaoDamRate == null ? null : currentHaoDamRate - previousHaoDamRate,
+      previousExceptionalPercent: previous ? (previous.exceptionalCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      previousGoodPercent: previous ? (previous.goodCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      previousFairPercent: previous ? (previous.fairCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      exceptionalChangePercent: previous ? (row.exceptionalCount / denominator) * 100 - (previous.exceptionalCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      goodChangePercent: previous ? (row.goodCount / denominator) * 100 - (previous.goodCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      fairChangePercent: previous ? (row.fairCount / denominator) * 100 - (previous.fairCount / Math.max(previous.workerCount, 1)) * 100 : null,
+      previousFavorablePercent: previous ? (previousFavorableCount! / Math.max(previous.workerCount, 1)) * 100 : null,
+      favorableChangePercent: previous ? (favorableCount / denominator) * 100 - (previousFavorableCount! / Math.max(previous.workerCount, 1)) * 100 : null,
+    };
+  }).sort((a, b) => b.favorablePercent - a.favorablePercent || a.unit.localeCompare(b.unit, "vi", { numeric: true }));
+  return {
+    monthKey: selectedMonth,
+    previousMonthKey: previousMonth,
+    availableMonths,
+    teams,
+    totals: teams.reduce((sum, row) => ({
+      workerCount: sum.workerCount + row.workerCount,
+      exceptionalCount: sum.exceptionalCount + row.exceptionalCount,
+      goodCount: sum.goodCount + row.goodCount,
+      fairCount: sum.fairCount + row.fairCount,
+      averageCount: sum.averageCount + row.averageCount,
+      weakCount: sum.weakCount + row.weakCount,
+      haoDamWorkers: sum.haoDamWorkers + row.haoDamWorkers,
+    }), { workerCount: 0, exceptionalCount: 0, goodCount: 0, fairCount: 0, averageCount: 0, weakCount: 0, haoDamWorkers: 0 }),
+  };
+}
+
+export type TeamImportSavePayload = {
+  unit: string;
+  gardenName: string;
+  periodLabel: string;
+  recordDate: Date;
+  frozenLatex: number;
+  latexThread: number;
+  note?: string | null;
+};
+
+export async function saveTeamImport(input: TeamImportSavePayload, userId: number) {
+  await bulkUpsertTeamImports([input], userId);
+  return { success: true };
+}
+
+export async function listCombinedLatexImports(periodLabel?: string) {
+  const [plotRows, teamRows] = await Promise.all([
+    listLatexImports(periodLabel),
+    listTeamImports(),
+  ]);
+  const mappedTeamRows = teamRows
+    .filter(row => !periodLabel || row.periodLabel === periodLabel)
+    .map(row => ({
+      ...row,
+      plotId: null,
+      plotCode: "—",
+      plotName: row.gardenName,
+    }));
+  return [...plotRows, ...mappedTeamRows].sort(
+    (left, right) => right.recordDate.getTime() - left.recordDate.getTime()
+  );
 }

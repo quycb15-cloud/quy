@@ -8,7 +8,7 @@ describe("summarizeProductionChangeRows", () => {
       { unit: "Đội 1", periodLabel: "Đợt 1-8", totalImport: 10, totalExport: 40 },
       { unit: "Đội 1", periodLabel: "Đợt 1-8", totalImport: 15, totalExport: 40 },
     ]);
-    expect(rows[0]).toEqual({ label: "Tổng chung", totalImport: 45, totalExport: 70, differenceKg: -25 });
-    expect(rows[1]).toEqual({ label: "Đội 1", totalImport: 25, totalExport: 40, differenceKg: -15 });
+    expect(rows[0]).toEqual({ label: "Tổng chung", totalImport: 45, totalExport: 70, differenceKg: 25, warehouseLossKg: -25 });
+    expect(rows[1]).toEqual({ label: "Đội 1", totalImport: 25, totalExport: 40, differenceKg: 15, warehouseLossKg: -15 });
   });
 });

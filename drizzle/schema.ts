@@ -439,6 +439,51 @@ export const managementGroupTargets = mysqlTable(
   })
 );
 
+export const latexProductionPlans = mysqlTable(
+  "latex_production_plans",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    unit: varchar("unit", { length: 120 }).notNull(),
+    year: int("year").notNull(),
+    month: int("month").default(0).notNull(),
+    areaHa: decimal("areaHa", { precision: 12, scale: 2 }).default("0.00").notNull(),
+    planFrozenLatex: decimal("planFrozenLatex", { precision: 14, scale: 2 }).default("0.00").notNull(),
+    planDryRubber: decimal("planDryRubber", { precision: 14, scale: 2 }).default("0.00").notNull(),
+    note: text("note"),
+    createdBy: int("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    unitYearMonthUnique: uniqueIndex("latex_production_plans_unit_year_month_unique").on(table.unit, table.year, table.month),
+    yearMonthIndex: index("latex_production_plans_year_month_index").on(table.year, table.month),
+  })
+);
+
+export const technicalSkillMonthlySummaries = mysqlTable(
+  "technical_skill_monthly_summaries",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    unit: varchar("unit", { length: 120 }).notNull(),
+    monthKey: varchar("monthKey", { length: 7 }).notNull(),
+    workerCount: int("workerCount").default(0).notNull(),
+    exceptionalCount: int("exceptionalCount").default(0).notNull(),
+    goodCount: int("goodCount").default(0).notNull(),
+    fairCount: int("fairCount").default(0).notNull(),
+    averageCount: int("averageCount").default(0).notNull(),
+    weakCount: int("weakCount").default(0).notNull(),
+    haoDamWorkers: int("haoDamWorkers").default(0).notNull(),
+    note: text("note"),
+    createdBy: int("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    unitMonthUnique: uniqueIndex("technical_skill_monthly_summaries_unit_month_unique").on(table.unit, table.monthKey),
+    monthIndex: index("technical_skill_monthly_summaries_month_index").on(table.monthKey),
+  })
+);
+
 export const teamLatexImports = mysqlTable(
   "team_latex_imports",
   {

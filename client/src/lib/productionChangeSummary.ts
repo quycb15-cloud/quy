@@ -2,7 +2,7 @@ import { compareTeamName } from "@shared/teamOrder";
 
 export type ProductionChangeSummaryRow = { unit: string; periodLabel: string; totalImport: number; totalExport: number };
 
-type Summary = { label: string; totalImport: number; totalExport: number; differenceKg: number };
+type Summary = { label: string; totalImport: number; totalExport: number; differenceKg: number; warehouseLossKg: number };
 
 const summaryFrom = (label: string, rows: ProductionChangeSummaryRow[]): Summary => {
   const exportKeys = new Set<string>();
@@ -13,7 +13,7 @@ const summaryFrom = (label: string, rows: ProductionChangeSummaryRow[]): Summary
     exportKeys.add(key);
     return sum + row.totalExport;
   }, 0);
-  return { label, totalImport, totalExport, differenceKg: totalImport - totalExport };
+  return { label, totalImport, totalExport, differenceKg: totalExport - totalImport, warehouseLossKg: totalImport - totalExport };
 };
 
 export function summarizeProductionChangeRows(rows: ProductionChangeSummaryRow[]): Summary[] {

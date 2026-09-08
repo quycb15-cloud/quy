@@ -58,7 +58,9 @@ const plotInput = z
   );
 
 const importInput = z.object({
-  plotId: z.number().int().positive(),
+  plotId: z.number().int().positive().optional().nullable(),
+  unit: z.string().trim().max(120).optional(),
+  gardenName: z.string().trim().max(160).optional(),
   recordDate: dateInput,
   periodLabel: requiredText("Đợt", 80),
   frozenLatex: quantity,
@@ -424,31 +426,25 @@ export const rubberRouter = router({
       )
       .query(async ({ input, ctx }) =>
         filterByScope(
-          await db.listLatexImports(input?.periodLabel),
+          await db.listCombinedLatexImports(input?.periodLabel),
           await requirePermission(ctx, "reports:read")
         )
       ),
     save: protectedProcedure
       .input(importInput)
       .mutation(async ({ input, ctx }) => {
-        const plot = await db.getPlotById(input.plotId);
-        if (!plot)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Không tìm thấy vườn",
-          });
-        await requirePermission(ctx, "latex:write", plot.unit);
-        await db.saveLatexImport(input, ctx.user.id);
-        await db.logActivity(ctx.user.id, {
-          eventType: "latex.import.save",
-          entityType: "latex_import",
-          entityId: input.plotId,
-          summary: `Ghi nhận nhập mủ ${input.periodLabel}`,
-          metadata: {
-            frozenLatex: input.frozenLatex,
-            latexThread: input.latexThread,
-          },
-        });
+        if (input.plotId) {
+          const plot = await db.getPlotById(input.plotId);
+          if (!plot) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy Lô" });
+          await requirePermission(ctx, "latex:write", plot.unit);
+          await db.saveLatexImport({ plotId: input.plotId, recordDate: input.recordDate, periodLabel: input.periodLabel, frozenLatex: input.frozenLatex, latexThread: input.latexThread, note: input.note }, ctx.user.id);
+          await db.logActivity(ctx.user.id, { eventType: "latex.import.save", entityType: "latex_import", entityId: input.plotId, summary: `Ghi nhận nhập mủ theo Lô ${input.periodLabel}`, metadata: { frozenLatex: input.frozenLatex, latexThread: input.latexThread } });
+        } else {
+          if (!input.unit || !input.gardenName) throw new TRPCError({ code: "BAD_REQUEST", message: "Khi không chọn Lô, cần chọn Đội và Vườn A/B/C hoặc tất cả vườn" });
+          await requirePermission(ctx, "latex:write", input.unit);
+          await db.saveTeamImport({ unit: input.unit, gardenName: input.gardenName, recordDate: input.recordDate, periodLabel: input.periodLabel, frozenLatex: input.frozenLatex, latexThread: input.latexThread, note: input.note }, ctx.user.id);
+          await db.logActivity(ctx.user.id, { eventType: "latex.import.save", entityType: "team_latex_import", summary: `Ghi nhận nhập mủ theo ${input.gardenName} ${input.periodLabel}`, metadata: { unit: input.unit, frozenLatex: input.frozenLatex, latexThread: input.latexThread } });
+        }
         return { success: true };
       }),
   }),

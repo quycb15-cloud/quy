@@ -10,13 +10,14 @@ import { comparePlotsByYearAndName } from "@/lib/plotOrder";
 import { formatQuantity, STANDARD_PERIODS } from "@/lib/rubber";
 import { parseWorkerPlotAllocationRows } from "@/lib/workerPlotAllocationImport";
 import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "@/lib/workerPlotAllocationWorkbook";
+import { buildProductionPlanTemplateMatrix, buildTechnicalSkillTemplateMatrix, parseProductionPlanMatrix, parseTechnicalSkillMatrix, productionPlanMerges, technicalSkillMerges } from "@/lib/reportImportWorkbook";
 import { trpc } from "@/lib/trpc";
 import { compareTeamName } from "@shared/teamOrder";
 import { Archive, CheckCircle2, Download, FileSpreadsheet, Loader2, TriangleAlert, Upload, UploadCloud } from "lucide-react";
 import { ChangeEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-type Dataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations";
+type Dataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations" | "productionPlans" | "technicalSkillMonthly";
 type TeamImportProgress = { unit: string; rows: number; status: "ready" | "importing" | "complete" | "error" };
 
 const labels: Record<Dataset, string> = {
@@ -26,6 +27,8 @@ const labels: Record<Dataset, string> = {
   teamImports: "Nhập mủ theo đội",
   teamExports: "Xuất mủ theo đội",
   workerPlotAllocations: "Phân chia nhân công vườn cây",
+  productionPlans: "Kế hoạch sản lượng tháng/năm",
+  technicalSkillMonthly: "Tổng hợp tay nghề và hao dăm",
 };
 
 const samples: Record<Dataset, Record<string, string | number>> = {
@@ -35,6 +38,8 @@ const samples: Record<Dataset, Record<string, string | number>> = {
   teamImports: { Đợt: "Đợt 1", Ngày: "", Đội: "", Vườn: "", "Mủ đông, tạp (kg)": "", "Mủ dây (kg)": "" },
   teamExports: { Đợt: "Đợt 1", Ngày: "", Đội: "", "Mủ đông, tạp (kg)": "", "Mủ dây (kg)": "" },
   workerPlotAllocations: { Đội: "Đội 1", "Nhân công": "", "Mã số nhân công": "", "Vườn A/B/C": "A", "Mã lô": "", "Từ hàng": "", "Đến hàng": "", "Diện tích (ha)": "" },
+  productionPlans: { "Đơn vị": "Đội 1", "Năm": new Date().getFullYear(), "Tháng": 0, "ĐVT": "ha", "Diện tích": "", "Kế hoạch mủ đông, tạp (kg)": "", "Kế hoạch mủ quy khô (kg)": "", "Ghi chú": "" },
+  technicalSkillMonthly: { "Đội": "Đội 1", "Tháng báo cáo": "2026-08", "Quân số": "", "Xuất sắc": "", "Giỏi": "", "Khá": "", "Trung bình": "", "Yếu": "", "Hao dăm số thợ": "", "Ghi chú": "" },
 };
 
 const text = (value: unknown) => String(value ?? "").replace(/\s+/g, " ").trim();
@@ -68,6 +73,8 @@ function detectDataset(headers: string[]): Dataset | null {
   if (keys.includes("ten lo")) return "plots";
   if (keys.includes("ten phien am")) return "workers";
   if (keys.includes("vuon")) return "teamImports";
+  if (keys.includes("doi") && (keys.includes("ke hoach mu dong tap kg") || keys.includes("ke hoach mu dong tap"))) return "productionPlans";
+  if (keys.includes("thang bao cao") && keys.includes("quan so") && keys.includes("hao dam so tho")) return "technicalSkillMonthly";
   if (keys.includes("dot") && keys.includes("doi") && keys.some(key => key.startsWith("mu dong"))) return "teamExports";
   return null;
 }
@@ -113,6 +120,8 @@ export default function DataToolsPage() {
   const teamImport = trpc.dataTools.import.teamImports.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.teamImports), onError: error => failImport(error.message) });
   const teamExport = trpc.dataTools.import.teamExports.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.teamExports), onError: error => failImport(error.message) });
   const allocationImport = trpc.dataTools.import.workerPlotAllocations.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.workerPlotAllocations), onError: error => failImport(error.message) });
+  const productionPlanImport = trpc.dataTools.import.productionPlans.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.productionPlans), onError: error => failImport(error.message) });
+  const technicalSkillMonthlyImport = trpc.dataTools.import.technicalSkillMonthly.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.technicalSkillMonthly), onError: error => failImport(error.message) });
   const backupCreate = trpc.dataTools.backups.create.useMutation({
     onSuccess: async backup => { await utils.dataTools.backups.list.invalidate(); toast.success(`Đã tạo bản sao lưu ${backup.fileName}`); },
     onError: error => toast.error(error.message),
@@ -121,7 +130,7 @@ export default function DataToolsPage() {
     onSuccess: ({ url, fileName }) => { const link = document.createElement("a"); link.href = url; link.download = fileName; link.rel = "noopener"; document.body.appendChild(link); link.click(); link.remove(); },
     onError: error => toast.error(error.message),
   });
-  const busy = plotImport.isPending || indicatorImport.isPending || workerImport.isPending || teamImport.isPending || teamExport.isPending || allocationImport.isPending;
+  const busy = plotImport.isPending || indicatorImport.isPending || workerImport.isPending || teamImport.isPending || teamExport.isPending || allocationImport.isPending || productionPlanImport.isPending || technicalSkillMonthlyImport.isPending;
 
   const reset = () => {
     setFile(null);
@@ -134,16 +143,19 @@ export default function DataToolsPage() {
   const downloadTemplate = async () => {
     const XLSX = await import("xlsx");
     const book = XLSX.utils.book_new();
-    const sheet = dataset === "workerPlotAllocations" ? XLSX.utils.aoa_to_sheet(buildWorkerPlotAllocationTemplateMatrix()) : XLSX.utils.json_to_sheet([samples[dataset]]);
-    if (dataset === "workerPlotAllocations") {
-      sheet["!merges"] = workerPlotAllocationMerges.map(XLSX.utils.decode_range);
-      sheet["!cols"] = [8, 18, 14, 14, 14, 16, 14, 14, 14, 16, 14, 14, 14, 16, 16, 16, 28].map(wch => ({ wch }));
-      sheet["!rows"] = [{ hpt: 24 }, { hpt: 36 }, { hpt: 22 }];
+    const isGroupedTemplate = dataset === "workerPlotAllocations" || dataset === "productionPlans" || dataset === "technicalSkillMonthly";
+    const matrix = dataset === "workerPlotAllocations" ? buildWorkerPlotAllocationTemplateMatrix() : dataset === "productionPlans" ? buildProductionPlanTemplateMatrix() : dataset === "technicalSkillMonthly" ? buildTechnicalSkillTemplateMatrix() : null;
+    const sheet = matrix ? XLSX.utils.aoa_to_sheet(matrix) : XLSX.utils.json_to_sheet([samples[dataset]]);
+    if (isGroupedTemplate) {
+      const merges = dataset === "workerPlotAllocations" ? workerPlotAllocationMerges : dataset === "productionPlans" ? productionPlanMerges : technicalSkillMerges;
+      sheet["!merges"] = merges.map(XLSX.utils.decode_range);
+      sheet["!cols"] = Array.from({ length: (matrix?.[0]?.length ?? 13) }, (_, index) => ({ wch: index === 1 ? 18 : index === 2 ? 12 : 15 }));
+      sheet["!rows"] = [{ hpt: 24 }, { hpt: 32 }, { hpt: 42 }, { hpt: 22 }];
     }
     XLSX.utils.book_append_sheet(book, sheet, labels[dataset]);
     const guide = XLSX.utils.aoa_to_sheet([
       [`MẪU IMPORT ${labels[dataset].toUpperCase()}`],
-      [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
+      [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Năm, Tháng (0 nếu là kế hoạch năm), Diện tích, kế hoạch mủ đông/tạp và kế hoạch mủ quy khô." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một tháng dạng YYYY-MM; nhập quân số, số thợ theo cấp tay nghề và số thợ hao dăm." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
       ["Các bản ghi trùng khóa sẽ được cập nhật, không tạo bản sao."],
     ]);
     XLSX.utils.book_append_sheet(book, guide, "Hướng dẫn");
@@ -181,6 +193,19 @@ export default function DataToolsPage() {
       const sheet = book.Sheets[book.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" });
       const isAllocation = (text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô")) || (text(matrix[0]?.[1]).toLowerCase().includes("mã công nhân") && text(matrix[1]?.[2]).toLowerCase() === "lô");
+      const isProductionPlan = text(matrix[0]?.[1]) === "Đơn vị" && text(matrix[0]?.[2]) === "Năm" && text(matrix[2]?.[6]).includes("Kế hoạch");
+      const isTechnicalSkill = text(matrix[0]?.[1]) === "Nội dung" && text(matrix[0]?.[2]) === "Tháng báo cáo" && text(matrix[1]?.[4]).includes("Xuất sắc");
+      if (isProductionPlan || isTechnicalSkill) {
+        const parsed = isProductionPlan ? parseProductionPlanMatrix(matrix) : parseTechnicalSkillMatrix(matrix);
+        if (!parsed.rows.length) throw new Error(`Không có dòng hợp lệ. ${parsed.issues[0] ?? "Hãy kiểm tra đúng bố cục mẫu."}`);
+        setDataset(isProductionPlan ? "productionPlans" : "technicalSkillMonthly");
+        setFile(selected);
+        setRows(parsed.rows);
+        setIssues(parsed.issues);
+        setTeamProgress(groupTeamProgress(parsed.rows));
+        toast.success(`Đã đọc ${parsed.rows.length} dòng ${isProductionPlan ? "kế hoạch sản lượng" : "tổng hợp tay nghề"}.`);
+        return;
+      }
       if (isAllocation) {
         const allocation = parseWorkerPlotAllocationRows(matrix);
         if (!allocation.parsed.length) throw new Error(`Không có dòng phân chia hợp lệ. ${allocation.issues[0] ?? "Hãy điền Mã lô, hàng và diện tích."}`);
@@ -231,7 +256,9 @@ export default function DataToolsPage() {
     else if (dataset === "workers") workerImport.mutate({ rows });
     else if (dataset === "teamImports") teamImport.mutate({ rows });
     else if (dataset === "teamExports") teamExport.mutate({ rows });
-    else allocationImport.mutate({ rows });
+    else if (dataset === "workerPlotAllocations") allocationImport.mutate({ rows });
+    else if (dataset === "productionPlans") productionPlanImport.mutate({ rows });
+    else technicalSkillMonthlyImport.mutate({ rows });
   };
 
   const previewColumns = useMemo(() => Object.keys(rows[0] ?? {}).slice(0, 5), [rows]);
