@@ -905,10 +905,10 @@ export const rubberRouter = router({
   }),
   reports: router({
     progress: protectedProcedure
-      .input(z.object({ periodLabel: requiredText("Đợt", 80) }))
+      .input(z.object({ periodLabel: z.string().max(80).default("All"), year: z.coerce.number().int().min(2000).max(2200).optional(), month: z.coerce.number().int().min(0).max(12).optional() }))
       .query(async ({ input, ctx }) =>
         filterByScope(
-          await db.getProgressReport(input.periodLabel),
+          await db.getProgressReport(input.periodLabel, input.year, input.month),
           await requirePermission(ctx, "reports:read")
         )
       ),

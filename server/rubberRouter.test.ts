@@ -228,7 +228,15 @@ describe("rubberRouter authorization and business procedures", () => {
     await caller.rubber.imports.save({ plotId: 8, periodLabel: "Đợt 1", recordDate, frozenLatex: 125, latexThread: 8 });
     await caller.rubber.reports.progress({ periodLabel: "Đợt 1" });
     expect(dbMocks.saveLatexImport).toHaveBeenCalledWith(expect.objectContaining({ plotId: 8, frozenLatex: 125, latexThread: 8 }), 2);
-    expect(dbMocks.getProgressReport).toHaveBeenCalledWith("Đợt 1");
+    expect(dbMocks.getProgressReport).toHaveBeenCalledWith("Đợt 1", undefined, undefined);
+  });
+
+  it("lọc báo cáo tiến độ theo Năm, Tháng và Đợt All", async () => {
+    dbMocks.getProgressReport.mockResolvedValue([]);
+    dbMocks.getInternalAccountByUserId.mockResolvedValue({ isActive: 1, scopeUnits: JSON.stringify([]), permissionProfile: JSON.stringify(["reports:read"]) });
+    const caller = appRouter.createCaller(makeContext("user"));
+    await caller.rubber.reports.progress({ periodLabel: "All", year: 2026, month: 0 });
+    expect(dbMocks.getProgressReport).toHaveBeenCalledWith("All", 2026, 0);
   });
 
   it("lưu xuất mủ theo Đội và trả hao kho từ dữ liệu nhập xuất thực", async () => {

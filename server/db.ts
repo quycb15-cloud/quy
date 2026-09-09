@@ -43,6 +43,8 @@ import {
 } from "./workforceSummary";
 import { comparePeriodLabel, TEAM_ORDER } from "../shared/teamOrder";
 import { getDashboardTotalArea } from "./dashboardMath";
+import { relativeChangePercent } from "../shared/technicalSkillMath";
+import { mergeProductionPlanRows } from "../shared/productionPlanSummary";
 
 const MANAGEMENT_GROUPS = [
   { groupType: "board" as const, label: "Ban Giám đốc" },
@@ -2784,20 +2786,27 @@ export async function getLatexProductionManagement(
   };
 }
 
-export async function getProgressReport(periodLabel: string) {
+export async function getProgressReport(periodLabel: string, year?: number, month?: number) {
   const [imports, exports] = await Promise.all([
     listTeamImports(),
     listTeamExports(),
   ]);
+  const matchesPeriod = (row: { periodLabel: string; recordDate: Date }) => {
+    const periodMatches = !periodLabel || periodLabel === "All" || row.periodLabel === periodLabel;
+    const date = new Date(row.recordDate);
+    const yearMatches = year == null || date.getUTCFullYear() === year;
+    const monthMatches = month == null || month === 0 || date.getUTCMonth() + 1 === month;
+    return periodMatches && yearMatches && monthMatches;
+  };
   const byUnit = new Map<string, { unit: string; frozenLatex: number; latexThreadImport: number; frozenContaminatedLatex: number; latexThreadExport: number; dailyImports: { recordDate: Date; frozenLatex: number; latexThread: number; totalImport: number }[] }>();
-  imports.filter(item => item.periodLabel === periodLabel).forEach(item => {
+  imports.filter(matchesPeriod).forEach(item => {
     const summary = byUnit.get(item.unit) ?? { unit: item.unit, frozenLatex: 0, latexThreadImport: 0, frozenContaminatedLatex: 0, latexThreadExport: 0, dailyImports: [] };
     summary.frozenLatex += item.frozenLatex;
     summary.latexThreadImport += item.latexThread;
     summary.dailyImports.push({ recordDate: item.recordDate, frozenLatex: item.frozenLatex, latexThread: item.latexThread, totalImport: item.totalImport });
     byUnit.set(item.unit, summary);
   });
-  exports.filter(item => item.periodLabel === periodLabel).forEach(item => {
+  exports.filter(matchesPeriod).forEach(item => {
     const summary = byUnit.get(item.unit) ?? { unit: item.unit, frozenLatex: 0, latexThreadImport: 0, frozenContaminatedLatex: 0, latexThreadExport: 0, dailyImports: [] };
     summary.frozenContaminatedLatex += item.frozenContaminatedLatex;
     summary.latexThreadExport += item.latexThread;
@@ -3063,34 +3072,7 @@ export async function getLatexProductionPlanSummary(
   scopeUnits?: string[]
 ) {
   const plans = await listLatexProductionPlans();
-  const inScope = (unit: string) =>
-    !scopeUnits?.length || scopeUnits.includes(unit);
-  const selected = plans.filter(
-    row =>
-      inScope(row.unit) &&
-      row.year === year &&
-      (month === 0 ? row.month === 0 : row.month === month || row.month === 0)
-  );
-  const byUnit = new Map<string, (typeof selected)[number]>();
-  selected.forEach(row => {
-    const existing = byUnit.get(row.unit);
-    if (!existing || row.month === month) byUnit.set(row.unit, row);
-  });
-  const rows = Array.from(byUnit.values()).map(row => ({
-    ...row,
-    planMonthFrozenLatex:
-      row.month === month ? row.planFrozenLatex : 0,
-    planMonthThreadLatex: row.month === month ? row.planThreadLatex : 0,
-    planMonthDryRubber: row.month === month ? row.planDryRubber : 0,
-    planMonthDryFromFrozen: row.month === month ? row.planDryFromFrozen : 0,
-    planMonthDryFromThread: row.month === month ? row.planDryFromThread : 0,
-    planYearFrozenLatex:
-      row.month === 0 ? row.planFrozenLatex : 0,
-    planYearThreadLatex: row.month === 0 ? row.planThreadLatex : 0,
-    planYearDryRubber: row.month === 0 ? row.planDryRubber : 0,
-    planYearDryFromFrozen: row.month === 0 ? row.planDryFromFrozen : 0,
-    planYearDryFromThread: row.month === 0 ? row.planDryFromThread : 0,
-  }));
+  const rows = mergeProductionPlanRows(plans, year, month, scopeUnits);
   return {
     year,
     month,
@@ -3185,6 +3167,7 @@ export async function getTechnicalSkillMonthlySummary(
     const denominator = Math.max(row.workerCount, 1);
     const currentHaoDamRate = (row.haoDamWorkers / denominator) * 100;
     const previousHaoDamRate = previous ? (previous.haoDamWorkers / Math.max(previous.workerCount, 1)) * 100 : null;
+    const previousHaoDamWorkers = previous ? previous.haoDamWorkers : (row.previousHaoDamWorkers || null);
     const favorableCount = row.exceptionalCount + row.goodCount + row.fairCount;
     const previousFavorableCount = previous ? previous.exceptionalCount + previous.goodCount + previous.fairCount : null;
     return {
@@ -3195,10 +3178,10 @@ export async function getTechnicalSkillMonthlySummary(
       averagePercent: (row.averageCount / denominator) * 100,
       weakPercent: (row.weakCount / denominator) * 100,
       favorablePercent: (favorableCount / denominator) * 100,
-      previousHaoDamWorkers: previous ? previous.haoDamWorkers : (row.previousHaoDamWorkers || null),
-      previousHaoDamRate: previous ? previousHaoDamRate : (row.previousHaoDamWorkers ? (row.previousHaoDamWorkers / Math.max(row.workerCount, 1)) * 100 : null),
-      haoDamChangeWorkers: previous ? row.haoDamWorkers - previous.haoDamWorkers : (row.previousHaoDamWorkers ? row.haoDamWorkers - row.previousHaoDamWorkers : null),
-      haoDamChangePercent: (previousHaoDamRate == null && !row.previousHaoDamWorkers) ? null : currentHaoDamRate - (previous ? previousHaoDamRate! : (row.previousHaoDamWorkers / Math.max(row.workerCount, 1)) * 100),
+      previousHaoDamWorkers,
+      previousHaoDamRate: previous ? previousHaoDamRate : (previousHaoDamWorkers ? (previousHaoDamWorkers / Math.max(row.workerCount, 1)) * 100 : null),
+      haoDamChangeWorkers: previousHaoDamWorkers == null ? null : row.haoDamWorkers - previousHaoDamWorkers,
+      haoDamChangePercent: relativeChangePercent(row.haoDamWorkers, previousHaoDamWorkers),
       previousExceptionalPercent: previous ? (previous.exceptionalCount / Math.max(previous.workerCount, 1)) * 100 : null,
       previousGoodPercent: previous ? (previous.goodCount / Math.max(previous.workerCount, 1)) * 100 : null,
       previousFairPercent: previous ? (previous.fairCount / Math.max(previous.workerCount, 1)) * 100 : null,

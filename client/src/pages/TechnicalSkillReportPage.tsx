@@ -57,6 +57,18 @@ type TeamRow = {
   productionPerWorker: number;
   workers: WorkerRow[];
 };
+const importedSkillFields = [
+  ["workerCount", "Quân số"],
+  ["exceptionalCount", "Xuất sắc"],
+  ["goodCount", "Giỏi"],
+  ["fairCount", "Khá"],
+  ["averageCount", "Trung bình"],
+  ["weakCount", "Yếu"],
+  ["haoDamWorkers", "Hao dăm tháng này"],
+  ["previousHaoDamWorkers", "Hao dăm tháng trước"],
+] as const;
+type ImportedSkillKey = (typeof importedSkillFields)[number][0];
+type ImportedSkillForm = Record<ImportedSkillKey, string> & { unit: string; monthKey: string; note: string };
 
 export default function TechnicalSkillReportPage() {
   const utils = trpc.useUtils();
@@ -75,6 +87,8 @@ export default function TechnicalSkillReportPage() {
     safetyScore: "",
   });
   const [note, setNote] = useState("");
+  const [skillImportOpen, setSkillImportOpen] = useState(false);
+  const [skillImportForm, setSkillImportForm] = useState<ImportedSkillForm>({ unit: "", monthKey: "", workerCount: "", exceptionalCount: "", goodCount: "", fairCount: "", averageCount: "", weakCount: "", haoDamWorkers: "", previousHaoDamWorkers: "", note: "" });
   const {
     data: summary,
     isLoading,
@@ -83,6 +97,16 @@ export default function TechnicalSkillReportPage() {
     periodLabel ? { periodLabel } : undefined
   );
   const { data: workers = [] } = trpc.rubber.workforce.workers.list.useQuery();
+  const { data: me } = trpc.auth.me.useQuery();
+  const { data: importedSkillSummary } = trpc.dataTools.technicalSkillMonthly.useQuery();
+  const saveImportedSkill = trpc.dataTools.import.technicalSkillMonthly.useMutation({
+    onSuccess: async () => {
+      await utils.dataTools.technicalSkillMonthly.invalidate();
+      toast.success("Đã lưu tổng hợp tay nghề theo mẫu Import");
+      setSkillImportOpen(false);
+    },
+    onError: value => toast.error(value.message),
+  });
   const saveEvaluation =
     trpc.rubber.reports.saveTechnicalSkillEvaluation.useMutation({
       onSuccess: async () => {
@@ -106,6 +130,7 @@ export default function TechnicalSkillReportPage() {
       ),
     [summary, unitFilter]
   );
+  const importedTeams = useMemo(() => (importedSkillSummary?.teams ?? []).filter(team => !unitFilter || team.unit === unitFilter), [importedSkillSummary, unitFilter]);
   const rows = useMemo(() => teams.flatMap(team => team.workers), [teams]);
   const chartData = teams.map(team => ({
     unit: team.unit,
@@ -136,8 +161,20 @@ export default function TechnicalSkillReportPage() {
     });
   };
   const openForm = () => {
-    setFormPeriod(summary?.periodLabel || periodLabel || "Tháng hiện tại");
+    setFormPeriod(importedSkillSummary?.monthKey || summary?.periodLabel || periodLabel || "Tháng hiện tại");
     setDialogOpen(true);
+  };
+  const openSkillImportForm = () => {
+    setSkillImportForm(current => ({ ...current, monthKey: importedSkillSummary?.monthKey || new Date().toISOString().slice(0, 7) }));
+    setSkillImportOpen(true);
+  };
+  const submitSkillImport = (event: FormEvent) => {
+    event.preventDefault();
+    if (!skillImportForm.unit.trim() || !/^\\d{4}-(0[1-9]|1[0-2])$/.test(skillImportForm.monthKey)) return toast.error("Cần nhập Đội và tháng theo dạng YYYY-MM");
+    const values = Object.fromEntries(importedSkillFields.map(([key]) => [key, Number(skillImportForm[key])])) as Record<ImportedSkillKey, number>;
+    if (Object.values(values).some(value => !Number.isInteger(value) || value < 0)) return toast.error("Các trường quân số, cấp tay nghề và Hao dăm phải là số nguyên không âm");
+    if (values.exceptionalCount + values.goodCount + values.fairCount + values.averageCount + values.weakCount > values.workerCount) return toast.error("Tổng 5 mức tay nghề không được vượt quân số");
+    saveImportedSkill.mutate({ rows: [{ ...values, unit: skillImportForm.unit.trim(), monthKey: skillImportForm.monthKey, note: skillImportForm.note.trim() || null }] });
   };
 
   return (
@@ -147,15 +184,25 @@ export default function TechnicalSkillReportPage() {
         title="Tổng hợp đánh giá tay nghề kỹ thuật"
         description="So sánh điểm đánh giá với sản lượng bình quân theo người và theo Đội để nhận diện điểm mạnh, khoảng cần đào tạo."
         action={
-          <Button
-            onClick={openForm}
-            className="bg-emerald-700 hover:bg-emerald-800"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nhập đánh giá
-          </Button>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button onClick={openForm} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="mr-2 h-4 w-4" />Nhập đánh giá nhân công</Button>
+            {me?.role === "admin" ? <Button onClick={openSkillImportForm} variant="outline" className="bg-white"><Plus className="mr-2 h-4 w-4" />Nhập tổng hợp theo mẫu</Button> : null}
+          </div>
         }
       />
+      <Panel
+        title="Tổng hợp từ file Import"
+        description={importedSkillSummary?.monthKey ? `Kỳ ${importedSkillSummary.monthKey}; dữ liệu đã import theo mẫu tổng hợp tay nghề.` : "Chưa có dữ liệu Import tổng hợp tay nghề."}
+      >
+        {importedTeams.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[980px] text-left text-sm">
+              <thead><tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-400"><th className="px-3 py-3">Đội</th><th className="px-3 py-3 text-right">Quân số</th><th className="px-3 py-3 text-right">Xuất sắc %</th><th className="px-3 py-3 text-right">Giỏi %</th><th className="px-3 py-3 text-right">Khá %</th><th className="px-3 py-3 text-right">XS+G+K %</th><th className="px-3 py-3 text-right">Xếp hạng</th><th className="px-3 py-3 text-right">Hao dăm</th><th className="px-3 py-3 text-right">So tháng trước</th></tr></thead>
+              <tbody>{importedTeams.map((team, index) => <tr key={team.unit} className="border-b border-slate-100"><td className="px-3 py-3 font-semibold">{team.unit}</td><td className="px-3 py-3 text-right">{team.workerCount}</td><td className="px-3 py-3 text-right">{team.exceptionalPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{team.goodPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{team.fairPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right font-semibold text-emerald-700">{team.favorablePercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{index + 1}</td><td className="px-3 py-3 text-right">{team.haoDamWorkers}</td><td className="px-3 py-3 text-right">{team.haoDamChangePercent == null ? "—" : `${team.haoDamChangePercent.toFixed(2)}%`}</td></tr>)}</tbody>
+            </table>
+          </div>
+        ) : <EmptyState title="Chưa có dữ liệu Import" description="Dùng mẫu Tổng hợp tay nghề và hao dăm trong Import Excel để nạp dữ liệu." />}
+      </Panel>
       <Panel
         title="Bộ lọc và kỳ đánh giá"
         description="Sản lượng được đối chiếu từ dữ liệu nhập mủ của cùng kỳ, còn điểm tay nghề lấy kết quả đánh giá gần nhất của từng nhân công."
@@ -298,49 +345,29 @@ export default function TechnicalSkillReportPage() {
           description="Ưu tiên các Đội có điểm thấp hoặc chưa đủ độ phủ đánh giá."
         >
           <div className="space-y-3">
-            {teams
+            {importedTeams.length ? importedTeams.map((team, index) => (
+              <div key={team.unit} className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-800">{index + 1}. {team.unit}</span>
+                  <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">{team.favorablePercent.toFixed(2)}% XS+G+K</Badge>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                  <span>Quân số: {team.workerCount} · Xuất sắc/Giỏi/Khá: {team.exceptionalCount}/{team.goodCount}/{team.fairCount}</span>
+                  <span>Hao dăm: {team.haoDamWorkers}</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-emerald-600" style={{ width: `${Math.min(team.favorablePercent, 100)}%` }} /></div>
+              </div>
+            )) : teams
               .slice()
               .sort((a, b) => (b.averageScore ?? -1) - (a.averageScore ?? -1))
               .map(team => (
-                <div
-                  key={team.unit}
-                  className="rounded-xl border border-slate-100 bg-slate-50/70 p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-800">
-                      {team.unit}
-                    </span>
-                    <Badge
-                      className={
-                        team.averageScore != null && team.averageScore >= 80
-                          ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100"
-                          : "bg-amber-100 text-amber-800 hover:bg-amber-100"
-                      }
-                    >
-                      {team.averageScore == null
-                        ? "Chưa đánh giá"
-                        : `${team.averageScore.toFixed(1)} điểm`}
-                    </Badge>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                    <span>
-                      {team.evaluatedCount}/{team.workerCount} người đã đánh giá
-                    </span>
-                    <span>
-                      {formatQuantity(team.productionPerWorker)} kg/người
-                    </span>
-                  </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full bg-emerald-600"
-                      style={{
-                        width: `${Math.min(team.averageScore ?? 0, 100)}%`,
-                      }}
-                    />
-                  </div>
+                <div key={team.unit} className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                  <div className="flex items-center justify-between"><span className="font-semibold text-slate-800">{team.unit}</span><Badge className={team.averageScore != null && team.averageScore >= 80 ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-amber-100 text-amber-800 hover:bg-amber-100"}>{team.averageScore == null ? "Chưa đánh giá" : `${team.averageScore.toFixed(1)} điểm`}</Badge></div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-slate-500"><span>{team.evaluatedCount}/{team.workerCount} người đã đánh giá</span><span>{formatQuantity(team.productionPerWorker)} kg/người</span></div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-emerald-600" style={{ width: `${Math.min(team.averageScore ?? 0, 100)}%` }} /></div>
                 </div>
               ))}
-            {!teams.length ? (
+            {!teams.length && !importedTeams.length ? (
               <EmptyState
                 title="Chưa có nhân công trong phạm vi"
                 description="Kiểm tra lại quyền truy cập hoặc dữ liệu nhân công."
@@ -428,7 +455,7 @@ export default function TechnicalSkillReportPage() {
             <DialogTitle>Nhập kết quả đánh giá tay nghề</DialogTitle>
             <DialogDescription>
               Chấm từng tiêu chí theo thang 0–100. Kết quả mới nhất của nhân
-              công trong kỳ sẽ được dùng để tổng hợp.
+              công trong kỳ sẽ được dùng để tổng hợp. Kỳ Import gần nhất: {importedSkillSummary?.monthKey || "chưa có"}; dữ liệu tổng hợp theo Đội gồm quân số, 5 mức tay nghề và Hao dăm được xem ở bảng Import phía trên.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="grid gap-4">
@@ -515,6 +542,25 @@ export default function TechnicalSkillReportPage() {
                 {saveEvaluation.isPending ? "Đang lưu…" : "Lưu đánh giá"}
               </Button>
             </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={skillImportOpen} onOpenChange={setSkillImportOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Nhập tổng hợp tay nghề và Hao dăm</DialogTitle>
+            <DialogDescription>Biểu mẫu này khớp với file Import: mỗi dòng là một Đội trong một tháng, gồm quân số, 5 mức tay nghề, Hao dăm hiện tại và tháng trước. Chênh lệch được tính tự động theo công thức số thợ hiện tại chia số thợ tháng trước nhân 100 rồi trừ 100.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitSkillImport} className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div><Label>Đội</Label><Input value={skillImportForm.unit} onChange={event => setSkillImportForm(current => ({ ...current, unit: event.target.value }))} placeholder="Ví dụ: Đội 1" className="mt-2" /></div>
+              <div><Label>Tháng</Label><Input type="month" value={skillImportForm.monthKey} onChange={event => setSkillImportForm(current => ({ ...current, monthKey: event.target.value }))} className="mt-2" /></div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {importedSkillFields.map(([key, label]) => <div key={key}><Label>{label}</Label><Input type="number" min="0" step="1" value={skillImportForm[key]} onChange={event => setSkillImportForm(current => ({ ...current, [key]: event.target.value }))} placeholder="0" className="mt-2" /></div>)}
+            </div>
+            <div><Label>Ghi chú</Label><Textarea value={skillImportForm.note} onChange={event => setSkillImportForm(current => ({ ...current, note: event.target.value }))} placeholder="Ghi chú đối chiếu nếu có" className="mt-2" /></div>
+            <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setSkillImportOpen(false)}>Hủy</Button><Button type="submit" disabled={saveImportedSkill.isPending} className="bg-emerald-700 hover:bg-emerald-800">{saveImportedSkill.isPending ? "Đang lưu…" : "Lưu tổng hợp"}</Button></div>
           </form>
         </DialogContent>
       </Dialog>

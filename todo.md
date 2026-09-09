@@ -334,3 +334,31 @@
 - [x] Chạy migration, check/test/build và lưu checkpoint; chưa publish khi chưa xác nhận visibility
 
 - [x] Mở rộng chống trùng cho import mã nhân công và chỉ số Lô, chạy lại test và build
+
+## Xóa bản trùng nhập mủ năm 2026
+
+- [x] Đối chiếu các nhóm nhập mủ trùng theo Đội và ngày trong năm 2026
+- [x] Xóa 11 bản sao đã xác định, giữ lại bản ghi gốc
+- [x] Kiểm tra lại và không còn nhóm nhập mủ trùng theo khóa đã rà soát
+
+## Sửa báo cáo kế hoạch, tiến độ và tay nghề
+
+- [x] Đối chiếu Kết quả/Kế hoạch theo Tháng, Cả năm và All, xác định lỗi trùng hoặc thiếu kế hoạch/%
+- [x] Sửa Tổng quan hiển thị đúng Kế hoạch tháng, Kế hoạch năm, Kế hoạch TT và % theo kỳ
+- [x] Bổ sung lọc Tháng/Cả năm cho báo cáo tiến độ nhập–xuất khi Đợt = All
+- [x] Xác định và sửa công thức chênh lệch Hao dăm theo mẫu người dùng
+- [x] Nối dữ liệu Import tay nghề vào tổng hợp, so sánh và xếp hạng theo Đội
+- [x] Sửa phần nhập đánh giá tay nghề để nhận và hiển thị theo mẫu Import
+- [x] Bổ sung test số học/API/UI, chạy check/test/build và lưu checkpoint
+
+- [x] Tỷ lệ Hao dăm/chênh lệch = (Số thợ tháng hiện tại / Số thợ tháng trước × 100) − 100; xử lý mẫu số 0 rõ ràng
+
+- [x] Bổ sung lọc Năm, Tháng/Cả năm, Đợt All cho báo cáo tiến độ nhập–xuất
+- [x] Đồng bộ hao hụt kho với cùng tháng/đợt và xử lý Đợt All
+- [x] Nối panel dữ liệu Import tay nghề vào trang Tổng hợp kỹ thuật
+- [x] Bổ sung test router tiến độ, hao hụt và công thức tỷ lệ Hao dăm; chạy toàn bộ test/build
+
+- [x] Kiểm tra và sửa Kết quả thực hiện/Kế hoạch trên Tổng quan cho Tháng, Cả năm và All; không trùng Kế hoạch TT/Kế hoạch năm và luôn hiện đúng %
+- [x] Bổ sung/kiểm tra bộ lọc Tháng và Cả năm cho báo cáo tiến độ nhập–xuất khi Đợt = All
+- [x] Sửa chênh lệch Hao dăm theo công thức: ((Số thợ tháng hiện tại / Số thợ tháng trước) × 100) − 100
+- [x] Đồng bộ dữ liệu Import tay nghề với tổng hợp, xếp hạng nhanh theo Đội và form nhập đánh giá
