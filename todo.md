@@ -315,3 +315,11 @@
 - [x] Bổ sung test điều kiện hiển thị theo Tháng/Cả năm, chạy check/test/build và lưu checkpoint
 
 - [x] Ẩn hoàn toàn nội dung Kế hoạch TT khi Kỳ xem là một Tháng; chỉ hiển thị Kế hoạch tháng và Kế hoạch năm
+
+## Đồng bộ Đợt 4 toàn hệ thống
+
+- [x] Rà soát các màn hình, API, parser và báo cáo đang dùng danh sách Đợt
+- [x] Bổ sung Đợt 4 động từ dữ liệu thực tế vào mọi bộ lọc/nội dung liên quan
+- [x] Đồng bộ All và Đợt 4 với Tổng quan, sản lượng, nhập/xuất và báo cáo
+- [x] Bổ sung test Đợt 4 và chạy check/test/build
+- [x] Lưu checkpoint; chưa publish khi chưa có xác nhận visibility

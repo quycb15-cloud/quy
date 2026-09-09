@@ -1,4 +1,4 @@
-export const STANDARD_PERIODS = ["Đợt 1", "Đợt 2", "Đợt 3"] as const;
+export const STANDARD_PERIODS = ["Đợt 1", "Đợt 2", "Đợt 3", "Đợt 4"] as const;
 export const DEFAULT_PERIOD = STANDARD_PERIODS[0];
 export const periodOptions = (existing: readonly string[] | undefined | null = []) => Array.from(new Set<string>([...STANDARD_PERIODS, ...(existing ?? []).filter(Boolean)]));
 export const currentPeriod = () => DEFAULT_PERIOD;

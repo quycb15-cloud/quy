@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_PERIOD, formatAreaHa, periodOptions, STANDARD_PERIODS } from "./rubber";
 
 describe("danh mục đợt chuẩn", () => {
-  it("đặt Đợt 1 làm mặc định và luôn giữ Đợt 1/2/3 trước các đợt lịch sử", () => {
+  it("đặt Đợt 1 làm mặc định và luôn giữ Đợt 1/2/3/4 trước các đợt lịch sử", () => {
     expect(DEFAULT_PERIOD).toBe("Đợt 1");
-    expect(STANDARD_PERIODS).toEqual(["Đợt 1", "Đợt 2", "Đợt 3"]);
-    expect(periodOptions(["Đợt 2", "Đợt 1-7"])).toEqual(["Đợt 1", "Đợt 2", "Đợt 3", "Đợt 1-7"]);
+    expect(STANDARD_PERIODS).toEqual(["Đợt 1", "Đợt 2", "Đợt 3", "Đợt 4"]);
+    expect(periodOptions(["Đợt 2", "Đợt 1-7"])).toEqual(["Đợt 1", "Đợt 2", "Đợt 3", "Đợt 4", "Đợt 1-7"]);
   });
 });
 
