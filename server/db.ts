@@ -1316,13 +1316,30 @@ export type ExportPayload = {
 export async function createLatexExport(input: ExportPayload, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
-  await db.insert(latexExports).values({
+  const values = {
     ...input,
     frozenContaminatedLatex: asQuantity(input.frozenContaminatedLatex),
     latexThread: asQuantity(input.latexThread),
     note: input.note?.trim() || null,
     createdBy: userId,
-  });
+  };
+  const existing = await db
+    .select({ id: latexExports.id })
+    .from(latexExports)
+    .where(and(eq(latexExports.plotId, input.plotId), eq(latexExports.recordDate, input.recordDate)))
+    .limit(1);
+  if (existing[0]) {
+    await db.update(latexExports).set({
+      periodLabel: values.periodLabel,
+      frozenContaminatedLatex: values.frozenContaminatedLatex,
+      latexThread: values.latexThread,
+      note: values.note,
+      createdBy: userId,
+    }).where(eq(latexExports.id, existing[0].id));
+    return { created: false, updated: true };
+  }
+  await db.insert(latexExports).values(values);
+  return { created: true, updated: false };
 }
 
 export async function listLatexExports(periodLabel?: string) {

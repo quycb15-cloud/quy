@@ -3,7 +3,7 @@ import type { TrpcContext } from "./_core/context";
 
 const dbMocks = vi.hoisted(() => ({
   getExcelDataSummary: vi.fn(), listTeamImports: vi.fn(), listTeamExports: vi.fn(), getWarehouseLossByTeam: vi.fn(), getInternalAccountByUserId: vi.fn(),
-  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
+  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpsertLatexProductionPlans: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMocks);
@@ -36,12 +36,33 @@ describe("dataToolsRouter", () => {
     expect(dbMocks.bulkUpsertExcelPlots).not.toHaveBeenCalled();
   });
 
+  it("từ chối file nhập mủ có cùng Đội và ngày trùng nhau", async () => {
+    const caller = appRouter.createCaller(context("admin"));
+    const recordDate = new Date("2026-07-07T12:00:00.000Z");
+    const rows = [
+      { unit: "Đội 1", gardenName: "Vườn A", periodLabel: "Đợt 1", recordDate, frozenLatex: 100, latexThread: 0 },
+      { unit: "Đội 1", gardenName: "Vườn B", periodLabel: "Đợt 2", recordDate, frozenLatex: 200, latexThread: 0 },
+    ];
+    await expect(caller.dataTools.import.teamImports({ rows })).rejects.toThrow(/Nhập mủ.*dòng 1 và 2/);
+    expect(dbMocks.bulkUpsertTeamImports).not.toHaveBeenCalled();
+  });
+
   it("cho phép admin import dữ liệu nhập mủ theo đội", async () => {
     const caller = appRouter.createCaller(context("admin"));
     const recordDate = new Date("2026-07-07T12:00:00.000Z");
     await expect(caller.dataTools.import.teamImports({ rows: [{ unit: "Đội 1", gardenName: "Vườn A", periodLabel: "Đợt 1", recordDate, frozenLatex: 1686, latexThread: 0 }] })).resolves.toEqual({ success: true, imported: 1 });
     expect(dbMocks.bulkUpsertTeamImports).toHaveBeenCalledWith(expect.any(Array), 1);
     expect(dbMocks.logActivity).toHaveBeenCalledWith(1, expect.objectContaining({ eventType: "excel.import", entityType: "team_imports" }));
+  });
+
+  it("từ chối file kế hoạch có cùng Đội, năm và tháng trùng nhau", async () => {
+    const caller = appRouter.createCaller(context("admin"));
+    const rows = [
+      { unit: "Đội 1", year: 2026, month: 8, planFrozenLatex: 100, planDryRubber: 50 },
+      { unit: "Đội 1", year: 2026, month: 8, planFrozenLatex: 120, planDryRubber: 60 },
+    ];
+    await expect(caller.dataTools.import.productionPlans({ rows })).rejects.toThrow(/Kế hoạch sản lượng.*dòng 1 và 2/);
+    expect(dbMocks.bulkUpsertLatexProductionPlans).not.toHaveBeenCalled();
   });
 
   it("từ chối người dùng thường import dữ liệu Excel", async () => {

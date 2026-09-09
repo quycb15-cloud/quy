@@ -323,3 +323,12 @@
 - [x] Đồng bộ All và Đợt 4 với Tổng quan, sản lượng, nhập/xuất và báo cáo
 - [x] Bổ sung test Đợt 4 và chạy check/test/build
 - [x] Lưu checkpoint; chưa publish khi chưa có xác nhận visibility
+
+## Cơ chế chống trùng dữ liệu
+
+- [x] Rà soát khóa nhận diện và các luồng ghi/import hiện có
+- [x] Định nghĩa quy tắc chống trùng cho Vườn/Lô, nhập/xuất mủ, kế hoạch, tay nghề và phân bổ nhân công
+- [x] Bổ sung validation và unique/upsert an toàn ở backend/database
+- [x] Hiển thị lỗi trùng rõ ràng trước khi ghi dữ liệu
+- [x] Bổ sung test dòng trùng trong cùng file và nhập lại cùng file
+- [x] Chạy migration, check/test/build và lưu checkpoint; chưa publish khi chưa xác nhận visibility
