@@ -332,3 +332,5 @@
 - [x] Hiển thị lỗi trùng rõ ràng trước khi ghi dữ liệu
 - [x] Bổ sung test dòng trùng trong cùng file và nhập lại cùng file
 - [x] Chạy migration, check/test/build và lưu checkpoint; chưa publish khi chưa xác nhận visibility
+
+- [x] Mở rộng chống trùng cho import mã nhân công và chỉ số Lô, chạy lại test và build
