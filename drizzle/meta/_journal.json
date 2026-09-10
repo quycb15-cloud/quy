@@ -225,6 +225,13 @@
       "when": 1788860932577,
       "tag": "0031_wonderful_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1789010053598,
+      "tag": "0032_fearless_captain_universe",
+      "breakpoints": true
     }
   ]
 }

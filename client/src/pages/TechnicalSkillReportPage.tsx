@@ -69,6 +69,10 @@ const importedSkillFields = [
 ] as const;
 type ImportedSkillKey = (typeof importedSkillFields)[number][0];
 type ImportedSkillForm = Record<ImportedSkillKey, string> & { unit: string; monthKey: string; note: string };
+const skillLevels = ["Xuất sắc", "Giỏi", "Khá", "Trung bình", "Yếu"] as const;
+type SkillLevel = (typeof skillLevels)[number];
+const skillLevelScores: Record<SkillLevel, number> = { "Xuất sắc": 100, "Giỏi": 85, "Khá": 70, "Trung bình": 55, "Yếu": 35 };
+const skillLevelFromScore = (score: number | null) => score == null ? "Chưa đánh giá" : skillLevels.reduce((best, level) => Math.abs(skillLevelScores[level] - score) < Math.abs(skillLevelScores[best] - score) ? level : best, "Yếu" as SkillLevel);
 
 export default function TechnicalSkillReportPage() {
   const utils = trpc.useUtils();
@@ -80,12 +84,10 @@ export default function TechnicalSkillReportPage() {
     new Date().toISOString().slice(0, 10)
   );
   const [formPeriod, setFormPeriod] = useState("");
-  const [scores, setScores] = useState<Record<ScoreKey, string>>({
-    technicalScore: "",
-    productivityScore: "",
-    qualityScore: "",
-    safetyScore: "",
-  });
+  const [skillLevel, setSkillLevel] = useState<SkillLevel | "">("");
+  const [technicalIssue, setTechnicalIssue] = useState("");
+  const [productivity, setProductivity] = useState("");
+  const [scrapingLoss, setScrapingLoss] = useState<"Có" | "Không" | "">("");
   const [note, setNote] = useState("");
   const [skillImportOpen, setSkillImportOpen] = useState(false);
   const [skillImportForm, setSkillImportForm] = useState<ImportedSkillForm>({ unit: "", monthKey: "", workerCount: "", exceptionalCount: "", goodCount: "", fairCount: "", averageCount: "", weakCount: "", haoDamWorkers: "", previousHaoDamWorkers: "", note: "" });
@@ -98,6 +100,8 @@ export default function TechnicalSkillReportPage() {
   );
   const { data: workers = [] } = trpc.rubber.workforce.workers.list.useQuery();
   const { data: me } = trpc.auth.me.useQuery();
+  const { data: internalProfile } = trpc.internalAccounts.me.useQuery(undefined, { enabled: Boolean(me && me.role !== "admin") });
+  const canEnterEvaluation = me?.role === "admin" || internalProfile?.groupType === "production";
   const { data: importedSkillSummary } = trpc.dataTools.technicalSkillMonthly.useQuery();
   const saveImportedSkill = trpc.dataTools.import.technicalSkillMonthly.useMutation({
     onSuccess: async () => {
@@ -113,12 +117,10 @@ export default function TechnicalSkillReportPage() {
         await utils.rubber.reports.technicalSkillSummary.invalidate();
         toast.success("Đã lưu kết quả đánh giá tay nghề");
         setDialogOpen(false);
-        setScores({
-          technicalScore: "",
-          productivityScore: "",
-          qualityScore: "",
-          safetyScore: "",
-        });
+        setSkillLevel("");
+        setTechnicalIssue("");
+        setProductivity("");
+        setScrapingLoss("");
         setNote("");
       },
       onError: value => toast.error(value.message),
@@ -143,22 +145,12 @@ export default function TechnicalSkillReportPage() {
     event.preventDefault();
     if (!workerId || !formPeriod)
       return toast.error("Vui lòng chọn nhân công và kỳ đánh giá");
-    const values = Object.fromEntries(
-      scoreFields.map(([key]) => [key, Number(scores[key])])
-    ) as Record<ScoreKey, number>;
-    if (
-      Object.values(values).some(
-        value => !Number.isFinite(value) || value < 0 || value > 100
-      )
-    )
-      return toast.error("Các tiêu chí phải nằm trong khoảng 0–100");
-    saveEvaluation.mutate({
-      workerId: Number(workerId),
-      evaluationDate: new Date(`${evaluationDate}T12:00:00`),
-      periodLabel: formPeriod,
-      ...values,
-      note: note || null,
-    });
+    if (!skillLevel || !scrapingLoss || productivity.trim() === "") return toast.error("Vui lòng nhập Kết quả đánh giá, Năng suất và Hao dăm");
+    const productivityValue = Number(productivity);
+    if (!Number.isFinite(productivityValue) || productivityValue < 0 || productivityValue > 100) return toast.error("Năng suất phải nằm trong khoảng 0–100");
+    const values: Record<ScoreKey, number> = { technicalScore: technicalIssue.trim() ? 0 : 100, productivityScore: productivityValue, qualityScore: skillLevelScores[skillLevel], safetyScore: scrapingLoss === "Có" ? 0 : 100 };
+    const detailNote = [technicalIssue.trim() ? `Lỗi kỹ thuật: ${technicalIssue.trim()}` : "", `Kết quả đánh giá: ${skillLevel}`, `Hao dăm: ${scrapingLoss}`, note.trim()].filter(Boolean).join(" · ");
+    saveEvaluation.mutate({ workerId: Number(workerId), evaluationDate: new Date(`${evaluationDate}T12:00:00`), periodLabel: formPeriod, ...values, note: detailNote || null });
   };
   const openForm = () => {
     setFormPeriod(importedSkillSummary?.monthKey || summary?.periodLabel || periodLabel || "Tháng hiện tại");
@@ -185,7 +177,7 @@ export default function TechnicalSkillReportPage() {
         description="So sánh điểm đánh giá với sản lượng bình quân theo người và theo Đội để nhận diện điểm mạnh, khoảng cần đào tạo."
         action={
           <div className="flex flex-wrap justify-end gap-2">
-            <Button onClick={openForm} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="mr-2 h-4 w-4" />Nhập đánh giá nhân công</Button>
+            {canEnterEvaluation ? <Button onClick={openForm} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="mr-2 h-4 w-4" />Nhập đánh giá nhân công</Button> : null}
             {me?.role === "admin" ? <Button onClick={openSkillImportForm} variant="outline" className="bg-white"><Plus className="mr-2 h-4 w-4" />Nhập tổng hợp theo mẫu</Button> : null}
           </div>
         }
@@ -379,7 +371,7 @@ export default function TechnicalSkillReportPage() {
       <div className="mt-5">
         <Panel
           title="Chi tiết so sánh theo nhân công"
-          description="Điểm tổng hợp là trung bình của bốn tiêu chí: kỹ thuật, năng suất, chất lượng và an toàn."
+          description="Hiển thị đúng các trường trong mẫu: Lỗi kỹ thuật, Kết quả đánh giá, Năng suất và Hao dăm."
         >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-left text-sm">
@@ -387,10 +379,10 @@ export default function TechnicalSkillReportPage() {
                 <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-400">
                   <th className="px-3 py-3">Nhân công</th>
                   <th className="px-3 py-3">Đội</th>
-                  <th className="px-3 py-3 text-right">Kỹ thuật</th>
+                  <th className="px-3 py-3">Lỗi kỹ thuật</th>
+                  <th className="px-3 py-3">Kết quả đánh giá</th>
                   <th className="px-3 py-3 text-right">Năng suất</th>
-                  <th className="px-3 py-3 text-right">Chất lượng</th>
-                  <th className="px-3 py-3 text-right">An toàn</th>
+                  <th className="px-3 py-3">Hao dăm</th>
                   <th className="px-3 py-3 text-right">Tổng hợp</th>
                   <th className="px-3 py-3 text-right">Kg/người</th>
                   <th className="px-3 py-3">Ngày đánh giá</th>
@@ -409,18 +401,10 @@ export default function TechnicalSkillReportPage() {
                       </p>
                     </td>
                     <td className="px-3 py-3 text-slate-600">{row.unit}</td>
-                    {(
-                      [
-                        "technicalScore",
-                        "productivityScore",
-                        "qualityScore",
-                        "safetyScore",
-                      ] as ScoreKey[]
-                    ).map(key => (
-                      <td key={key} className="px-3 py-3 text-right">
-                        {row[key] == null ? "—" : row[key]!.toFixed(1)}
-                      </td>
-                    ))}
+                    <td className="px-3 py-3 text-sm">{row.technicalScore === 0 ? (row.note?.match(/Lỗi kỹ thuật: ([^·]+)/)?.[1] || "Có") : "—"}</td>
+                    <td className="px-3 py-3 font-semibold">{skillLevelFromScore(row.qualityScore)}</td>
+                    <td className="px-3 py-3 text-right">{row.productivityScore == null ? "—" : row.productivityScore.toFixed(1)}</td>
+                    <td className="px-3 py-3">{row.safetyScore === 0 ? "Có" : row.safetyScore == null ? "—" : "Không"}</td>
                     <td className="px-3 py-3 text-right font-bold text-emerald-700">
                       {row.overallScore == null ? (
                         <Badge variant="outline">Chưa đánh giá</Badge>
@@ -454,8 +438,7 @@ export default function TechnicalSkillReportPage() {
           <DialogHeader>
             <DialogTitle>Nhập kết quả đánh giá tay nghề</DialogTitle>
             <DialogDescription>
-              Chấm từng tiêu chí theo thang 0–100. Kết quả mới nhất của nhân
-              công trong kỳ sẽ được dùng để tổng hợp. Kỳ Import gần nhất: {importedSkillSummary?.monthKey || "chưa có"}; dữ liệu tổng hợp theo Đội gồm quân số, 5 mức tay nghề và Hao dăm được xem ở bảng Import phía trên.
+              Nhập theo mẫu đánh giá: Lỗi kỹ thuật là trường tùy chọn; Kết quả đánh giá gồm Xuất sắc, Giỏi, Khá, Trung bình, Yếu; Hao dăm chọn Có hoặc Không. Kỳ Import gần nhất: {importedSkillSummary?.monthKey || "chưa có"}.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="grid gap-4">
@@ -496,26 +479,10 @@ export default function TechnicalSkillReportPage() {
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {scoreFields.map(([key, label]) => (
-                <div key={key}>
-                  <Label>{label}</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={scores[key]}
-                    onChange={event =>
-                      setScores(current => ({
-                        ...current,
-                        [key]: event.target.value,
-                      }))
-                    }
-                    placeholder="0–100"
-                    className="mt-2"
-                  />
-                </div>
-              ))}
+              <div><Label>Lỗi kỹ thuật <span className="font-normal text-slate-400">(không bắt buộc)</span></Label><Input value={technicalIssue} onChange={event => setTechnicalIssue(event.target.value)} placeholder="Chỉ nhập khi có lỗi kỹ thuật" className="mt-2" /></div>
+              <div><Label>Kết quả đánh giá</Label><select value={skillLevel} onChange={event => setSkillLevel(event.target.value as SkillLevel)} className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn mức tay nghề</option>{skillLevels.map(level => <option key={level} value={level}>{level}</option>)}</select></div>
+              <div><Label>Năng suất</Label><Input type="number" min="0" max="100" step="0.1" value={productivity} onChange={event => setProductivity(event.target.value)} placeholder="0–100" className="mt-2" /></div>
+              <div><Label>Hao dăm</Label><select value={scrapingLoss} onChange={event => setScrapingLoss(event.target.value as "Có" | "Không")} className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn Có/Không</option><option value="Có">Có</option><option value="Không">Không</option></select></div>
             </div>
             <div>
               <Label>Nhận xét / khuyến nghị đào tạo</Label>

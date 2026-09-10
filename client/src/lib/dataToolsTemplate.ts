@@ -1,7 +1,7 @@
 import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "./workerPlotAllocationWorkbook";
 import { buildProductionPlanTemplateMatrix, buildTechnicalSkillTemplateMatrix, productionPlanMerges, technicalSkillMerges } from "./reportImportWorkbook";
 
-export type TemplateDataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations" | "productionPlans" | "technicalSkillMonthly";
+export type TemplateDataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations" | "productionPlans" | "technicalSkillMonthly" | "technicalSkillEvaluations";
 export type TemplateSample = Record<string, string | number>;
 
 export function createImportTemplateWorkbook(XLSX: any, dataset: TemplateDataset, labels: Record<TemplateDataset, string>, samples: Record<TemplateDataset, TemplateSample>) {
@@ -19,7 +19,7 @@ export function createImportTemplateWorkbook(XLSX: any, dataset: TemplateDataset
   XLSX.utils.book_append_sheet(book, sheet, sheetName);
   const guide = XLSX.utils.aoa_to_sheet([
     [`MẪU IMPORT ${labels[dataset].toUpperCase()}`],
-    [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Kế hoạch năm, Kế hoạch tháng (0 nếu là kế hoạch năm), kế hoạch mủ đông/tạp, mủ dây, quy khô từ mủ đông/tạp và quy khô từ mủ dây." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một ngày thuộc tháng báo cáo; nhập quân số, số thợ theo năm cấp tay nghề, Hao dăm tháng hiện tại, tháng trước và chênh lệch nếu có." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
+    [dataset === "workerPlotAllocations" ? "Điền Mã công nhân, Lô, Hàng - hàng, Diện tích và Tổng cây cạo trong các nhóm Vườn A/B/C; hệ thống tự đối chiếu Đội và tên từ danh sách nhân công." : dataset === "productionPlans" ? "Điền Đơn vị, Kế hoạch năm, Kế hoạch tháng (0 nếu là kế hoạch năm), kế hoạch mủ đông/tạp, mủ dây, quy khô từ mủ đông/tạp và quy khô từ mủ dây." : dataset === "technicalSkillMonthly" ? "Mỗi dòng là một Đội trong một ngày thuộc tháng báo cáo; nhập quân số, số thợ theo năm cấp tay nghề, Hao dăm tháng hiện tại, tháng trước và chênh lệch nếu có." : dataset === "technicalSkillEvaluations" ? "Mỗi dòng là một nhân công; nhập Đội, Tên nhân công hoặc Mã số, Ngày/Kỳ đánh giá, Lỗi kỹ thuật tùy chọn, Kết quả đánh giá, Năng suất 0-100 và Hao dăm Có/Không." : "Xóa dòng trống mẫu và điền dữ liệu từ dòng 2."],
     ["Các bản ghi trùng khóa sẽ được cập nhật, không tạo bản sao."],
   ]);
   XLSX.utils.book_append_sheet(book, guide, "Hướng dẫn");

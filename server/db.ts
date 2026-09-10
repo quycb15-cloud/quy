@@ -41,7 +41,7 @@ import {
   summarizeWorkforceByTeam,
   WorkforceTeamTarget,
 } from "./workforceSummary";
-import { comparePeriodLabel, TEAM_ORDER } from "../shared/teamOrder";
+import { comparePeriodLabel, compareTeamName, TEAM_ORDER } from "../shared/teamOrder";
 import { getDashboardTotalArea } from "./dashboardMath";
 import { relativeChangePercent } from "../shared/technicalSkillMath";
 import { mergeProductionPlanRows } from "../shared/productionPlanSummary";
@@ -1104,7 +1104,7 @@ export async function getWarehouseLossByTeam(
 }
 
 export type DailyCarePayload = {
-  category: "tapping" | "reinforcement" | "care" | "treatment";
+  category: "tapping" | "reinforcement" | "care" | "treatment" | "fertilization";
   activityDate: Date;
   unit: string;
   gardenName: string;
@@ -1192,21 +1192,28 @@ export async function getProductionChangeReport() {
   type ChangeRow = { unit: string; gardenName: string; periodLabel: string; monthLabel: string; recordDate: Date; totalImport: number; totalExport: number; changeKg: number; changePercent: number; warehouseLoss: number; };
   const groups = new Map<string, ChangeRow>();
   imports.forEach(row => {
-    const key = `${row.unit}::${row.periodLabel}`;
-    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel: `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
+    const monthLabel = `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`;
+    const key = `${row.unit}::${row.periodLabel}::${monthLabel}`;
+    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
     value.totalImport += row.totalImport;
     if (row.recordDate > value.recordDate) value.recordDate = row.recordDate;
     groups.set(key, value);
   });
   exports.forEach(row => {
-    const key = `${row.unit}::${row.periodLabel}`;
-    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel: `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
+    const monthLabel = `${row.recordDate.getUTCMonth() + 1}/${row.recordDate.getUTCFullYear()}`;
+    const key = `${row.unit}::${row.periodLabel}::${monthLabel}`;
+    const value = groups.get(key) ?? { unit: row.unit, gardenName: "Tổng hợp đội", periodLabel: row.periodLabel, monthLabel, recordDate: row.recordDate, totalImport: 0, totalExport: 0, changeKg: 0, changePercent: 0, warehouseLoss: 0 };
     value.totalExport += row.totalExport;
     if (row.recordDate > value.recordDate) value.recordDate = row.recordDate;
     groups.set(key, value);
   });
-  const rows = Array.from(groups.values()).map(row => ({ ...row, changeKg: row.totalExport - row.totalImport, changePercent: row.totalImport > 0 ? ((row.totalExport - row.totalImport) / row.totalImport) * 100 : 0, warehouseLoss: row.totalImport - row.totalExport })).sort((a, b) => b.recordDate.getTime() - a.recordDate.getTime() || a.unit.localeCompare(b.unit, "vi", { numeric: true }));
-  return { rows, periods: Array.from(new Set(rows.map(row => row.periodLabel))), months: Array.from(new Set(rows.map(row => row.monthLabel))) };
+  const baseRows = Array.from(groups.values()).map(row => ({ ...row, changeKg: row.totalExport - row.totalImport, changePercent: row.totalImport > 0 ? ((row.totalExport - row.totalImport) / row.totalImport) * 100 : 0, warehouseLoss: row.totalImport - row.totalExport }));
+  const rowMap = new Map(baseRows.map(row => [`${row.unit}::${row.periodLabel}::${row.monthLabel}`, row]));
+  const shiftMonth = (label: string, delta: number) => { const [month, year] = label.split("/").map(Number); const date = new Date(Date.UTC(year, month - 1 + delta, 1)); return `${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`; };
+  const rows = baseRows.map(row => { const previousMonth = rowMap.get(`${row.unit}::${row.periodLabel}::${shiftMonth(row.monthLabel, -1)}`); const sameMonthLastYear = rowMap.get(`${row.unit}::${row.periodLabel}::${shiftMonth(row.monthLabel, -12)}`); return { ...row, previousMonthWarehouseLoss: previousMonth?.warehouseLoss ?? null, sameMonthLastYearWarehouseLoss: sameMonthLastYear?.warehouseLoss ?? null, monthWarehouseLossChange: previousMonth ? row.warehouseLoss - previousMonth.warehouseLoss : null, yearWarehouseLossChange: sameMonthLastYear ? row.warehouseLoss - sameMonthLastYear.warehouseLoss : null }; }).sort((a, b) => b.recordDate.getTime() - a.recordDate.getTime() || compareTeamName(a.unit, b.unit) || a.periodLabel.localeCompare(b.periodLabel, "vi", { numeric: true }));
+  const periods = Array.from(new Set(rows.map(row => row.periodLabel))).sort((a, b) => a.localeCompare(b, "vi", { numeric: true }));
+  const months = Array.from(new Set(rows.map(row => row.monthLabel))).sort((a, b) => { const [am, ay] = a.split("/").map(Number); const [bm, by] = b.split("/").map(Number); return by - ay || bm - am; });
+  return { rows, periods, months };
 }
 
 export async function removePlot(id: number) {
@@ -2860,6 +2867,22 @@ export async function listTechnicalSkillEvaluations() {
     safetyScore: numberValue(row.safetyScore),
     overallScore: evaluationScore(row),
   }));
+}
+
+export async function bulkUpsertTechnicalSkillEvaluations(rows: TechnicalSkillEvaluationInput[], createdBy: number) {
+  const database = await getDb();
+  if (!database) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  const existing = await database.select().from(technicalSkillEvaluations);
+  let imported = 0;
+  for (const input of rows) {
+    const dayKey = input.evaluationDate.toISOString().slice(0, 10);
+    const match = existing.find(row => row.workerId === input.workerId && row.periodLabel === input.periodLabel && row.evaluationDate.toISOString().slice(0, 10) === dayKey);
+    const values = { technicalScore: input.technicalScore.toFixed(2), productivityScore: input.productivityScore.toFixed(2), qualityScore: input.qualityScore.toFixed(2), safetyScore: input.safetyScore.toFixed(2), note: input.note ?? null, createdBy };
+    if (match) await database.update(technicalSkillEvaluations).set(values).where(eq(technicalSkillEvaluations.id, match.id));
+    else await database.insert(technicalSkillEvaluations).values({ workerId: input.workerId, evaluationDate: input.evaluationDate, periodLabel: input.periodLabel, ...values });
+    imported += 1;
+  }
+  return imported;
 }
 
 export async function saveTechnicalSkillEvaluation(

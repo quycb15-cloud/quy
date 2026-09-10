@@ -1,0 +1,1 @@
+ALTER TABLE `daily_care_records` MODIFY COLUMN `category` enum('tapping','reinforcement','care','treatment','fertilization') NOT NULL;

@@ -19,3 +19,17 @@ Chưa thể xác minh thao tác tải xuống trên production sau đăng nhập
 `https://caosucn386-hcbqtzyq.manus.space/` phản hồi HTTP/2 302 và chuyển hướng đến `https://manus.im/app-auth` với `appId=hCbqTzyqxBiRZRnkDQKFSS`, `redirectUri=https://caosucn386-hcbqtzyq.manus.space/manus-oauth/callback`, `responseType=code`. `/robots.txt` và `/manifest.json` cũng nhận cùng cơ chế redirect trước đăng nhập.
 
 Kết luận: domain đang hoạt động và đang được bảo vệ bởi OAuth của visibility Team; chưa có bằng chứng lỗi server hoặc lỗi build. Khi chưa có phiên đăng nhập Team trong trình duyệt chuẩn, trang sẽ không mở dashboard mà hiển thị trang Login của Manus. Cần đăng nhập đúng tài khoản Team rồi mở lại domain để kiểm tra màn hình protected.
+
+## Production ERR_FAILED diagnosis — 2026-09-09
+
+The reported URL `https://caosucn386-hcbqtzyq.manus.space/?source=pwa` was opened in the production browser. The first view showed the application shell/skeleton; after waiting, the page rendered the Cao su CN386 internal login screen with username/password fields and the Manus admin login link. The URL remained unchanged with `?source=pwa`. This indicates that DNS/TLS/HTML delivery and the PWA query string are working in the sandbox browser; the reported ERR_FAILED was not reproduced here.
+
+Next checks: compare the exact URL spelling and trailing punctuation, test the bare domain without `?source=pwa`, inspect production runtime logs, and verify whether the user's device has a stale installed PWA/service-worker cache. Do not republish or change visibility unless the user separately requests it.
+
+## Additional checks — 2026-09-09
+
+The bare production domain without `?source=pwa` also rendered the internal login screen successfully. Production runtime logs contained only normal server startup and expected `[Auth] Missing session cookie` entries; no uncaught server exception or deployment failure was present.
+
+HTTP checks returned 200 for `/`, `/?source=pwa`, `/manifest.webmanifest`, `/sw.js`, and `/cn386-icon.svg`. The correct PWA assets have the expected content types: `application/manifest+json`, `text/javascript`, and `image/svg+xml`. The earlier checks of `/manifest.json` and `/service-worker.js` were not valid asset paths for this project and returned the SPA HTML fallback. Production browser console had no JavaScript errors.
+
+Current diagnosis: the published site and the exact `?source=pwa` URL are reachable from the sandbox, so ERR_FAILED is not a server-wide publish failure. The remaining likely causes are a stale/broken installed PWA or browser cache on the user's device, a different URL spelling/trailing punctuation, or a transient network/proxy failure. No republish or visibility change was made.

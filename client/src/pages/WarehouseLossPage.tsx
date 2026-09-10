@@ -9,8 +9,9 @@ import { Download, Warehouse } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export default function WarehouseLossPage() {
+  const currentMonthLabel = `${new Date().getMonth() + 1}/${new Date().getFullYear()}`;
   const [period, setPeriod] = useState("all");
-  const [month, setMonth] = useState("all");
+  const [month, setMonth] = useState(currentMonthLabel);
   const queryInput = useMemo(() => period === "all" && month === "all" ? undefined : { ...(period === "all" ? {} : { periodLabel: period }), ...(month === "all" ? {} : { monthLabel: month }) }, [period, month]);
   const { data, error, isLoading } = trpc.dataTools.warehouseLoss.useQuery(queryInput);
   const rows = useMemo(() => [...(data?.rows ?? [])].sort((left, right) => comparePeriodLabel(right.periodLabel, left.periodLabel) || compareTeamName(left.unit, right.unit)), [data]);

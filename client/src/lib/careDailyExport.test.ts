@@ -13,4 +13,9 @@ describe("buildCareDailyExportRows", () => {
     expect(row).toMatchObject({ "Nội dung công việc": "Làm cỏ", "% hoàn thành": 80 });
     expect(row).not.toHaveProperty("Vườn");
   });
+  it("xuất Bón phân cùng trường nội dung công việc", () => {
+    const [row] = buildCareDailyExportRows("fertilization", [record]);
+    expect(row).toMatchObject({ "Nội dung công việc": "Làm cỏ", KH: 10, TH: 8 });
+    expect(row).not.toHaveProperty("Vườn");
+  });
 });

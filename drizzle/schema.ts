@@ -214,6 +214,7 @@ export const dailyCareRecords = mysqlTable(
       "reinforcement",
       "care",
       "treatment",
+      "fertilization",
     ]).notNull(),
     activityDate: timestamp("activityDate").notNull(),
     unit: varchar("unit", { length: 120 }).notNull(),

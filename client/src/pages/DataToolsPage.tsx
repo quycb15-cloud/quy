@@ -15,10 +15,10 @@ import { createImportTemplateWorkbook, downloadWorkbookFile } from "@/lib/dataTo
 import { trpc } from "@/lib/trpc";
 import { compareTeamName } from "@shared/teamOrder";
 import { Archive, CheckCircle2, Download, FileSpreadsheet, Loader2, TriangleAlert, Upload, UploadCloud } from "lucide-react";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-type Dataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations" | "productionPlans" | "technicalSkillMonthly";
+type Dataset = "plots" | "plotIndicators" | "workers" | "teamImports" | "teamExports" | "workerPlotAllocations" | "productionPlans" | "technicalSkillMonthly" | "technicalSkillEvaluations";
 type TeamImportProgress = { unit: string; rows: number; status: "ready" | "importing" | "complete" | "error" };
 
 const labels: Record<Dataset, string> = {
@@ -30,6 +30,7 @@ const labels: Record<Dataset, string> = {
   workerPlotAllocations: "Phân chia nhân công vườn cây",
   productionPlans: "Kế hoạch sản lượng tháng/năm",
   technicalSkillMonthly: "Tổng hợp tay nghề và hao dăm",
+  technicalSkillEvaluations: "Đánh giá tay nghề nhân công",
 };
 
 const samples: Record<Dataset, Record<string, string | number>> = {
@@ -41,6 +42,7 @@ const samples: Record<Dataset, Record<string, string | number>> = {
   workerPlotAllocations: { Đội: "Đội 1", "Nhân công": "", "Mã số nhân công": "", "Vườn A/B/C": "A", "Mã lô": "", "Từ hàng": "", "Đến hàng": "", "Diện tích (ha)": "" },
   productionPlans: { "Đơn vị": "Đội 1", "Năm": new Date().getFullYear(), "Tháng": 0, "ĐVT": "ha", "Diện tích": "", "Kế hoạch mủ đông, tạp (kg)": "", "Kế hoạch mủ quy khô (kg)": "", "Ghi chú": "" },
   technicalSkillMonthly: { "Đội": "Đội 1", "Tháng báo cáo": "2026-08", "Quân số": "", "Xuất sắc": "", "Giỏi": "", "Khá": "", "Trung bình": "", "Yếu": "", "Hao dăm số thợ": "", "Ghi chú": "" },
+  technicalSkillEvaluations: { "Đội": "Đội 1", "Tên nhân công": "", "Mã số": "", "Ngày đánh giá": "2026-08-30", "Kỳ đánh giá": "2026-08", "Lỗi kỹ thuật": "", "Kết quả đánh giá": "Xuất sắc", "Năng suất": "", "Hao dăm": "Không", "Nhận xét": "" },
 };
 
 const text = (value: unknown) => String(value ?? "").replace(/\s+/g, " ").trim();
@@ -75,6 +77,7 @@ function detectDataset(headers: string[]): Dataset | null {
   if (keys.includes("ten phien am")) return "workers";
   if (keys.includes("vuon")) return "teamImports";
   if (keys.includes("doi") && (keys.includes("ke hoach mu dong tap kg") || keys.includes("ke hoach mu dong tap"))) return "productionPlans";
+  if (keys.includes("ket qua danh gia") && keys.includes("nang suat") && keys.includes("hao dam")) return "technicalSkillEvaluations";
   if (keys.includes("thang bao cao") && keys.includes("quan so") && keys.includes("hao dam so tho")) return "technicalSkillMonthly";
   if (keys.includes("dot") && keys.includes("doi") && keys.some(key => key.startsWith("mu dong"))) return "teamExports";
   return null;
@@ -83,6 +86,9 @@ function detectDataset(headers: string[]): Dataset | null {
 export default function DataToolsPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const { data: internalProfile } = trpc.internalAccounts.me.useQuery(undefined, { enabled: Boolean(user && !isAdmin) });
+  const canImportData = isAdmin || internalProfile?.groupType === "production";
+  const availableDatasets = useMemo<Dataset[]>(() => isAdmin ? (Object.keys(labels) as Dataset[]) : ["plots", "workers", "workerPlotAllocations", "teamImports", "teamExports", "technicalSkillEvaluations"], [isAdmin]);
   const utils = trpc.useUtils();
   const { data: summary, error } = trpc.dataTools.summary.useQuery();
   const { data: teamImports } = trpc.dataTools.teamImports.useQuery();
@@ -95,6 +101,7 @@ export default function DataToolsPage() {
   const [parsing, setParsing] = useState(false);
   const [teamProgress, setTeamProgress] = useState<TeamImportProgress[]>([]);
   const [result, setResult] = useState<{ label: string; processed: number; valid: number; errors: number } | null>(null);
+  useEffect(() => { if (!availableDatasets.includes(dataset)) setDataset(availableDatasets[0] ?? "plots"); }, [availableDatasets, dataset]);
 
   const completeImport = async (processed: number, label: string) => {
     const valid = rows.length;
@@ -123,6 +130,7 @@ export default function DataToolsPage() {
   const allocationImport = trpc.dataTools.import.workerPlotAllocations.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.workerPlotAllocations), onError: error => failImport(error.message) });
   const productionPlanImport = trpc.dataTools.import.productionPlans.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.productionPlans), onError: error => failImport(error.message) });
   const technicalSkillMonthlyImport = trpc.dataTools.import.technicalSkillMonthly.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.technicalSkillMonthly), onError: error => failImport(error.message) });
+  const technicalSkillEvaluationImport = trpc.dataTools.import.technicalSkillEvaluations.useMutation({ onSuccess: ({ imported }) => completeImport(imported, labels.technicalSkillEvaluations), onError: error => failImport(error.message) });
   const backupCreate = trpc.dataTools.backups.create.useMutation({
     onSuccess: async backup => { await utils.dataTools.backups.list.invalidate(); toast.success(`Đã tạo bản sao lưu ${backup.fileName}`); },
     onError: error => toast.error(error.message),
@@ -131,7 +139,7 @@ export default function DataToolsPage() {
     onSuccess: ({ url, fileName }) => { const link = document.createElement("a"); link.href = url; link.download = fileName; link.rel = "noopener"; document.body.appendChild(link); link.click(); link.remove(); },
     onError: error => toast.error(error.message),
   });
-  const busy = plotImport.isPending || indicatorImport.isPending || workerImport.isPending || teamImport.isPending || teamExport.isPending || allocationImport.isPending || productionPlanImport.isPending || technicalSkillMonthlyImport.isPending;
+  const busy = plotImport.isPending || indicatorImport.isPending || workerImport.isPending || teamImport.isPending || teamExport.isPending || allocationImport.isPending || productionPlanImport.isPending || technicalSkillMonthlyImport.isPending || technicalSkillEvaluationImport.isPending;
 
   const reset = () => {
     setFile(null);
@@ -248,7 +256,8 @@ export default function DataToolsPage() {
     else if (dataset === "teamExports") teamExport.mutate({ rows });
     else if (dataset === "workerPlotAllocations") allocationImport.mutate({ rows });
     else if (dataset === "productionPlans") productionPlanImport.mutate({ rows });
-    else technicalSkillMonthlyImport.mutate({ rows });
+    else if (dataset === "technicalSkillMonthly") technicalSkillMonthlyImport.mutate({ rows });
+    else technicalSkillEvaluationImport.mutate({ rows });
   };
 
   const previewColumns = useMemo(() => Object.keys(rows[0] ?? {}).slice(0, 5), [rows]);
@@ -259,8 +268,8 @@ export default function DataToolsPage() {
     <div className="grid gap-4 md:grid-cols-3"><Metric label="Lô vườn" value={summary?.plots ?? 0} /><Metric label="Nhân công" value={summary?.workers ?? 0} /><Metric label="Nhập / xuất theo đội" value={`${summary?.teamImports ?? 0} / ${summary?.teamExports ?? 0}`} /></div>
     <div className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
       <Panel title="Nạp dữ liệu từ Excel" description="Tải mẫu đúng loại dữ liệu, xem trước và kiểm tra tệp trước khi ghi vào hệ thống.">
-        {isAdmin ? <div className="grid gap-4">
-          <div className="grid gap-2"><Label>Loại dữ liệu</Label><Select value={dataset} onValueChange={value => { setDataset(value as Dataset); reset(); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{(Object.keys(labels) as Dataset[]).map(key => <SelectItem key={key} value={key}>{labels[key]}</SelectItem>)}</SelectContent></Select></div>
+        {canImportData ? <div className="grid gap-4">
+          <div className="grid gap-2"><Label>Loại dữ liệu</Label><Select value={dataset} onValueChange={value => { setDataset(value as Dataset); reset(); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{availableDatasets.map(key => <SelectItem key={key} value={key}>{labels[key]}</SelectItem>)}</SelectContent></Select></div>
           <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={downloadTemplate}><FileSpreadsheet className="mr-2 h-4 w-4" />Tải mẫu Excel</Button><label className="inline-flex cursor-pointer items-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"><UploadCloud className="mr-2 h-4 w-4" />Chọn tệp Excel<input className="sr-only" type="file" accept=".xlsx,.xls" onChange={parseFile} /></label></div>
           {parsing ? <div className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 text-sm font-semibold text-sky-900"><Loader2 className="h-4 w-4 animate-spin" />Đang đọc và kiểm tra cấu trúc tệp Excel…</div> : null}
           {file ? <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
@@ -273,7 +282,7 @@ export default function DataToolsPage() {
             <div className="mt-3 flex justify-end"><Button onClick={commit} disabled={busy} className="bg-emerald-700 hover:bg-emerald-800"><Upload className="mr-2 h-4 w-4" />{busy ? "Đang nhập…" : `Nhập ${rows.length} dòng`}</Button></div>
           </div> : <div className={issues.length ? "rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" : "rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500"}>{issues.length ? `Không thể đọc tệp: ${issues[0]}` : "Chưa chọn tệp. Hệ thống tự nhận diện loại dữ liệu khi bạn chọn file Excel."}</div>}
           {result ? <div className="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" /><div><p className="font-bold">Đã hoàn tất import {result.label}</p><p className="mt-1">Đã xử lý {result.processed} dòng; {result.valid} dòng hợp lệ và {result.errors} dòng lỗi đã được báo trước.</p></div></div> : null}
-        </div> : <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Chỉ quản trị viên có quyền import dữ liệu. Bạn vẫn có thể xuất dữ liệu hiện có.</div>}
+          </div> : <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Chỉ quản trị viên hoặc tài khoản cấp Đội có quyền import dữ liệu trong phạm vi được cấp. Bạn vẫn có thể xuất dữ liệu hiện có.</div>}
       </Panel>
       <Panel title="Số liệu đã nhập" description="Tổng khối lượng theo dữ liệu đội được đối chiếu từ các tệp Excel."><div className="space-y-3"><Stat label="Tổng cộng nhập" value={`${formatQuantity(summary?.totalImport ?? 0)} kg`} tone="emerald" /><Stat label="Tổng cộng xuất" value={`${formatQuantity(summary?.totalExport ?? 0)} kg`} tone="sky" /><div className="rounded-xl border border-slate-100 p-4 text-sm text-slate-600">Khi import lại, hệ thống nhận diện khóa dữ liệu và cập nhật số liệu hiện có để tránh trùng lặp.</div></div></Panel>
     </div>
@@ -286,6 +295,13 @@ function TeamProgressPanel({ items }: { items: TeamImportProgress[] }) {
 }
 
 function normalize(type: Dataset, row: Record<string, unknown>, XLSX: any) {
+  if (type === "technicalSkillEvaluations") {
+    const unit = text(row["Đội"]); const workerName = text(row["Tên nhân công"]) || text(row["Nhân công"]); const employeeCode = text(row["Mã số"]); const periodLabel = text(row["Kỳ đánh giá"]); const evaluationDate = parseDate(row["Ngày đánh giá"], XLSX); const issue = text(row["Lỗi kỹ thuật"]); const result = text(row["Kết quả đánh giá"]); const productivityScore = number(row["Năng suất"]); const scrapingLoss = text(row["Hao dăm"]);
+    const qualityScore = ({ "Xuất sắc": 100, "Giỏi": 85, "Khá": 70, "Trung bình": 55, "Yếu": 35 } as Record<string, number>)[result];
+    if (!unit || !workerName || !periodLabel || !Number.isFinite(qualityScore) || !["Có", "Không"].includes(scrapingLoss)) throw new Error("cần Đội, Tên nhân công, Kỳ đánh giá, Kết quả đánh giá hợp lệ và Hao dăm Có/Không");
+    if (!Number.isFinite(productivityScore) || productivityScore < 0 || productivityScore > 100) throw new Error("Năng suất phải nằm trong khoảng 0–100");
+    return { unit, workerName, employeeCode: employeeCode || null, evaluationDate, periodLabel, technicalScore: issue ? 0 : 100, productivityScore, qualityScore, safetyScore: scrapingLoss === "Có" ? 0 : 100, note: [issue ? `Lỗi kỹ thuật: ${issue}` : "", `Kết quả đánh giá: ${result}`, `Hao dăm: ${scrapingLoss}`, text(row["Nhận xét"]) || text(row["Ghi chú"])].filter(Boolean).join(" · ") || null };
+  }
   if (type === "plots") {
     const unit = text(row["Đơn vị"]); const lot = text(row["Tên lô"]); const year = number(row["Năm trồng"]); const areaHa = number(row["Diện tích (ha)"]);
     const rawGardenType = text(row["Loại vườn"]).toUpperCase(); const gardenType = rawGardenType ? (rawGardenType === "A" || rawGardenType === "B" || rawGardenType === "C" ? rawGardenType : null) : null;

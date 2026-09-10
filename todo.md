@@ -362,3 +362,17 @@
 - [x] Bổ sung/kiểm tra bộ lọc Tháng và Cả năm cho báo cáo tiến độ nhập–xuất khi Đợt = All
 - [x] Sửa chênh lệch Hao dăm theo công thức: ((Số thợ tháng hiện tại / Số thợ tháng trước) × 100) − 100
 - [x] Đồng bộ dữ liệu Import tay nghề với tổng hợp, xếp hạng nhanh theo Đội và form nhập đánh giá
+
+- [x] Chẩn đoán ERR_FAILED trên URL production có ?source=pwa mà không publish lại hoặc đổi visibility
+- [x] Xác minh domain gốc, query source=pwa, manifest.webmanifest, sw.js và runtime logs production
+
+## Nâng cấp kỳ xem, phân quyền và vận hành hằng ngày
+- [x] Đặt mặc định kỳ xem là năm hiện tại, tháng hiện tại, Đợt All trên Tổng quan và các bộ lọc liên quan
+- [x] Chỉ hiện phần nhập đánh giá tay nghề ở cấp Đội; cập nhật mẫu đánh giá và hỗ trợ import Excel
+- [x] Đồng bộ Chi tiết so sánh nhân công theo mẫu đánh giá mới
+- [x] Bỏ Tổng hợp tay nghề và Hao dăm khỏi Báo cáo tiến độ
+- [x] Ẩn Đội ngũ quản lý khỏi Quản lý và nhân công đối với tài khoản cấp Đội
+- [x] Sắp xếp nhật ký nhập/xuất theo Đội 1 đến Đội 6 trong cùng kỳ/ngày/tháng
+- [x] Bổ sung đủ các tháng có dữ liệu và so sánh cùng kỳ trong báo cáo tăng/giảm
+- [x] Bổ sung Rập thiết kế, trang bị; Phun, bôi thuốc; Bón phân và giản lược theo dõi cạo mủ theo Vườn A/B/C
+- [x] Cho phép cấp Đội import Excel Vườn/Lô, nhân công, phân chia, nhập mủ, xuất mủ theo phạm vi Đội và quy tắc chống ghi ngoài

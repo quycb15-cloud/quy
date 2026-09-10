@@ -3,7 +3,7 @@ import type { TrpcContext } from "./_core/context";
 
 const dbMocks = vi.hoisted(() => ({
   getExcelDataSummary: vi.fn(), listTeamImports: vi.fn(), listTeamExports: vi.fn(), getWarehouseLossByTeam: vi.fn(), getInternalAccountByUserId: vi.fn(),
-  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpsertLatexProductionPlans: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), logActivity: vi.fn(),
+  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpsertLatexProductionPlans: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), listWorkers: vi.fn(), logActivity: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMocks);
@@ -14,7 +14,7 @@ function context(role: "admin" | "user"): TrpcContext {
 }
 
 describe("dataToolsRouter", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); dbMocks.listWorkers.mockResolvedValue([{ id: 1, employeeCode: "NC-002", name: "YIM RA", unit: "Đội 2" }]); });
   it("chỉ trả về dữ liệu thuộc phạm vi đội của tài khoản", async () => {
     dbMocks.getInternalAccountByUserId.mockResolvedValue({ isActive: 1, scopeUnits: JSON.stringify(["Đội 1"]), permissionProfile: JSON.stringify(["reports:read"]) });
     dbMocks.listTeamImports.mockResolvedValue([{ unit: "Đội 1", totalImport: 100 }, { unit: "Đội 2", totalImport: 200 }]);

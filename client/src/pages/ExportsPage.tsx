@@ -31,7 +31,7 @@ export default function ExportsPage() {
   const { data: balance } = trpc.rubber.exports.teamBalance.useQuery({ unit, periodLabel }, { enabled: Boolean(unit) });
   const projectedLoss = calculateProjectedWarehouseLoss(balance?.totalImport ?? 0, balance?.totalExport ?? 0, totalExport);
   const journalPeriods = useMemo(() => Array.from(new Set((records ?? []).map(row => row.periodLabel))).sort(comparePeriodLabel), [records]);
-  const filteredRecords = useMemo(() => filterTeamExportJournal(records ?? [], { unit, periodLabel: journalPeriod, fromDate, toDate }), [records, unit, journalPeriod, fromDate, toDate]);
+  const filteredRecords = useMemo(() => [...filterTeamExportJournal(records ?? [], { unit, periodLabel: journalPeriod, fromDate, toDate })].sort((left, right) => new Date(right.recordDate).getTime() - new Date(left.recordDate).getTime() || comparePeriodLabel(left.periodLabel, right.periodLabel) || compareTeamName(left.unit, right.unit)), [records, unit, journalPeriod, fromDate, toDate]);
   const create = trpc.rubber.exports.teamCreate.useMutation({ onSuccess: async () => { await Promise.all([utils.rubber.exports.teamList.invalidate(), utils.rubber.exports.teamBalance.invalidate(), utils.rubber.dashboard.invalidate(), utils.rubber.periods.invalidate()]); toast.success("Đã lưu xuất mủ theo Đội"); setFrozenContaminatedLatex(""); setLatexThread(""); setNote(""); }, onError: e => toast.error(e.message) });
   const submit = (event: FormEvent) => { event.preventDefault(); create.mutate({ unit, periodLabel, recordDate: new Date(`${recordDate}T12:00:00`), frozenContaminatedLatex: Number(frozenContaminatedLatex), latexThread: Number(latexThread), note }); };
   const exportJournal = async () => {

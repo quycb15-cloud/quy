@@ -24,10 +24,11 @@ function exactNumber(value: number) { return new Intl.NumberFormat("vi-VN", { ma
 export default function Home() {
   const [, navigate] = useLocation();
   const { data: periods = [] } = trpc.rubber.periods.useQuery();
-  const [periodLabel, setPeriodLabel] = useState<string>(currentPeriod());
-  const [productionYear, setProductionYear] = useState<number | undefined>(() => new Date().getFullYear());
-  const [productionMonth, setProductionMonth] = useState<number | undefined>(undefined);
-  const [productionPeriod, setProductionPeriod] = useState<string>(currentPeriod());
+  const currentDate = new Date();
+  const [periodLabel, setPeriodLabel] = useState<string>("all");
+  const [productionYear, setProductionYear] = useState<number | undefined>(() => currentDate.getFullYear());
+  const [productionMonth, setProductionMonth] = useState<number | undefined>(() => currentDate.getMonth() + 1);
+  const [productionPeriod, setProductionPeriod] = useState<string>("all");
   const [productionUnit, setProductionUnit] = useState("all");
   const [workforceUnit, setWorkforceUnit] = useState("all");
   const [visibleColumns, setVisibleColumns] = useState({ area: true, plots: true, workforce: true, production: true });

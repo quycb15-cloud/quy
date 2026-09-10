@@ -24,6 +24,7 @@ import {
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { INSTALL_MENU_LABEL, INSTALL_PAGE_PATH } from "@/lib/installSupport";
+import { trpc } from "@/lib/trpc";
 import {
   BarChart3,
   ClipboardCheck,
@@ -42,13 +43,17 @@ import {
   ShieldCheck,
   ScrollText,
   TableProperties,
+  type LucideIcon,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { InstallAppBanner } from "./InstallAppBanner";
 
-const menuGroups = [
+type MenuItem = { icon: LucideIcon; label: string; path: string; adminOnly?: boolean; productionOnly?: boolean };
+type MenuGroup = { label: string; items: MenuItem[] };
+
+const menuGroups: MenuGroup[] = [
   {
     label: "Điều hành",
     items: [
@@ -83,6 +88,7 @@ const menuGroups = [
         icon: ClipboardCheck,
         label: "Đánh giá tay nghề",
         path: "/technical-skill",
+        productionOnly: true,
       },
     ],
   },
@@ -180,6 +186,7 @@ function DashboardLayoutContent({
   setSidebarWidth: (width: number) => void;
 }) {
   const { user, logout } = useAuth();
+  const { data: internalProfile } = trpc.internalAccounts.me.useQuery(undefined, { enabled: Boolean(user && user.role !== "admin") });
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -190,7 +197,7 @@ function DashboardLayoutContent({
     .map(group => ({
       ...group,
       items: group.items.filter(
-        item => !item.adminOnly || user?.role === "admin"
+        item => (!item.adminOnly || user?.role === "admin") && (!item.productionOnly || user?.role === "admin" || internalProfile?.groupType === "production")
       ),
     }))
     .filter(group => group.items.length);

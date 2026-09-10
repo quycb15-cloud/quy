@@ -4,7 +4,7 @@ import * as db from "../db";
 import { filterByScope, requirePermission } from "../access";
 import { protectedProcedure, router } from "../_core/trpc";
 
-const categories = z.enum(["tapping", "reinforcement", "care", "treatment"]);
+const categories = z.enum(["tapping", "reinforcement", "care", "treatment", "fertilization"]);
 const record = z.object({ category: categories, activityDate: z.coerce.date(), unit: z.string().trim().min(1).max(120), gardenName: z.string().trim().min(1).max(160), plotId: z.coerce.number().int().positive().optional().nullable(), areaHa: z.coerce.number().min(0).optional().nullable(), tappingSection: z.coerce.number().int().min(0).optional().nullable(), planQuantity: z.coerce.number().min(0), actualQuantity: z.coerce.number().min(0), cumulativeQuantity: z.coerce.number().min(0).optional(), metricUnit: z.string().trim().min(1).max(24), completedGardens: z.coerce.number().int().min(0).optional().nullable(), pendingGardens: z.coerce.number().int().min(0).optional().nullable(), partialGardens: z.coerce.number().int().min(0).optional().nullable(), nextGarden: z.string().max(160).optional().nullable(), workContent: z.string().max(220).optional().nullable(), note: z.string().max(2000).optional().nullable() });
 
 export const operationsRouter = router({
