@@ -232,6 +232,13 @@
       "when": 1789010053598,
       "tag": "0032_fearless_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1789093043696,
+      "tag": "0033_chemical_zombie",
+      "breakpoints": true
     }
   ]
 }

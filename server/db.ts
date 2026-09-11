@@ -1119,6 +1119,8 @@ export type DailyCarePayload = {
   pendingGardens?: number | null;
   partialGardens?: number | null;
   nextGarden?: string | null;
+  nextGardenPlanQuantity?: number | null;
+  nextGardenActualQuantity?: number | null;
   workContent?: string | null;
   note?: string | null;
 };
@@ -1136,7 +1138,7 @@ export async function saveDailyCareRecord(
   );
   const progressPercent =
     input.planQuantity > 0
-      ? asQuantity((input.actualQuantity / input.planQuantity) * 100)
+      ? asQuantity(((input.cumulativeQuantity ?? input.actualQuantity) / input.planQuantity) * 100)
       : "0.00";
   const values = {
     ...input,
@@ -1151,6 +1153,8 @@ export async function saveDailyCareRecord(
     pendingGardens: input.pendingGardens ?? null,
     partialGardens: input.partialGardens ?? null,
     nextGarden: input.nextGarden?.trim() || null,
+    nextGardenPlanQuantity: input.nextGardenPlanQuantity == null ? null : asQuantity(input.nextGardenPlanQuantity),
+    nextGardenActualQuantity: input.nextGardenActualQuantity == null ? null : asQuantity(input.nextGardenActualQuantity),
     workContent: input.workContent?.trim() || null,
     note: input.note?.trim() || null,
     createdBy: userId,
@@ -1183,7 +1187,11 @@ export async function listDailyCareRecords(
     actualQuantity: numberValue(row.actualQuantity),
     cumulativeQuantity: numberValue(row.cumulativeQuantity),
     progressPercent:
-      row.progressPercent == null ? 0 : numberValue(row.progressPercent),
+      numberValue(row.planQuantity) > 0
+        ? (numberValue(row.cumulativeQuantity) / numberValue(row.planQuantity)) * 100
+        : 0,
+    nextGardenPlanQuantity: row.nextGardenPlanQuantity == null ? null : numberValue(row.nextGardenPlanQuantity),
+    nextGardenActualQuantity: row.nextGardenActualQuantity == null ? null : numberValue(row.nextGardenActualQuantity),
   }));
 }
 

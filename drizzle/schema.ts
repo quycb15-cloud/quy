@@ -240,6 +240,8 @@ export const dailyCareRecords = mysqlTable(
     partialGardens: int("partialGardens"),
     progressPercent: decimal("progressPercent", { precision: 8, scale: 2 }),
     nextGarden: varchar("nextGarden", { length: 160 }),
+    nextGardenPlanQuantity: decimal("nextGardenPlanQuantity", { precision: 14, scale: 2 }),
+    nextGardenActualQuantity: decimal("nextGardenActualQuantity", { precision: 14, scale: 2 }),
     workContent: varchar("workContent", { length: 220 }),
     note: text("note"),
     createdBy: int("createdBy").notNull(),

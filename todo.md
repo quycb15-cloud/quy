@@ -381,4 +381,13 @@
 - [x] Cộng đủ kế hoạch mủ đông và mủ dây vào thẻ Kế hoạch tháng theo đúng nguồn kế hoạch
 - [x] Ngăn biểu mẫu theo dõi cạo mủ tự nhảy/tự tính ngoài các trường được yêu cầu; căn chỉnh theo mẫu ảnh
 - [x] Bổ sung test hồi quy cho kế hoạch mủ dây và biểu mẫu theo dõi cạo mủ
-- [ ] Chạy check/test/build, tạo checkpoint và publish Public bản sửa
+- [x] Chạy check/test/build, tạo checkpoint và publish Public bản sửa
+
+## Khai thác–Chăm sóc: kiểm tra trước publish
+- [x] Tính % Lũy kế/Kế hoạch cho Chăm sóc, Phun/bôi thuốc, Bón phân và Rập thiết kế–trang bị
+- [x] Thiết kế lại bố cục Khai thác–Chăm sóc theo nhóm thông tin rõ ràng
+- [x] Tách Cạo tiếp vườn thành Cạo tiếp vườn, KH và TH; không tự nhảy số
+- [x] Tổng hợp cạo mủ theo Đội và Vườn từ đầu tháng đến ngày xem
+- [x] Cho phép xem và sửa dữ liệu khai thác/chăm sóc theo ngày
+- [x] Bảo đảm độ chính xác nguồn, không làm tròn, cộng trùng hoặc ghi trùng
+- [x] Chạy kiểm thử đầy đủ, tạo checkpoint và chỉ xin xác nhận publish sau khi đạt
