@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { monthStartDate, monthYearLabel } from "@/lib/plotProductionPeriod";
+import { changeProductionUnit, filterProductionPlots } from "@/lib/plotProductionForm";
 import { aggregatePlotProduction, aggregatePlotProductionByTeam, comparePlotProduction, plotProductionExcelRows } from "@/lib/plotProduction";
 import { comparePlotsByTeamYearAndName } from "@/lib/plotOrder";
 import { formatAreaHa, formatQuantity } from "@/lib/rubber";
@@ -56,7 +57,7 @@ export default function PlotProductionPage() {
   const [unit, setUnit] = useState("all");
   const [year, setYear] = useState("all");
   const [month, setMonth] = useState("all");
-  const [form, setForm] = useState(() => ({ plotId: "", year: String(new Date().getFullYear()), month: String(new Date().getMonth() + 1), frozenContaminatedLatex: "", dryRubber: "", note: "" }));
+  const [form, setForm] = useState(() => ({ plotId: "", unit: "", year: String(new Date().getFullYear()), month: String(new Date().getMonth() + 1), frozenContaminatedLatex: "", dryRubber: "", note: "" }));
   const [quickUnit, setQuickUnit] = useState("");
   const [quickYear, setQuickYear] = useState(() => String(new Date().getFullYear()));
   const [quickMonth, setQuickMonth] = useState(() => String(new Date().getMonth() + 1));
@@ -72,7 +73,8 @@ export default function PlotProductionPage() {
   const totals = useMemo(() => reportRows.reduce((sum, row) => ({ frozen: sum.frozen + row.frozenContaminatedLatex, dry: sum.dry + row.dryRubber }), { frozen: 0, dry: 0 }), [reportRows]);
   const teamProductionRows = useMemo(() => aggregatePlotProductionByTeam(reportRows), [reportRows]);
   const productionComparison = useMemo(() => comparePlotProduction(entries ?? [], { year: year === "all" ? undefined : Number(year), month: month === "all" ? undefined : Number(month), unit: unit === "all" ? undefined : unit }), [entries, year, month, unit]);
-  const selectedPlot = useMemo(() => (plots ?? []).find(plot => String(plot.id) === form.plotId), [plots, form.plotId]);
+  const formPlots = useMemo(() => filterProductionPlots(plots ?? [], form.unit).sort(comparePlotsByTeamYearAndName), [plots, form.unit]);
+  const selectedPlot = useMemo(() => formPlots.find(plot => String(plot.id) === form.plotId), [formPlots, form.plotId]);
   const quickPlots = useMemo(() => [...(plots ?? []).filter(plot => plot.unit === quickUnit)].sort(comparePlotsByTeamYearAndName), [plots, quickUnit]);
   const lockedPeriodKeys = useMemo(() => new Set(periodLocks.map(lock => periodKey(lock.year, lock.month))), [periodLocks]);
   const manualPeriodLocked = lockedPeriodKeys.has(periodKey(form.year, form.month));
@@ -179,7 +181,8 @@ export default function PlotProductionPage() {
       <div className="space-y-5">
         <Panel title="Nhập sản lượng theo lô" description="Chọn đúng tên Lô và lập số liệu theo Tháng/Năm; mỗi Lô chỉ có một bản ghi cho một tháng.">
           <form onSubmit={submit} className="grid gap-3">
-            <Field label="Lô"><select value={form.plotId} onChange={event => setForm(current => ({ ...current, plotId: event.target.value }))} required disabled={manualPeriodLocked} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"><option value="">Chọn Lô</option>{[...(plots ?? [])].sort(comparePlotsByTeamYearAndName).map(plot => <option key={plot.id} value={plot.id}>{plot.unit} · {plot.name} ({plot.code})</option>)}</select></Field>
+            <Field label="Đội"><select value={form.unit} onChange={event => setForm(current => changeProductionUnit(current, event.target.value))} disabled={manualPeriodLocked} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"><option value="">Tất cả Đội</option>{units.map(item => <option key={item} value={item}>{item}</option>)}</select></Field>
+            <Field label="Lô"><select value={form.plotId} onChange={event => setForm(current => ({ ...current, plotId: event.target.value }))} required disabled={manualPeriodLocked} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"><option value="">{form.unit ? "Chọn Lô trong Đội" : "Chọn Lô"}</option>{formPlots.map(plot => <option key={plot.id} value={plot.id}>{plot.unit} · {plot.name} ({plot.code})</option>)}</select></Field>
             {selectedPlot ? <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">Năm trồng: <strong>{selectedPlot.plantedYear ?? "—"}</strong> · Diện tích: <strong>{formatAreaHa(selectedPlot.areaHa)} ha</strong></p> : null}
             <div className="grid gap-3 sm:grid-cols-2"><Field label="Tháng"><select value={form.month} onChange={event => setForm(current => ({ ...current, month: event.target.value }))} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">{Array.from({ length: 12 }, (_, index) => index + 1).map(item => <option key={item} value={item}>Tháng {item}</option>)}</select></Field><Field label="Năm"><select value={form.year} onChange={event => setForm(current => ({ ...current, year: event.target.value }))} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">{years.map(item => <option key={item} value={item}>Năm {item}</option>)}</select></Field></div>
             <PeriodLockNotice year={form.year} month={form.month} locked={manualPeriodLocked} isAdmin={isAdmin} pending={lockPeriod.isPending || unlockPeriod.isPending} onLock={() => lockPeriod.mutate({ year: Number(form.year), month: Number(form.month) })} onUnlock={() => unlockPeriod.mutate({ year: Number(form.year), month: Number(form.month) })} />

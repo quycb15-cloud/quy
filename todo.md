@@ -46,7 +46,7 @@
 - [x] Kiểm tra log runtime production và phản hồi HTTP của domain team
 - [x] Sửa lỗi production, chạy lại check/build và xác minh trang đăng nhập tải được
 - [x] Tạo checkpoint bản sửa và deploy lại visibility team
-- [ ] Kiểm tra sau deploy bằng domain Manus và cập nhật hướng dẫn truy cập
+- [x] Kiểm tra sau deploy bằng domain Manus và cập nhật hướng dẫn truy cập
 
 ## Android PWA install
 
@@ -73,7 +73,7 @@
 - [x] Bổ sung kiểm tra server-side cho trùng mã, trùng nhân công và phạm vi Đội trước khi ghi
 - [x] Bổ sung test tRPC backend cho import mới, import lại/update, trùng mã và validation
 - [ ] Kiểm tra trực tiếp WorkforcePage sau khi thêm dialog import Excel
-- [ ] Kiểm tra production PWA assets sau deploy trả đúng loại tài nguyên
+- [x] Kiểm tra production PWA assets sau deploy trả đúng loại tài nguyên
 
 ## Login incident
 
@@ -101,8 +101,8 @@
 
 ## Website access incident
 
-- [ ] Kiểm tra URL domain và URL deployment hiện tại bằng HTTP
-- [ ] Kiểm tra runtime logs và trạng thái OAuth redirect
+- [x] Kiểm tra URL domain và URL deployment hiện tại bằng HTTP
+- [x] Kiểm tra runtime logs và trạng thái OAuth redirect
 - [ ] Xác định, sửa và kiểm thử nguyên nhân không truy cập được website
 - [ ] Lưu checkpoint bản sửa nếu có thay đổi mã nguồn
 - [ ] Xác minh người dùng có thể mở website trước khi yêu cầu publish lại
@@ -138,14 +138,14 @@
 - [ ] Mở trang Tổng quan và xác minh thẻ Tổng diện tích hiển thị 1.582,71 ha
 - [x] Bổ sung test tích hợp getDashboard totalArea cho dữ liệu 1582.715
 
-- [ ] Bổ sung test dashboard dùng tập bản ghi Lô mô phỏng tổng 1582.715 và assert kết quả totalArea 1582.71 trước checkpoint kế tiếp
+- [x] Bổ sung test dashboard dùng tập bản ghi Lô mô phỏng tổng 1582.715 và assert kết quả totalArea 1582.71 trước checkpoint kế tiếp
 
 ## Lọc Lô theo Đội khi nhập sản lượng
 
-- [ ] Thêm combobox Đội vào màn hình Nhập sản lượng theo Lô
-- [ ] Lọc danh sách Lô theo Đội đã chọn, giữ quyền/phạm vi hiện có
-- [ ] Reset Lô đã chọn khi đổi Đội và hiển thị trạng thái chưa chọn
-- [ ] Bổ sung test lọc và kiểm tra giao diện responsive
+- [x] Thêm combobox Đội vào màn hình Nhập sản lượng theo Lô
+- [x] Lọc danh sách Lô theo Đội đã chọn, giữ quyền/phạm vi hiện có
+- [x] Reset Lô đã chọn khi đổi Đội và hiển thị trạng thái chưa chọn
+- [x] Bổ sung test lọc và kiểm tra giao diện responsive
 
 ## Sửa hiển thị phân bổ Vườn A/B
 
@@ -391,3 +391,12 @@
 - [x] Cho phép xem và sửa dữ liệu khai thác/chăm sóc theo ngày
 - [x] Bảo đảm độ chính xác nguồn, không làm tròn, cộng trùng hoặc ghi trùng
 - [x] Chạy kiểm thử đầy đủ, tạo checkpoint và chỉ xin xác nhận publish sau khi đạt
+
+## Bằng chứng truy cập Public còn thiếu
+- [ ] Nếu lỗi truy cập website tái hiện được, xác định nguyên nhân gốc cụ thể và triển khai bản sửa hoặc ghi rõ lý do kỹ thuật không cần sửa mã
+- [ ] Bổ sung kiểm thử hoặc bước xác minh lặp lại cho lỗi truy cập website sau khi có nguyên nhân gốc rõ ràng
+- [ ] Xác nhận thực tế từ phía người dùng hoặc bằng môi trường tương đương rằng website mở được sau khi xử lý
+
+## Bổ sung bằng chứng bộ lọc nhập sản lượng theo Lô
+- [x] Thêm test UI/helper cho chọn Đội chỉ hiện Lô thuộc Đội đó và đổi Đội thì reset Lô đã chọn
+- [x] Kiểm tra trực quan PlotProductionPage ở kích thước mobile/desktop để xác nhận bộ lọc mới responsive

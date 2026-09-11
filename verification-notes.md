@@ -33,3 +33,6 @@ The bare production domain without `?source=pwa` also rendered the internal logi
 HTTP checks returned 200 for `/`, `/?source=pwa`, `/manifest.webmanifest`, `/sw.js`, and `/cn386-icon.svg`. The correct PWA assets have the expected content types: `application/manifest+json`, `text/javascript`, and `image/svg+xml`. The earlier checks of `/manifest.json` and `/service-worker.js` were not valid asset paths for this project and returned the SPA HTML fallback. Production browser console had no JavaScript errors.
 
 Current diagnosis: the published site and the exact `?source=pwa` URL are reachable from the sandbox, so ERR_FAILED is not a server-wide publish failure. The remaining likely causes are a stale/broken installed PWA or browser cache on the user's device, a different URL spelling/trailing punctuation, or a transient network/proxy failure. No republish or visibility change was made.
+
+## Production asset audit — 2026-09-11
+Public domain root and `/?source=pwa` return HTTP 200. `/manifest.webmanifest` returns `application/manifest+json` and `/sw.js` returns `text/javascript`. The manifest references `/manus-storage/cn386-pwa-192_f8e3c026.png` and `/manus-storage/cn386-pwa-512_75d9b5e3.png`; direct `/icon-192.png` and `/icon-512.png` return SPA HTML, but those paths are not referenced by the manifest. No PWA code change is required for this finding.
