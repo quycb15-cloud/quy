@@ -376,3 +376,9 @@
 - [x] Bổ sung đủ các tháng có dữ liệu và so sánh cùng kỳ trong báo cáo tăng/giảm
 - [x] Bổ sung Rập thiết kế, trang bị; Phun, bôi thuốc; Bón phân và giản lược theo dõi cạo mủ theo Vườn A/B/C
 - [x] Cho phép cấp Đội import Excel Vườn/Lô, nhân công, phân chia, nhập mủ, xuất mủ theo phạm vi Đội và quy tắc chống ghi ngoài
+
+## Sửa lỗi sau publish Public
+- [x] Cộng đủ kế hoạch mủ đông và mủ dây vào thẻ Kế hoạch tháng theo đúng nguồn kế hoạch
+- [x] Ngăn biểu mẫu theo dõi cạo mủ tự nhảy/tự tính ngoài các trường được yêu cầu; căn chỉnh theo mẫu ảnh
+- [x] Bổ sung test hồi quy cho kế hoạch mủ dây và biểu mẫu theo dõi cạo mủ
+- [ ] Chạy check/test/build, tạo checkpoint và publish Public bản sửa
