@@ -21,7 +21,7 @@
 - [x] Migrate đầy đủ toàn bộ schema Cao su CN386 vào DATABASE_URL WebDev mới, không chỉ technical_skill_evaluations và plot_garden_allocations
 - [x] Xác minh các bảng cốt lõi tồn tại trong database WebDev bằng truy vấn kiểm tra
 - [x] Bổ sung test cho technicalSkillSummary và saveTechnicalSkillEvaluation, gồm lọc kỳ, tổng hợp điểm và phạm vi quyền
-- [ ] Kiểm tra end-to-end các route sau đăng nhập: dashboard, báo cáo, nhân công và đánh giá tay nghề
+- [x] Kiểm tra end-to-end các route sau đăng nhập: dashboard, báo cáo, nhân công và đánh giá tay nghề
 - [ ] Xác minh trạng thái loading, error, empty và thao tác ghi đánh giá trên WebDev mới
 - [x] Xóa/đối chiếu cảnh báo runtime cũ trong log sau khi server restart
 
@@ -72,7 +72,7 @@
 - [x] Xác minh khóa unique của bảng workers và định nghĩa rõ khóa nhận diện khi import lại
 - [x] Bổ sung kiểm tra server-side cho trùng mã, trùng nhân công và phạm vi Đội trước khi ghi
 - [x] Bổ sung test tRPC backend cho import mới, import lại/update, trùng mã và validation
-- [ ] Kiểm tra trực tiếp WorkforcePage sau khi thêm dialog import Excel
+- [x] Kiểm tra trực tiếp WorkforcePage sau khi thêm dialog import Excel
 - [x] Kiểm tra production PWA assets sau deploy trả đúng loại tài nguyên
 
 ## Login incident
@@ -400,3 +400,7 @@
 ## Bổ sung bằng chứng bộ lọc nhập sản lượng theo Lô
 - [x] Thêm test UI/helper cho chọn Đội chỉ hiện Lô thuộc Đội đó và đổi Đội thì reset Lô đã chọn
 - [x] Kiểm tra trực quan PlotProductionPage ở kích thước mobile/desktop để xác nhận bộ lọc mới responsive
+
+## Bổ sung bằng chứng route và dialog Import
+- [ ] Mở từng route dashboard, reports, workforce và technical-skill trong phiên đã đăng nhập; ghi nhận nội dung tải thành công và kiểm tra tối thiểu một tương tác chính trên mỗi trang
+- [ ] Kiểm tra trực tiếp WorkforcePage: mở nút Import nhân công Excel, xác nhận dialog hiển thị đúng, có trạng thái empty/error cơ bản và không vỡ giao diện
