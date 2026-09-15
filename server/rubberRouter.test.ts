@@ -193,6 +193,16 @@ describe("rubberRouter authorization and business procedures", () => {
     expect(dbMocks.logActivity).toHaveBeenCalledWith(1, expect.objectContaining({ eventType: "plot.garden_portion.allocate", metadata: expect.objectContaining({ gardenType: "B" }) }));
   });
 
+  it("lưu riêng phân bổ Vườn A rồi Vườn B cho cùng một Lô", async () => {
+    dbMocks.getPlotById.mockResolvedValue({ id: 144, code: "LO-7", name: "7", unit: "Đội 4" });
+    dbMocks.allocatePlotGardenPortion.mockResolvedValue({ remainingAreaHa: 0, remainingTappingTrees: 0, allocatedAreaHa: 0, allocatedTappingTrees: 0 });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    await caller.rubber.plots.allocateGardenPortion({ plotId: 144, gardenType: "A", areaHa: 4.56, tappingTrees: 2260 });
+    await caller.rubber.plots.allocateGardenPortion({ plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 });
+    expect(dbMocks.allocatePlotGardenPortion).toHaveBeenNthCalledWith(1, { plotId: 144, gardenType: "A", areaHa: 4.56, tappingTrees: 2260 }, 1);
+    expect(dbMocks.allocatePlotGardenPortion).toHaveBeenNthCalledWith(2, { plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 }, 1);
+  });
+
   it("admin có thể sửa và xóa từng phần phân bổ, đồng thời ghi lịch sử", async () => {
     dbMocks.updatePlotGardenAllocation.mockResolvedValue({ success: true, id: 21, plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 });
     dbMocks.removePlotGardenAllocation.mockResolvedValue({ success: true, id: 21, plotId: 144, gardenType: "B", areaHa: 1.81, tappingTrees: 931 });
