@@ -36,7 +36,7 @@ const labels: Record<Dataset, string> = {
 const samples: Record<Dataset, Record<string, string | number>> = {
   plots: { "Đơn vị": "", "Loại vườn": "A", "Tên lô": "", "Năm trồng": "", Giống: "", "Từ hàng": "", "Đến hàng": "", "Diện tích (ha)": "", "Tổng số hố kiểm kê": "", "Tổng số cây kiểm kê": "", "Cây cạo": "", "Mật độ cây cạo/ha": "", "Xếp hạng vườn cây": "" },
   plotIndicators: { "Mã lô": "", "Ngày cập nhật": "2026-08-22", "Tổng số hố kiểm kê": "", "Tổng số cây kiểm kê": "", "Cây cạo": "", "Cây chưa đủ tiêu chuẩn": "", "Cây không hiệu quả": "", "Cây bệnh không cạo": "", "Cây khô miệng cạo": "", "Hố trống": "", "Mật độ cây cạo/ha": "", "Xếp hạng vườn cây": "" },
-  workers: { Đội: "Đội 1", Tên: "Nguyễn Văn A", "Mã số": "CN001", "Tên phiên âm": "Nguyễn A", "Giới tính": "Nam", "Số điện thoại": "0901234567", "Trạng thái làm việc": "Đang làm việc", "Vai trò": "Công nhân khai thác", "Ghi chú": "Hàng ví dụ — xóa hoặc thay trước khi import" },
+  workers: { Đội: "Đội 1", Tên: "Nguyễn Văn A", "Mã số": "D1-01", "Tên phiên âm": "Nguyễn A", "Giới tính": "Nam", "Số điện thoại": "0901234567", "Trạng thái làm việc": "Đang làm việc", "Vai trò": "Công nhân khai thác", "Ghi chú": "Hàng ví dụ — xóa hoặc thay trước khi import" },
   teamImports: { Đợt: "Đợt 1", Ngày: "", Đội: "", Vườn: "", "Mủ đông, tạp (kg)": "", "Mủ dây (kg)": "" },
   teamExports: { Đợt: "Đợt 1", Ngày: "", Đội: "", "Mủ đông, tạp (kg)": "", "Mủ dây (kg)": "" },
   workerPlotAllocations: { Đội: "Đội 1", "Nhân công": "", "Mã số nhân công": "", "Vườn A/B/C": "A", "Mã lô": "", "Từ hàng": "", "Đến hàng": "", "Diện tích (ha)": "" },

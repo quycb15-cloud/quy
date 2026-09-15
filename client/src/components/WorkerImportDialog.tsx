@@ -62,7 +62,7 @@ export default function WorkerImportDialog({ onImported }: { onImported: () => v
   const downloadTemplate = async () => {
     const XLSX = await import("xlsx");
     const book = XLSX.utils.book_new();
-    const sample = [["Đội", "Tên", "Mã số", "Tên phiên âm", "Giới tính", "Số điện thoại", "Trạng thái làm việc", "Vai trò", "Ghi chú"], ["Đội 1", "Nguyễn Văn A", "CN001", "Nguyễn A", "Nam", "0901234567", "Đang làm việc", "Công nhân khai thác", "Hàng ví dụ — xóa hoặc thay trước khi import"]];
+    const sample = [["Đội", "Tên", "Mã số", "Tên phiên âm", "Giới tính", "Số điện thoại", "Trạng thái làm việc", "Vai trò", "Ghi chú"], ["Đội 1", "Nguyễn Văn A", "D1-01", "Nguyễn A", "Nam", "0901234567", "Đang làm việc", "Công nhân khai thác", "Hàng ví dụ — xóa hoặc thay trước khi import"]];
     XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(sample), "Nhân công");
     XLSX.writeFile(book, "mau-import-nhan-cong.xlsx");
   };

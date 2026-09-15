@@ -424,3 +424,8 @@
 - [x] Cập nhật file mẫu Import nhân công có hàng ví dụ hợp lệ
 - [x] Bổ sung test lỗi SQL, mapping cột và hàng ví dụ template
 - [x] Chạy test/typecheck/build, lưu checkpoint và không publish/đổi visibility
+
+## Giữ Mã số nhân công dạng chuỗi
+- [x] Parser giữ nguyên Mã số như D1-01, D1-02, không ép số hoặc làm mất dấu gạch nối
+- [x] Template và mapping Import nhân công dùng đúng cột Mã số dạng chuỗi
+- [x] Bổ sung test hồi quy cho mã D1-01 và chạy kiểm tra trước checkpoint
