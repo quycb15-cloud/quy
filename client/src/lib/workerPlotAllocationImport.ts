@@ -29,7 +29,7 @@ function parseRowRange(value: unknown) {
 export function parseWorkerPlotAllocationRows(rows: unknown[][]) {
   const parsed: WorkerPlotAllocationRow[] = [];
   const issues: string[] = [];
-  const newLayout = text(rows[0]?.[1]).toLowerCase().includes("mã công nhân") || text(rows[1]?.[2]).toLowerCase() === "lô";
+  const newLayout = text(rows[0]?.[1]).toLowerCase().includes("mã công nhân") || text(rows[1]?.[2]).toLowerCase().startsWith("lô");
   const slots = newLayout
     ? [{ gardenType: "A" as const, start: 2 }, { gardenType: "B" as const, start: 6 }, { gardenType: "C" as const, start: 10 }]
     : [{ gardenType: "A" as const, start: 4 }, { gardenType: "B" as const, start: 10 }, { gardenType: "C" as const, start: 16 }];

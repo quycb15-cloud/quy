@@ -1,6 +1,10 @@
-export const workerPlotAllocationHeaders: string[][] = [
+import { formatPlotDisplayName } from "@shared/plotDisplay";
+
+export type WorkerPlotTemplatePlot = { unit?: string | null; code: string; name: string; plantedYear?: number | null };
+
+const workerPlotAllocationHeaders = [
   ["TT", "Mã công nhân", "VƯỜN A", "", "", "", "VƯỜN B", "", "", "", "VƯỜN C", "", "", "", "TỔNG DIỆN TÍCH", "TỔNG CÂY CẠO", "GHI CHÚ"],
-  ["", "", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "", "", ""],
+  ["", "", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "", "", ""],
 ];
 
 export const workerPlotAllocationMerges = [
@@ -8,9 +12,22 @@ export const workerPlotAllocationMerges = [
 ];
 
 export const workerPlotAllocationExampleRow: (string | number)[] = [
-  1, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  1, "", "1 (2011)", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
 ];
 
 export function buildWorkerPlotAllocationTemplateMatrix() {
   return [...workerPlotAllocationHeaders, workerPlotAllocationExampleRow];
+}
+
+export function buildWorkerPlotListMatrix(plotOptions: WorkerPlotTemplatePlot[]) {
+  return [
+    ["Đội", "Mã lô", "Lô (Tên hiển thị)", "Năm trồng", "Loại vườn"],
+    ...plotOptions.map(plot => [
+      plot.unit ?? "",
+      plot.code,
+      formatPlotDisplayName(plot.name, plot.plantedYear),
+      plot.plantedYear ?? "",
+      "",
+    ]),
+  ];
 }

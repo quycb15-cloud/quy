@@ -12,7 +12,7 @@ describe("parseWorkerPlotAllocationRows", () => {
   it("đọc mẫu mới chỉ có Mã công nhân và ba nhóm Vườn", () => {
     const rows = [
       ["TT", "Mã công nhân", "VƯỜN A", "", "", "", "VƯỜN B"],
-      ["", "", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô", "Hàng - hàng", "Diện tích", "Tổng cây cạo"],
+      ["", "", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo"],
       [1, "NC-002", "LO-A", "1-12", "2,35", 1200, "LO-B", "13–25", "3,40", 1500, "", "", "", ""],
     ];
     expect(parseWorkerPlotAllocationRows(rows)).toEqual({
@@ -22,6 +22,11 @@ describe("parseWorkerPlotAllocationRows", () => {
         { unit: undefined, workerName: undefined, employeeCode: "NC-002", gardenType: "B", plotCode: "LO-B", rowStart: 13, rowEnd: 25, areaHa: 3.4, tappingTrees: 1500 },
       ],
     });
+  });
+
+  it("nhận tên Lô hiển thị kèm năm trồng như trong danh sách", () => {
+    const rows = [["TT", "Mã công nhân", "VƯỜN A"], ["", "", "Lô (Tên hiển thị)"], [1, "D1-01", "1 (2011)", "1-10", "2,5", 100]];
+    expect(parseWorkerPlotAllocationRows(rows).parsed[0]?.plotCode).toBe("1 (2011)");
   });
 
   it("giữ nguyên diện tích thập phân khi Excel trả về ô số", () => {

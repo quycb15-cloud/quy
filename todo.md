@@ -441,3 +441,10 @@
 - [x] Cho phép sửa thông tin nhân công qua UI và API với kiểm tra quyền/phạm vi
 - [x] Import dữ liệu nhân công mới từ file đính kèm, kiểm tra số dòng và kết quả
 - [x] Chạy test/typecheck/build và lưu checkpoint; không publish hoặc đổi visibility
+
+## Tên Lô hiển thị trong Import Phân chia nhân công
+- [x] Đối chiếu parser và template Phân chia nhân công với tên Lô hiển thị kèm năm trồng
+- [x] Cập nhật cột Lô trong mẫu và luồng import để dùng dạng `Tên Lô (Năm trồng)`
+- [x] Giữ mapping backend đúng Lô thực tế, không tạo Lô trùng khi import tên hiển thị
+- [x] Bổ sung test cho tên Lô có năm trồng và chạy check/test/build
+- [x] Lưu checkpoint; chưa publish và chưa đổi visibility

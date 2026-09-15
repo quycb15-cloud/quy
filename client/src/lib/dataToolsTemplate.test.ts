@@ -33,4 +33,11 @@ describe("data tools template workbook", () => {
     expect(XLSX.utils.sheet_to_json(sheet, { header: 1 })[0]).toContain("VƯỜN B");
     expect(XLSX.utils.sheet_to_json(sheet, { header: 1 })[0]).toContain("VƯỜN C");
   });
+
+  it("đưa danh sách Lô thực tế vào mẫu với tên hiển thị kèm năm trồng", () => {
+    const result = createImportTemplateWorkbook(XLSX, "workerPlotAllocations", labels, samples, [{ unit: "Đội 1", code: "LO-1", name: "1", plantedYear: 2011 }]);
+    expect(result.book.SheetNames).toEqual(["Phân chia nhân công vườn cây", "Danh sách Lô", "Hướng dẫn"]);
+    const rows = XLSX.utils.sheet_to_json(result.book.Sheets["Danh sách Lô"], { header: 1 }) as unknown[][];
+    expect(rows[1]).toEqual(["Đội 1", "LO-1", "1 (2011)", 2011, ""]);
+  });
 });

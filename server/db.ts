@@ -43,6 +43,7 @@ import {
 } from "./workforceSummary";
 import { comparePeriodLabel, compareTeamName, TEAM_ORDER } from "../shared/teamOrder";
 import { getDashboardTotalArea } from "./dashboardMath";
+import { formatPlotDisplayName, normalizePlotLookup, parsePlotDisplayName } from "../shared/plotDisplay";
 import { relativeChangePercent } from "../shared/technicalSkillMath";
 import { mergeProductionPlanRows } from "../shared/productionPlanSummary";
 
@@ -2242,6 +2243,8 @@ export async function bulkUpsertWorkerPlotAllocations(
       id: plantationPlots.id,
       unit: plantationPlots.unit,
       code: plantationPlots.code,
+      name: plantationPlots.name,
+      plantedYear: plantationPlots.plantedYear,
       gardenType: plantationPlots.gardenType,
     })
     .from(plantationPlots)
@@ -2250,14 +2253,30 @@ export async function bulkUpsertWorkerPlotAllocations(
   const plotsByUnitAndCode = new Map(
     plotRows.map(plot => [`${plot.unit}::${plot.code}`, plot])
   );
+  const plotsByUnitAndDisplayName = new Map<string, typeof plotRows>();
+  plotRows.forEach(plot => {
+    const displayName = formatPlotDisplayName(plot.name, plot.plantedYear);
+    const parsedName = parsePlotDisplayName(displayName);
+    const key = `${plot.unit}::${normalizePlotLookup(parsedName.name)}::${parsedName.plantedYear ?? ""}`;
+    const candidates = plotsByUnitAndDisplayName.get(key) ?? [];
+    candidates.push(plot);
+    plotsByUnitAndDisplayName.set(key, candidates);
+  });
   const desiredGardenType = new Map<number, "A" | "B" | "C">();
   const resolved = resolvedWorkers.map(({ row, worker }, index) => {
     if (row.rowStart > row.rowEnd)
       throw new Error(`Dòng ${index + 2}: Hàng từ phải nhỏ hơn hoặc bằng Hàng đến`);
-    const plot = plotsByUnitAndCode.get(`${worker.unit}::${row.plotCode.trim()}`);
+    const rawPlotValue = row.plotCode.trim();
+    const codePlot = plotsByUnitAndCode.get(`${worker.unit}::${rawPlotValue}`);
+    const parsedPlot = parsePlotDisplayName(rawPlotValue);
+    const displayKey = `${worker.unit}::${normalizePlotLookup(parsedPlot.name)}::${parsedPlot.plantedYear ?? ""}`;
+    const displayCandidates = plotsByUnitAndDisplayName.get(displayKey) ?? [];
+    const plot = codePlot ?? (displayCandidates.length === 1 ? displayCandidates[0] : undefined);
     if (!plot)
       throw new Error(
-        `Dòng ${index + 2}: Không tìm thấy Mã lô ${row.plotCode} thuộc ${row.unit}`
+        displayCandidates.length > 1
+          ? `Dòng ${index + 2}: Tên Lô ${row.plotCode} thuộc ${worker.unit} bị trùng năm trồng; hãy ghi đúng dạng Tên Lô (Năm trồng)`
+          : `Dòng ${index + 2}: Không tìm thấy Lô ${row.plotCode} thuộc ${worker.unit}`
       );
     const priorGarden = desiredGardenType.get(plot.id);
     if (
@@ -2265,7 +2284,7 @@ export async function bulkUpsertWorkerPlotAllocations(
       (priorGarden && priorGarden !== row.gardenType)
     )
       throw new Error(
-        `Dòng ${index + 2}: Lô ${row.plotCode} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
+        `Dòng ${index + 2}: Lô ${formatPlotDisplayName(plot.name, plot.plantedYear)} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
       );
     desiredGardenType.set(plot.id, row.gardenType);
     return { row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };
@@ -2310,6 +2329,7 @@ export async function listWorkerPlotAllocations() {
       gardenType: workerPlotAllocations.gardenType,
       plotCode: plantationPlots.code,
       plotName: plantationPlots.name,
+      plantedYear: plantationPlots.plantedYear,
       rowStart: workerPlotAllocations.rowStart,
       rowEnd: workerPlotAllocations.rowEnd,
       areaHa: workerPlotAllocations.areaHa,

@@ -10,6 +10,7 @@ import { comparePlotsByYearAndName } from "@/lib/plotOrder";
 import { formatQuantity, STANDARD_PERIODS } from "@/lib/rubber";
 import { parseWorkerPlotAllocationRows } from "@/lib/workerPlotAllocationImport";
 import { buildWorkerPlotAllocationTemplateMatrix, workerPlotAllocationMerges } from "@/lib/workerPlotAllocationWorkbook";
+import { formatPlotDisplayName } from "@shared/plotDisplay";
 import { parseProductionPlanMatrix, parseTechnicalSkillMatrix } from "@/lib/reportImportWorkbook";
 import { createImportTemplateWorkbook, downloadWorkbookFile } from "@/lib/dataToolsTemplate";
 import { trpc } from "@/lib/trpc";
@@ -152,7 +153,8 @@ export default function DataToolsPage() {
   const downloadTemplate = async () => {
     try {
       const XLSX = await import("xlsx");
-      const { book, fileName } = createImportTemplateWorkbook(XLSX, dataset, labels, samples);
+      const plotOptions = dataset === "workerPlotAllocations" ? await utils.rubber.plots.list.fetch() : [];
+      const { book, fileName } = createImportTemplateWorkbook(XLSX, dataset, labels, samples, plotOptions);
       downloadWorkbookFile(XLSX, book, fileName);
       toast.success(`Đã tải mẫu ${labels[dataset]}`);
     } catch (error) {
@@ -173,7 +175,7 @@ export default function DataToolsPage() {
       ["Nhập mủ đội", (teamImports ?? []).map(row => ({ Đợt: row.periodLabel, Ngày: row.recordDate, Đội: row.unit, Vườn: row.gardenName, "Mủ đông, tạp (kg)": row.frozenLatex, "Mủ dây (kg)": row.latexThread, "Cộng nhập (kg)": row.totalImport }))],
       ["Xuất mủ đội", (teamExports ?? []).map(row => ({ Đợt: row.periodLabel, Ngày: row.recordDate, Đội: row.unit, "Mủ đông, tạp (kg)": row.frozenContaminatedLatex, "Mủ dây (kg)": row.latexThread, "Cộng xuất (kg)": row.totalExport }))],
       ["Sản lượng theo lô", orderedPlotProductions.map(row => ({ Ngày: row.recordDate, Đội: row.unit, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Năm trồng": row.plantedYear ?? "", "Diện tích (ha)": row.areaHa, "Mủ đông, tạp (kg)": row.frozenContaminatedLatex, "Quy khô (kg)": row.dryRubber, "Ghi chú": row.note ?? "", Nguồn: row.source }))],
-      ["Phân công nhân công", allocations.map(row => ({ Đội: row.unit ?? "", "Nhân công": row.workerName, "Mã số nhân công": row.employeeCode ?? "", "Vườn A/B/C": row.gardenType, "Mã lô": row.plotCode, "Tên lô": row.plotName, "Từ hàng": row.rowStart, "Đến hàng": row.rowEnd, "Diện tích (ha)": row.areaHa, "Tổng cây cạo": row.tappingTrees ?? 0 }))],
+      ["Phân công nhân công", allocations.map(row => ({ Đội: row.unit ?? "", "Nhân công": row.workerName, "Mã số nhân công": row.employeeCode ?? "", "Vườn A/B/C": row.gardenType, "Mã lô": row.plotCode, "Tên lô": formatPlotDisplayName(row.plotName, row.plantedYear), "Từ hàng": row.rowStart, "Đến hàng": row.rowEnd, "Diện tích (ha)": row.areaHa, "Tổng cây cạo": row.tappingTrees ?? 0 }))],
     ];
     sheets.forEach(([name, data]) => XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(data), name));
     downloadWorkbookFile(XLSX, book, "du-lieu-cao-su-chi-nhanh-386.xlsx");
@@ -190,7 +192,7 @@ export default function DataToolsPage() {
       const book = XLSX.read(await selected.arrayBuffer(), { type: "array", cellDates: false });
       const sheet = book.Sheets[book.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" });
-      const isAllocation = (text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô")) || (text(matrix[0]?.[1]).toLowerCase().includes("mã công nhân") && text(matrix[1]?.[2]).toLowerCase() === "lô");
+      const isAllocation = (text(matrix[0]?.[2]).includes("Nhân công") && text(matrix[1]?.[4]).includes("Mã lô")) || (text(matrix[0]?.[1]).toLowerCase().includes("mã công nhân") && text(matrix[1]?.[2]).toLowerCase().startsWith("lô"));
       const isProductionPlan = text(matrix[0]?.[1]) === "Đơn vị" && (text(matrix[0]?.[2]).toLowerCase().includes("kế hoạch năm") || text(matrix[0]?.[2]) === "Năm") && (text(matrix[0]?.[4]).toLowerCase().includes("kế hoạch giao") || text(matrix[2]?.[6]).includes("Kế hoạch"));
       const isTechnicalSkill = text(matrix[0]?.[1]) === "Nội dung" && (text(matrix[0]?.[2]) === "Tháng báo cáo" || text(matrix[0]?.[2]).toLowerCase().includes("tháng/năm báo cáo")) && text(matrix[1]?.[4]).includes("Xuất sắc");
       if (isProductionPlan || isTechnicalSkill) {
