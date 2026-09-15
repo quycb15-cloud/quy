@@ -404,3 +404,11 @@
 ## Bổ sung bằng chứng route và dialog Import
 - [ ] Mở từng route dashboard, reports, workforce và technical-skill trong phiên đã đăng nhập; ghi nhận nội dung tải thành công và kiểm tra tối thiểu một tương tác chính trên mỗi trang
 - [ ] Kiểm tra trực tiếp WorkforcePage: mở nút Import nhân công Excel, xác nhận dialog hiển thị đúng, có trạng thái empty/error cơ bản và không vỡ giao diện
+
+## Chỉnh Tổng hợp sản lượng theo Lô theo đặc tả mới
+- [x] Tách riêng Mủ đông, tạp và Quy khô trong phần tổng hợp
+- [x] Hiển thị tăng/giảm so với tháng liền kề gần nhất có dữ liệu và ngày ở bên phải khối lượng
+- [x] Bỏ nội dung nhãn “so với tháng trước”
+- [x] Chia “so với cùng kỳ” thành hai ô riêng, mỗi ô dùng đúng loại số liệu tương ứng
+- [x] Không cộng dồn Mủ đông/tạp với Mủ quy khô trong các ô so sánh
+- [x] Chỉ chỉnh Tổng hợp sản lượng theo Lô; không publish khi chưa có xác nhận

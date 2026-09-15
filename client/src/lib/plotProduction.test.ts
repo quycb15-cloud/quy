@@ -19,15 +19,25 @@ describe("plot production summary", () => {
     ]);
   });
 
-  it("so sánh được tháng trước và cùng kỳ năm trước, có làm tròn hai chữ số", () => {
+  it("tách riêng Mủ đông/tạp và Quy khô khi so sánh cùng kỳ", () => {
     const comparison = comparePlotProduction([
       ...entries,
       { id: 4, plotId: 2, recordDate: "2026-07-01T12:00:00.000Z", frozenContaminatedLatex: 2.345, dryRubber: 1.115, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
       { id: 5, plotId: 2, recordDate: "2025-08-01T12:00:00.000Z", frozenContaminatedLatex: 4, dryRubber: 3, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
     ], { year: 2026, month: 8, unit: "Đội 1" });
-    expect(comparison.current).toEqual({ frozen: 15, dry: 12, total: 27 });
-    expect(comparison.previousMonth).toEqual({ frozen: 2.35, dry: 1.12, total: 3.47 });
-    expect(comparison.previousYear).toEqual({ frozen: 4, dry: 3, total: 7 });
+    expect(comparison.current).toEqual({ frozen: 15, dry: 12, total: 27, monthLabel: "08/2026" });
+    expect(comparison.previousMonth).toEqual({ frozen: 2.35, dry: 1.12, total: 3.47, monthLabel: "07/2026" });
+    expect(comparison.previousYear).toEqual({ frozen: 4, dry: 3, total: 7, monthLabel: "08/2025" });
+  });
+
+  it("chọn tháng liền kề gần nhất có dữ liệu thay vì mặc định trừ một tháng", () => {
+    const comparison = comparePlotProduction([
+      ...entries.filter(entry => entry.recordDate !== "2026-07-20T12:00:00.000Z"),
+      { id: 6, plotId: 2, recordDate: "2026-05-01T12:00:00.000Z", frozenContaminatedLatex: 6, dryRubber: 2, unit: "Đội 1", plotCode: "L-02", plotName: "Lô 02", plantedYear: 2011, areaHa: 2.5 },
+    ], { year: 2026, month: 8, unit: "Đội 1" });
+    expect(comparison.previousMonth?.monthLabel).toBe("05/2026");
+    expect(comparison.previousMonth?.frozen).toBe(6);
+    expect(comparison.previousMonth?.dry).toBe(2);
   });
 
   it("so sánh được Mủ đông/tạp và Quy khô theo từng Đội", () => {

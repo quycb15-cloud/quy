@@ -16,11 +16,17 @@ export type PlotProductionEntry = {
 
 export type PlotProductionFilters = { year?: number; month?: number; unit?: string };
 export type TeamPlotProduction = { unit: string; frozenContaminatedLatex: number; dryRubber: number };
-export type PlotProductionComparison = { current: { frozen: number; dry: number; total: number }; previousMonth: { frozen: number; dry: number; total: number } | null; previousYear: { frozen: number; dry: number; total: number } | null };
+export type PlotProductionTotals = { frozen: number; dry: number; total: number; monthLabel?: string };
+export type PlotProductionComparison = { current: PlotProductionTotals; previousMonth: PlotProductionTotals | null; previousYear: PlotProductionTotals | null };
 const roundQuantity = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
-const totalsOf = (rows: ReturnType<typeof aggregatePlotProduction>) => { const frozen = roundQuantity(rows.reduce((sum, row) => sum + row.frozenContaminatedLatex, 0)); const dry = roundQuantity(rows.reduce((sum, row) => sum + row.dryRubber, 0)); return { frozen, dry, total: roundQuantity(frozen + dry) }; };
-
 const dateOf = (value: Date | string) => new Date(value);
+const monthKey = (year: number, month: number) => `${year}-${String(month).padStart(2, "0")}`;
+const monthLabel = (year: number, month: number) => `${String(month).padStart(2, "0")}/${year}`;
+const totalsOf = (rows: ReturnType<typeof aggregatePlotProduction>, label?: string): PlotProductionTotals => {
+  const frozen = roundQuantity(rows.reduce((sum, row) => sum + row.frozenContaminatedLatex, 0));
+  const dry = roundQuantity(rows.reduce((sum, row) => sum + row.dryRubber, 0));
+  return { frozen, dry, total: roundQuantity(frozen + dry), ...(label ? { monthLabel: label } : {}) };
+};
 
 export function aggregatePlotProduction(entries: PlotProductionEntry[], filters: PlotProductionFilters) {
   const grouped = new Map<number, PlotProductionEntry & { frozenContaminatedLatex: number; dryRubber: number }>();
@@ -35,11 +41,27 @@ export function aggregatePlotProduction(entries: PlotProductionEntry[], filters:
 }
 
 export function comparePlotProduction(entries: PlotProductionEntry[], filters: PlotProductionFilters): PlotProductionComparison {
-  const current = totalsOf(aggregatePlotProduction(entries, filters));
+  const currentLabel = filters.year && filters.month ? monthLabel(filters.year, filters.month) : undefined;
+  const current = totalsOf(aggregatePlotProduction(entries, filters), currentLabel);
   if (!filters.year || !filters.month) return { current, previousMonth: null, previousYear: null };
-  const previousMonthDate = new Date(Date.UTC(filters.year, filters.month - 2, 1));
-  const previousYear = totalsOf(aggregatePlotProduction(entries, { ...filters, year: filters.year - 1 }));
-  const previousMonth = totalsOf(aggregatePlotProduction(entries, { ...filters, year: previousMonthDate.getUTCFullYear(), month: previousMonthDate.getUTCMonth() + 1 }));
+
+  const candidateMonths = new Set<string>();
+  entries.forEach(entry => {
+    if (filters.unit && entry.unit !== filters.unit) return;
+    const date = dateOf(entry.recordDate);
+    const key = monthKey(date.getUTCFullYear(), date.getUTCMonth() + 1);
+    if (key < monthKey(filters.year!, filters.month!)) candidateMonths.add(key);
+  });
+  const previousMonthKey = Array.from(candidateMonths).sort().at(-1);
+  const previousMonth = previousMonthKey
+    ? (() => {
+        const [year, month] = previousMonthKey.split("-").map(Number);
+        return totalsOf(aggregatePlotProduction(entries, { ...filters, year, month }), monthLabel(year, month));
+      })()
+    : null;
+
+  const previousYearRows = aggregatePlotProduction(entries, { ...filters, year: filters.year - 1, month: filters.month });
+  const previousYear = previousYearRows.length ? totalsOf(previousYearRows, monthLabel(filters.year - 1, filters.month)) : null;
   return { current, previousMonth, previousYear };
 }
 
