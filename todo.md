@@ -163,9 +163,9 @@
 
 - [x] Kiểm tra bản ghi allocation thực tế của Lô 7 và payload khi chọn Vườn B
 - [x] Xác định vì sao allocation A/B bị dồn thành Vườn A 6,37 ha
-- [ ] Sửa procedure/API để mỗi Vườn giữ bản ghi riêng và không tự gộp sai
-- [ ] Bổ sung test lưu A rồi B cho cùng một Lô và kiểm tra lại UI/modal
-- [ ] Ghi nhận payload `gardenType: B` khi thao tác phân bổ Vườn B
+- [x] Sửa procedure/API để mỗi Vườn giữ bản ghi riêng và không tự gộp sai
+- [x] Bổ sung test lưu A rồi B cho cùng một Lô và kiểm tra lại UI/modal
+- [x] Ghi nhận payload `gardenType: B` khi thao tác phân bổ Vườn B
 - [x] Đối chiếu log activity để xác định nguồn dồn allocation vào Vườn A
 
 - [x] Áp dụng logic hiển thị allocation theo phần cho tất cả các Lô có phân bổ A/B/C; Lô 7 chỉ là ca kiểm thử, không sửa dữ liệu riêng
@@ -429,3 +429,7 @@
 - [x] Parser giữ nguyên Mã số như D1-01, D1-02, không ép số hoặc làm mất dấu gạch nối
 - [x] Template và mapping Import nhân công dùng đúng cột Mã số dạng chuỗi
 - [x] Bổ sung test hồi quy cho mã D1-01 và chạy kiểm tra trước checkpoint
+
+## Bằng chứng allocation A/B cần bổ sung
+- [x] Bổ sung kiểm thử persistence riêng theo plotId/gardenType cho allocation A và B
+- [ ] Kiểm tra trực quan modal/danh sách Quản lý vườn để xác nhận một Lô hiển thị đồng thời allocation A và B

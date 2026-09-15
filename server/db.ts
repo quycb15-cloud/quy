@@ -446,6 +446,19 @@ export async function listPlots() {
   });
 }
 
+export type GardenAllocationRecord = { id: number; gardenType: "A" | "B" | "C"; areaHa: number | string; tappingTrees: number };
+
+export function resolveGardenAllocationOperation(
+  allocations: GardenAllocationRecord[],
+  input: { gardenType: "A" | "B" | "C"; areaHa: number; tappingTrees: number }
+) {
+  const existing = allocations.find(allocation => allocation.gardenType === input.gardenType);
+  if (existing) {
+    return { kind: "update" as const, id: existing.id, gardenType: existing.gardenType, areaHa: Math.round((Number(existing.areaHa) + input.areaHa) * 1000) / 1000, tappingTrees: Number(existing.tappingTrees ?? 0) + input.tappingTrees };
+  }
+  return { kind: "insert" as const, gardenType: input.gardenType, areaHa: input.areaHa, tappingTrees: input.tappingTrees };
+}
+
 export async function allocatePlotGardenPortion(
   input: {
     plotId: number;
@@ -494,26 +507,11 @@ export async function allocatePlotGardenPortion(
     throw new Error(
       `Số cây cạo phân bổ vượt quá số cây còn lại của Lô (${Math.max(0, totalTappingTrees - allocatedTappingTrees)} cây)`
     );
-  const existing = allocations.find(
-    allocation => allocation.gardenType === input.gardenType
-  );
-  if (existing) {
-    await db
-      .update(plotGardenAllocations)
-      .set({
-        areaHa: asArea(numberValue(existing.areaHa) + input.areaHa),
-        tappingTrees: Number(existing.tappingTrees ?? 0) + input.tappingTrees,
-        createdBy: userId,
-      })
-      .where(eq(plotGardenAllocations.id, existing.id));
+  const operation = resolveGardenAllocationOperation(allocations.map(allocation => ({ id: allocation.id, gardenType: allocation.gardenType, areaHa: numberValue(allocation.areaHa), tappingTrees: Number(allocation.tappingTrees ?? 0) })), input);
+  if (operation.kind === "update") {
+    await db.update(plotGardenAllocations).set({ areaHa: asArea(operation.areaHa), tappingTrees: operation.tappingTrees, createdBy: userId }).where(eq(plotGardenAllocations.id, operation.id));
   } else {
-    await db.insert(plotGardenAllocations).values({
-      plotId: input.plotId,
-      gardenType: input.gardenType,
-      areaHa: asArea(input.areaHa),
-      tappingTrees: input.tappingTrees,
-      createdBy: userId,
-    });
+    await db.insert(plotGardenAllocations).values({ plotId: input.plotId, gardenType: operation.gardenType, areaHa: asArea(operation.areaHa), tappingTrees: operation.tappingTrees, createdBy: userId });
   }
   return {
     remainingAreaHa: Math.max(0, totalAreaHa - nextAreaHa),

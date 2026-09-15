@@ -36,3 +36,7 @@ Current diagnosis: the published site and the exact `?source=pwa` URL are reacha
 
 ## Production asset audit — 2026-09-11
 Public domain root and `/?source=pwa` return HTTP 200. `/manifest.webmanifest` returns `application/manifest+json` and `/sw.js` returns `text/javascript`. The manifest references `/manus-storage/cn386-pwa-192_f8e3c026.png` and `/manus-storage/cn386-pwa-512_75d9b5e3.png`; direct `/icon-192.png` and `/icon-512.png` return SPA HTML, but those paths are not referenced by the manifest. No PWA code change is required for this finding.
+
+## Kiểm tra trực quan Quản lý vườn — 2026-09-15
+
+Route `/plots` trong preview đã tải thành công sau khi chờ dữ liệu. Viewport hiển thị bảng Danh sách chung với các cột Vườn A, Vườn B, Vườn C theo từng Đội và các thao tác Xem riêng, Chỉnh sửa, Import. Screenshot này chưa hiển thị riêng dòng Lô 7, nên chưa coi là bằng chứng xác nhận riêng Lô 7 xuất hiện đồng thời ở A và B.
