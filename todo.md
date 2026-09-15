@@ -417,3 +417,10 @@
 - [x] Tạo hai ô độc lập: Mủ đông, tạp và Quy khô
 - [x] Mỗi ô chỉ hiển thị số hiện tại và số cùng kỳ của đúng loại, không dùng tổng cộng dồn
 - [x] Chạy test/typecheck/build, lưu checkpoint và không publish/đổi visibility
+
+## Sửa Import nhân công và mẫu Excel
+- [x] Xác định nguyên nhân lỗi SQL insert workers do mapping cột/giá trị import
+- [x] Sửa parser, validation và backend upsert nhân công đúng schema
+- [x] Cập nhật file mẫu Import nhân công có hàng ví dụ hợp lệ
+- [x] Bổ sung test lỗi SQL, mapping cột và hàng ví dụ template
+- [x] Chạy test/typecheck/build, lưu checkpoint và không publish/đổi visibility

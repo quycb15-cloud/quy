@@ -6,6 +6,16 @@ const labels = { plots: "Vườn / lô", plotIndicators: "Chỉ số cây địn
 const samples = Object.fromEntries(Object.keys(labels).map(key => [key, { Mẫu: "" }])) as typeof labels extends Record<infer K, string> ? Record<K, Record<string, string | number>> : never;
 
 describe("data tools template workbook", () => {
+  it("tạo mẫu Nhân công có hàng ví dụ và cột mapping đầy đủ", () => {
+    const workerLabels = { ...labels, workers: "Nhân công" };
+    const workerSamples = { ...samples, workers: { Đội: "Đội 1", Tên: "Nguyễn Văn A", "Mã số": "CN001", "Tên phiên âm": "Nguyễn A", "Giới tính": "Nam", "Số điện thoại": "0901234567", "Trạng thái làm việc": "Đang làm việc", "Vai trò": "Công nhân khai thác", "Ghi chú": "Hàng ví dụ" } };
+    const result = createImportTemplateWorkbook(XLSX, "workers", workerLabels, workerSamples);
+    const rows = XLSX.utils.sheet_to_json(result.book.Sheets[result.book.SheetNames[0]], { header: 1 }) as unknown[][];
+    expect(rows[0]).toEqual(Object.keys(workerSamples.workers));
+    expect(rows[1]).toContain("CN001");
+    expect(rows[1]).toContain("0901234567");
+  });
+
   it("tạo đúng workbook đánh giá tay nghề theo nhân công", () => {
     const result = createImportTemplateWorkbook(XLSX, "technicalSkillEvaluations", labels, samples);
     expect(result.fileName).toBe("mau-import-technicalSkillEvaluations.xlsx");

@@ -722,6 +722,7 @@ export type ExcelWorkerPayload = {
   employeeCode?: string | null;
   phoneticName?: string | null;
   gender: "male" | "female";
+  phone?: string | null;
   status: "active" | "inactive";
   roleTitle?: string;
   note?: string | null;
@@ -759,6 +760,7 @@ export async function bulkUpsertExcelWorkers(
         unit: row.unit,
         phoneticName: row.phoneticName?.trim() || null,
         gender: row.gender,
+        phone: row.phone?.trim() || null,
         roleTitle,
         status: row.status,
         note: row.note?.trim() || null,
@@ -766,9 +768,12 @@ export async function bulkUpsertExcelWorkers(
       })
       .onDuplicateKeyUpdate({
         set: {
+          name: row.name.trim(),
+          unit: row.unit.trim(),
           employeeCode: row.employeeCode?.trim() || null,
           phoneticName: row.phoneticName?.trim() || null,
           gender: row.gender,
+          phone: row.phone?.trim() || null,
           roleTitle,
           status: row.status,
           note: row.note?.trim() || null,
