@@ -412,3 +412,8 @@
 - [x] Chia “so với cùng kỳ” thành hai ô riêng, mỗi ô dùng đúng loại số liệu tương ứng
 - [x] Không cộng dồn Mủ đông/tạp với Mủ quy khô trong các ô so sánh
 - [x] Chỉ chỉnh Tổng hợp sản lượng theo Lô; không publish khi chưa có xác nhận
+
+## Sửa lại So với cùng kỳ — Tổng hợp sản lượng theo Lô
+- [x] Tạo hai ô độc lập: Mủ đông, tạp và Quy khô
+- [x] Mỗi ô chỉ hiển thị số hiện tại và số cùng kỳ của đúng loại, không dùng tổng cộng dồn
+- [x] Chạy test/typecheck/build, lưu checkpoint và không publish/đổi visibility
