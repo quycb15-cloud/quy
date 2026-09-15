@@ -433,3 +433,11 @@
 ## Bằng chứng allocation A/B cần bổ sung
 - [x] Bổ sung kiểm thử persistence riêng theo plotId/gardenType cho allocation A và B
 - [ ] Kiểm tra trực quan modal/danh sách Quản lý vườn để xác nhận một Lô hiển thị đồng thời allocation A và B
+
+## Làm mới dữ liệu nhân công theo file mau-import-workers(2)
+- [x] Đọc và đối chiếu cấu trúc file mau-import-workers(2).xlsx với schema workers
+- [x] Xóa bản ghi nhân công cũ cùng toàn bộ liên kết lịch sử được xác định
+- [x] Giữ Số điện thoại là trường tùy chọn trong schema, parser và validation
+- [x] Cho phép sửa thông tin nhân công qua UI và API với kiểm tra quyền/phạm vi
+- [x] Import dữ liệu nhân công mới từ file đính kèm, kiểm tra số dòng và kết quả
+- [x] Chạy test/typecheck/build và lưu checkpoint; không publish hoặc đổi visibility

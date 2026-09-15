@@ -842,6 +842,32 @@ export const rubberRouter = router({
             return { success: true };
           }),
       }),
+      update: protectedProcedure
+        .input(z.object({
+          id: z.number().int().positive(),
+          data: z.object({
+            name: requiredText("Tên phiên âm", 160),
+            employeeCode: z.string().trim().max(64).optional().nullable(),
+            unit: requiredText("Đội", 120),
+            phoneticName: requiredText("Tên phiên âm", 160),
+            gender: z.enum(["male", "female"]).default("male"),
+            phone: z.string().max(32).optional().nullable(),
+            roleTitle: requiredText("Vai trò", 120),
+            status: z.enum(["active", "inactive"]),
+            note: z.string().max(1000).optional().nullable(),
+          }),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          const profile = await requirePermission(ctx, "workers:write");
+          const current = await db.getWorkerById(input.id);
+          if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy nhân công" });
+          if (!profile.fullAccess && profile.scopeUnits.length && (!current.unit || !profile.scopeUnits.includes(current.unit) || !profile.scopeUnits.includes(input.data.unit))) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Nhân công ngoài phạm vi Đội được cấp" });
+          }
+          await db.updateWorker(input.id, input.data, ctx.user.id);
+          await db.logActivity(ctx.user.id, { eventType: "worker.update", entityType: "worker", entityId: input.id, summary: `Cập nhật nhân công ${input.data.name}` });
+          return { success: true };
+        }),
       create: adminProcedure
         .input(
           z.object({

@@ -35,6 +35,8 @@ const dbMocks = vi.hoisted(() => ({
   unlockPlotProductionPeriod: vi.fn(),
   getTechnicalSkillSummary: vi.fn(),
   saveTechnicalSkillEvaluation: vi.fn(),
+  getWorkerById: vi.fn(),
+  updateWorker: vi.fn(),
   listWorkers: vi.fn(),
   updatePlotGardenAllocation: vi.fn(),
   removePlotGardenAllocation: vi.fn(),
@@ -81,6 +83,8 @@ vi.mock("./db", () => ({
   unlockPlotProductionPeriod: dbMocks.unlockPlotProductionPeriod,
   getTechnicalSkillSummary: dbMocks.getTechnicalSkillSummary,
   saveTechnicalSkillEvaluation: dbMocks.saveTechnicalSkillEvaluation,
+  getWorkerById: dbMocks.getWorkerById,
+  updateWorker: dbMocks.updateWorker,
 }));
 
 vi.mock("./storage", () => storageMocks);
@@ -388,6 +392,23 @@ describe("rubberRouter authorization and business procedures", () => {
     const input = { workerId: 8, periodLabel: "Đợt 2", evaluationDate: new Date("2026-08-12T00:00:00.000Z"), technicalScore: 90, productivityScore: 85, qualityScore: 88, safetyScore: 92, note: "Đạt" };
     await expect(appRouter.createCaller(makeContext("user")).rubber.reports.saveTechnicalSkillEvaluation(input)).resolves.toEqual({ success: true });
     expect(dbMocks.saveTechnicalSkillEvaluation).toHaveBeenCalledWith(input, 2);
+  });
+
+  it("cho phép admin sửa nhân công và để trống số điện thoại", async () => {
+    const worker = { id: 12, unit: "Đội 1", name: "SAN DUK", employeeCode: "D1-01" };
+    dbMocks.getWorkerById.mockResolvedValue(worker);
+    dbMocks.updateWorker.mockResolvedValue(undefined);
+    const data = { name: "SAN DUK", employeeCode: "D1-01", unit: "Đội 1", phoneticName: "San Đúc", gender: "male" as const, phone: null, roleTitle: "Công nhân khai thác", status: "active" as const, note: null };
+    await expect(appRouter.createCaller(makeContext("admin")).rubber.workforce.workers.update({ id: 12, data })).resolves.toEqual({ success: true });
+    expect(dbMocks.updateWorker).toHaveBeenCalledWith(12, data, 1);
+  });
+
+  it("chỉ cho tài khoản Đội sửa nhân công trong đúng scope", async () => {
+    dbMocks.getWorkerById.mockResolvedValue({ id: 13, unit: "Đội 2", name: "Worker" });
+    const data = { name: "Worker", employeeCode: "D2-01", unit: "Đội 2", phoneticName: "Worker", gender: "male" as const, phone: "", roleTitle: "Công nhân khai thác", status: "active" as const, note: null };
+    dbMocks.getInternalAccountByUserId.mockResolvedValue({ isActive: 1, groupType: "production", scopeUnits: JSON.stringify(["Đội 1"]), permissionProfile: JSON.stringify(["workers:write"]) });
+    await expect(appRouter.createCaller(makeContext("user")).rubber.workforce.workers.update({ id: 13, data })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(dbMocks.updateWorker).not.toHaveBeenCalled();
   });
 
   it("chỉ admin được lưu chỉ tiêu ba nhóm đội ngũ quản lý", async () => {

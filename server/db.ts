@@ -2024,6 +2024,29 @@ export async function createWorker(input: WorkerPayload, userId: number) {
   });
 }
 
+export async function updateWorker(id: number, input: WorkerPayload, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.update(workers).set({
+    name: input.name.trim(),
+    employeeCode: input.employeeCode?.trim() || null,
+    unit: input.unit?.trim() || null,
+    phoneticName: input.phoneticName?.trim() || null,
+    gender: input.gender ?? "male",
+    phone: input.phone?.trim() || null,
+    roleTitle: input.roleTitle.trim(),
+    status: input.status,
+    note: input.note?.trim() || null,
+    createdBy: userId,
+  }).where(eq(workers.id, id));
+}
+
+export async function getWorkerById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  return (await db.select().from(workers).where(eq(workers.id, id)).limit(1))[0];
+}
+
 export type WorkerCodeRow = {
   unit: string;
   phoneticName: string;
