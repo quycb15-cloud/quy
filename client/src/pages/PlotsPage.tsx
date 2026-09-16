@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { summarizePlotAreaByYear } from "@/lib/plotAreaByYear";
-import { groupPlotsByGarden, groupPlotsByTeam, type GardenGroupKey } from "@/lib/plotTeamGroups";
+import { groupPlotsByGarden, groupPlotsByTeam, type GardenFilterKey, type GardenGroupKey } from "@/lib/plotTeamGroups";
 import { formatAreaHa as formatQuantity, formatDate } from "@/lib/rubber";
 import { buildTeamPlotExportRows, summarizeTeamGardenAreas } from "@/lib/teamPlotExport";
 import { buildTeamGardenPieData } from "@/lib/teamGardenPie";
@@ -86,12 +86,26 @@ export default function PlotsPage() {
   const units = useMemo(() => Array.from(new Set((plots ?? []).map(plot => plot.unit))).sort(compareTeamName), [plots]);
   const summaries = useMemo<TeamSummary[]>(() => units.map(unit => {
     const teamPlots = (plots ?? []).filter(plot => plot.unit === unit);
-    return { unit, plots: teamPlots, areaHa: teamPlots.reduce((sum, plot) => sum + Number(plot.areaHa ?? 0), 0), gardenCounts: { A: teamPlots.filter(plot => plot.gardenType === "A").length, B: teamPlots.filter(plot => plot.gardenType === "B").length, C: teamPlots.filter(plot => plot.gardenType === "C").length }, tappingDays: Array.from(new Set(teamPlots.map(plot => plot.tappingDay).filter((day): day is number => day !== null))).sort((a, b) => a - b) };
+    const gardenCounts = { A: 0, B: 0, C: 0 } as Record<GardenType, number>;
+    teamPlots.forEach(plot => {
+      const allocations = (plot.gardenAllocations ?? []).filter(item => Number(item.areaHa ?? 0) > 0);
+      if (allocations.length) allocations.forEach(item => { gardenCounts[item.gardenType] += 1; });
+      else if (plot.gardenType) gardenCounts[plot.gardenType] += 1;
+    });
+    return { unit, plots: teamPlots, areaHa: teamPlots.reduce((sum, plot) => sum + Number(plot.areaHa ?? 0), 0), gardenCounts, tappingDays: Array.from(new Set(teamPlots.map(plot => plot.tappingDay).filter((day): day is number => day !== null))).sort((a, b) => a - b) };
   }), [plots, units]);
   const scopedPlots = useMemo(() => (selectedUnit === "all" ? (plots ?? []) : (plots ?? []).filter(plot => plot.unit === selectedUnit)).sort(comparePlotsByTeamYearAndName), [plots, selectedUnit]);
   const filteredPlots = useMemo(() => scopedPlots.filter(plot => {
-    const matchText = [plot.code, plot.name, plot.unit, plot.gardenType ?? "", plot.note ?? ""].join(" ").toLocaleLowerCase("vi").includes(plotSearch.toLocaleLowerCase("vi"));
-    const matchType = gardenFilter === "all" || (gardenFilter === "unclassified" ? !plot.gardenType : plot.gardenType === gardenFilter);
+    const actualAllocations = (plot.gardenAllocations ?? []).filter(item => Number(item.areaHa ?? 0) > 0);
+    const actualGardenTypes = actualAllocations.map(item => item.gardenType);
+    const allocatedAreaHa = actualAllocations.reduce((sum, item) => sum + Number(item.areaHa ?? 0), 0);
+    const hasUnclassifiedRemainder = Number(plot.areaHa ?? 0) - allocatedAreaHa > 0.0000001;
+    const gardenSearchText = actualGardenTypes.map(type => `Vườn ${type}`).join(" ");
+    const matchText = [plot.code, plot.name, plot.unit, plot.gardenType ?? "", gardenSearchText, plot.note ?? ""].join(" ").toLocaleLowerCase("vi").includes(plotSearch.toLocaleLowerCase("vi"));
+    const matchType = gardenFilter === "all"
+      || (gardenFilter === "unclassified"
+        ? (actualAllocations.length ? hasUnclassifiedRemainder : !plot.gardenType)
+        : (actualAllocations.length ? actualGardenTypes.includes(gardenFilter) : plot.gardenType === gardenFilter));
     return matchText && matchType;
   }).sort(comparePlotsByTeamYearAndName), [gardenFilter, plotSearch, scopedPlots]);
   const areaByPlantingYear = useMemo(() => summarizePlotAreaByYear(filteredPlots), [filteredPlots]);
@@ -136,7 +150,7 @@ export default function PlotsPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2"><Button type="button" size="sm" variant="outline" onClick={() => downloadTeamPlots(group.unit, group.plots, group.areaHa)} disabled={exportingTeam !== null} className="border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-100">{exportingTeam === group.unit ? "Đang xuất…" : <><Download className="mr-1.5 h-4 w-4" />Xuất Excel</>}</Button><button type="button" onClick={() => toggleTeam(group.unit)} aria-expanded={!collapsed} aria-controls={contentId} className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-bold text-emerald-800 transition-colors hover:bg-emerald-100">{collapsed ? "Mở rộng" : "Thu gọn"}{collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</button></div>
           </div>
-          <div id={contentId}>{collapsed ? <p className="px-4 py-3 text-sm text-slate-500">Danh sách {group.plotCount} Lô đang được thu gọn.</p> : <><TeamGardenPieChart unit={group.unit} gardenAreas={group.gardenAreas} /><GardenPlotGroups plots={group.plots} isAdmin={isAdmin} onEdit={openEdit} onAllocate={openAllocation} onDelete={plot => window.confirm(`Xóa ${plot.name}?`) && remove.mutate({ id: plot.id })} deleting={remove.isPending} /></>}</div>
+          <div id={contentId}>{collapsed ? <p className="px-4 py-3 text-sm text-slate-500">Danh sách {group.plotCount} Lô đang được thu gọn.</p> : <><TeamGardenPieChart unit={group.unit} gardenAreas={group.gardenAreas} /><GardenPlotGroups plots={group.plots} gardenFilter={gardenFilter} isAdmin={isAdmin} onEdit={openEdit} onAllocate={openAllocation} onDelete={plot => window.confirm(`Xóa ${plot.name}?`) && remove.mutate({ id: plot.id })} deleting={remove.isPending} /></>}</div>
         </section>;
       })}</div> : <EmptyState title="Không có lô phù hợp" description="Thay đổi bộ lọc hoặc chọn đội khác để xem danh sách." />}
     </Panel></div>
@@ -158,8 +172,8 @@ function TeamGardenPieChart({ unit, gardenAreas }: { unit: string; gardenAreas: 
   if (totalAreaHa <= 0) return <div className="mx-3 mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Chưa có diện tích Vườn A, B hoặc C của {unit} để hiển thị biểu đồ tỷ trọng.</div>;
   return <section className="mx-3 mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3" aria-label={`Tỷ trọng diện tích Vườn A B C của ${unit}`}><p className="text-sm font-bold text-slate-800">Tỷ trọng diện tích Vườn A/B/C</p><div className="mt-2 flex flex-col items-center gap-3 sm:flex-row sm:items-stretch"><div className="relative h-44 w-full max-w-[220px] shrink-0"><ChartContainer config={config} className="h-44 w-full"><PieChart><ChartTooltip content={<ChartTooltipContent formatter={(value) => `${formatQuantity(Number(value))} ha`} />} /><Pie data={items} dataKey="areaHa" nameKey="label" innerRadius={46} outerRadius={68} paddingAngle={2}>{items.map(item => <Cell key={item.gardenType} fill={item.color} />)}</Pie></PieChart></ChartContainer><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Tổng A/B/C</p><p className="text-sm font-bold text-slate-900">{formatQuantity(totalAreaHa)} ha</p></div></div></div><div className="grid w-full gap-2 sm:grid-cols-3">{items.map(item => <div key={item.gardenType} className="rounded-lg border border-slate-200 bg-white px-3 py-2"><div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} /><p className="text-xs font-bold text-slate-700">{item.label}</p></div><p className="mt-1 text-sm font-bold text-slate-900">{formatQuantity(item.areaHa)} ha</p><p className="text-xs text-slate-500">{formatQuantity(item.percent)}%</p></div>)}</div></div></section>;
 }
-export function GardenPlotGroups({ plots, isAdmin, onEdit, onAllocate, onDelete, deleting }: { plots: Plot[]; isAdmin: boolean; onEdit: (plot: Plot) => void; onAllocate: (plot: Plot) => void; onDelete: (plot: Plot) => void; deleting: boolean }) {
-  const groups = groupPlotsByGarden(plots);
+export function GardenPlotGroups({ plots, gardenFilter = "all", isAdmin, onEdit, onAllocate, onDelete, deleting }: { plots: Plot[]; gardenFilter?: GardenFilterKey; isAdmin: boolean; onEdit: (plot: Plot) => void; onAllocate: (plot: Plot) => void; onDelete: (plot: Plot) => void; deleting: boolean }) {
+  const groups = groupPlotsByGarden(plots, gardenFilter);
   return <div className="space-y-3 p-3">{groups.map(group => {
     const label = group.gardenType === "unclassified" ? "Chưa phân loại" : `Vườn ${group.gardenType}`;
     const tone = group.gardenType === "A" ? "border-emerald-200 bg-emerald-50/50 text-emerald-900" : group.gardenType === "B" ? "border-sky-200 bg-sky-50/50 text-sky-900" : group.gardenType === "C" ? "border-amber-200 bg-amber-50/50 text-amber-900" : "border-slate-200 bg-slate-50 text-slate-800";

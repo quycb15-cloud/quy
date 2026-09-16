@@ -450,6 +450,49 @@ export async function listPlots() {
 
 export type GardenAllocationRecord = { id: number; gardenType: "A" | "B" | "C"; areaHa: number | string; tappingTrees: number };
 
+type TeamGardenAllocationTotals = {
+  sourceAreaHa: number;
+  sourceTappingTrees: number;
+  hasUnknownSourceTappingTrees: boolean;
+  allocatedAreaHa: number;
+  allocatedTappingTrees: number;
+};
+
+export function validateTeamGardenAllocationTotals(input: {
+  unit: string;
+  sourceLabel?: string;
+  sourceAreaHa: number;
+  sourceTappingTrees: number;
+  hasUnknownSourceTappingTrees: boolean;
+  allocatedAreaHa: number;
+  allocatedTappingTrees: number;
+}) {
+  const label = input.sourceLabel ?? input.unit;
+  if (input.allocatedAreaHa > input.sourceAreaHa + 0.0000001)
+    throw new Error(`${label}: Tổng diện tích phân bổ của ${input.unit} (${input.allocatedAreaHa} ha) vượt tổng diện tích nguồn của ${input.unit} (${input.sourceAreaHa} ha)`);
+  if (!input.hasUnknownSourceTappingTrees && input.allocatedTappingTrees > input.sourceTappingTrees)
+    throw new Error(`${label}: Tổng số cây cạo phân bổ của ${input.unit} (${input.allocatedTappingTrees} cây) vượt tổng số cây cạo nguồn của ${input.unit} (${input.sourceTappingTrees} cây)`);
+  return true as const;
+}
+
+async function getTeamGardenAllocationTotals(
+  db: ReturnType<typeof drizzle>,
+  unit: string,
+  excludeAllocationId?: number,
+): Promise<TeamGardenAllocationTotals> {
+  const [plots, allocations] = await Promise.all([
+    db.select({ areaHa: plantationPlots.areaHa, tappingTrees: plantationPlots.tappingTrees }).from(plantationPlots).where(eq(plantationPlots.unit, unit)),
+    db.select({ id: plotGardenAllocations.id, areaHa: plotGardenAllocations.areaHa, tappingTrees: plotGardenAllocations.tappingTrees }).from(plotGardenAllocations).innerJoin(plantationPlots, eq(plotGardenAllocations.plotId, plantationPlots.id)).where(eq(plantationPlots.unit, unit)),
+  ]);
+  return {
+    sourceAreaHa: plots.reduce((sum, plot) => sum + numberValue(plot.areaHa), 0),
+    sourceTappingTrees: plots.reduce((sum, plot) => sum + Number(plot.tappingTrees ?? 0), 0),
+    hasUnknownSourceTappingTrees: plots.some(plot => plot.tappingTrees == null),
+    allocatedAreaHa: allocations.filter(item => item.id !== excludeAllocationId).reduce((sum, allocation) => sum + numberValue(allocation.areaHa), 0),
+    allocatedTappingTrees: allocations.filter(item => item.id !== excludeAllocationId).reduce((sum, allocation) => sum + Number(allocation.tappingTrees ?? 0), 0),
+  };
+}
+
 export function resolveGardenAllocationOperation(
   allocations: GardenAllocationRecord[],
   input: { gardenType: "A" | "B" | "C"; areaHa: number; tappingTrees: number }
@@ -493,22 +536,11 @@ export async function allocatePlotGardenPortion(
     0
   );
   const totalAreaHa = numberValue(plot.areaHa);
-  const totalTappingTrees =
-    plot.tappingTrees == null ? null : Number(plot.tappingTrees);
+  const totalTappingTrees = plot.tappingTrees == null ? null : Number(plot.tappingTrees);
   const nextAreaHa = allocatedAreaHa + input.areaHa;
   const nextTappingTrees = allocatedTappingTrees + input.tappingTrees;
-  if (nextAreaHa > totalAreaHa + 0.0005)
-    throw new Error(
-      `Diện tích phân bổ vượt quá diện tích còn lại của Lô (${Math.max(0, totalAreaHa - allocatedAreaHa).toFixed(3)} ha)`
-    );
-  if (totalTappingTrees == null)
-    throw new Error(
-      "Lô chưa có tổng số cây cạo; hãy cập nhật số cây cạo của Lô trước"
-    );
-  if (nextTappingTrees > totalTappingTrees)
-    throw new Error(
-      `Số cây cạo phân bổ vượt quá số cây còn lại của Lô (${Math.max(0, totalTappingTrees - allocatedTappingTrees)} cây)`
-    );
+  const teamTotals = await getTeamGardenAllocationTotals(db, plot.unit);
+  validateTeamGardenAllocationTotals({ unit: plot.unit, sourceLabel: plot.unit, ...teamTotals, allocatedAreaHa: teamTotals.allocatedAreaHa + input.areaHa, allocatedTappingTrees: teamTotals.allocatedTappingTrees + input.tappingTrees });
   const operation = resolveGardenAllocationOperation(allocations.map(allocation => ({ id: allocation.id, gardenType: allocation.gardenType, areaHa: numberValue(allocation.areaHa), tappingTrees: Number(allocation.tappingTrees ?? 0) })), input);
   if (operation.kind === "update") {
     await db.update(plotGardenAllocations).set({ areaHa: asArea(operation.areaHa), tappingTrees: operation.tappingTrees, createdBy: userId }).where(eq(plotGardenAllocations.id, operation.id));
@@ -517,7 +549,7 @@ export async function allocatePlotGardenPortion(
   }
   return {
     remainingAreaHa: Math.max(0, totalAreaHa - nextAreaHa),
-    remainingTappingTrees: Math.max(0, totalTappingTrees - nextTappingTrees),
+    remainingTappingTrees: totalTappingTrees == null ? null : Math.max(0, totalTappingTrees - nextTappingTrees),
     allocatedAreaHa: nextAreaHa,
     allocatedTappingTrees: nextTappingTrees,
   };
@@ -538,9 +570,8 @@ export async function updatePlotGardenAllocation(
   const otherTappingTrees = others.filter(item => item.id !== input.id).reduce((sum, item) => sum + Number(item.tappingTrees ?? 0), 0);
   const totalAreaHa = numberValue(plot.areaHa);
   const totalTappingTrees = plot.tappingTrees == null ? null : Number(plot.tappingTrees);
-  if (otherAreaHa + input.areaHa > totalAreaHa + 0.0005) throw new Error(`Diện tích vượt quá diện tích Lô (${Math.max(0, totalAreaHa - otherAreaHa).toFixed(3)} ha còn lại)`);
-  if (totalTappingTrees == null) throw new Error("Lô chưa có tổng số cây cạo; hãy cập nhật số cây cạo của Lô trước");
-  if (otherTappingTrees + input.tappingTrees > totalTappingTrees) throw new Error(`Số cây vượt quá số cây cạo của Lô (${Math.max(0, totalTappingTrees - otherTappingTrees)} cây còn lại)`);
+  const teamTotals = await getTeamGardenAllocationTotals(db, plot.unit, input.id);
+  validateTeamGardenAllocationTotals({ unit: plot.unit, sourceLabel: plot.unit, ...teamTotals, allocatedAreaHa: teamTotals.allocatedAreaHa + input.areaHa, allocatedTappingTrees: teamTotals.allocatedTappingTrees + input.tappingTrees });
   await db.update(plotGardenAllocations).set({ areaHa: asArea(input.areaHa), tappingTrees: input.tappingTrees, createdBy: userId }).where(eq(plotGardenAllocations.id, input.id));
   return { success: true as const, id: input.id, plotId: allocation.plotId, gardenType: allocation.gardenType, areaHa: input.areaHa, tappingTrees: input.tappingTrees };
 }
@@ -2286,34 +2317,41 @@ export async function bulkUpsertWorkerPlotAllocations(
       );
     return { plot, sourceLabel, row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };
   });
-  const plotIds = Array.from(new Set(resolved.map(item => item.plotId)));
-  const existingAllocations = plotIds.length
+  const existingAllocations = resolvedUnits.length
     ? await db
-        .select({ id: workerPlotAllocations.id, workerId: workerPlotAllocations.workerId, plotId: workerPlotAllocations.plotId, gardenType: workerPlotAllocations.gardenType, rowStart: workerPlotAllocations.rowStart, rowEnd: workerPlotAllocations.rowEnd, areaHa: workerPlotAllocations.areaHa, tappingTrees: workerPlotAllocations.tappingTrees })
+        .select({ id: workerPlotAllocations.id, workerId: workerPlotAllocations.workerId, plotId: workerPlotAllocations.plotId, gardenType: workerPlotAllocations.gardenType, rowStart: workerPlotAllocations.rowStart, rowEnd: workerPlotAllocations.rowEnd, areaHa: workerPlotAllocations.areaHa, tappingTrees: workerPlotAllocations.tappingTrees, unit: workers.unit })
         .from(workerPlotAllocations)
-        .where(inArray(workerPlotAllocations.plotId, plotIds))
+        .innerJoin(workers, eq(workerPlotAllocations.workerId, workers.id))
+        .where(inArray(workers.unit, resolvedUnits))
     : [];
-  const incomingKeys = new Set(resolved.map(item => `${item.workerId}::${item.plotId}::${item.row.gardenType}::${item.row.rowStart}::${item.row.rowEnd}`));
-  const totals = new Map<number, { areaHa: number; tappingTrees: number; sourceAreaHa: number; sourceTappingTrees: number | null; sourceLabel: string; plotName: string }>();
-  for (const item of resolved) {
-    const current = totals.get(item.plotId) ?? { areaHa: 0, tappingTrees: 0, sourceAreaHa: Number(item.plot.areaHa ?? 0), sourceTappingTrees: item.plot.tappingTrees ?? null, sourceLabel: item.sourceLabel, plotName: formatPlotDisplayName(item.plot.name, item.plot.plantedYear) };
-    current.areaHa += Number(item.row.areaHa ?? 0);
-    current.tappingTrees += Number(item.row.tappingTrees ?? 0);
-    totals.set(item.plotId, current);
-  }
-  for (const existing of existingAllocations) {
+  const incomingByKey = new Map<string, (typeof resolved)[number]>();
+  resolved.forEach(item => {
+    incomingByKey.set(`${item.workerId}::${item.plotId}::${item.row.gardenType}::${item.row.rowStart}::${item.row.rowEnd}`, item);
+  });
+  const teamSources = new Map<string, { areaHa: number; tappingTrees: number; hasUnknownTrees: boolean }>();
+  plotRows.forEach(plot => {
+    const current = teamSources.get(plot.unit) ?? { areaHa: 0, tappingTrees: 0, hasUnknownTrees: false };
+    current.areaHa += Number(plot.areaHa ?? 0);
+    if (plot.tappingTrees == null) current.hasUnknownTrees = true;
+    else current.tappingTrees += Number(plot.tappingTrees);
+    teamSources.set(plot.unit, current);
+  });
+  const teamTotals = new Map<string, { areaHa: number; tappingTrees: number; sourceLabel: string; hasUnknownTrees: boolean }>();
+  const addTeamTotal = (unit: string, areaHa: number, tappingTrees: number, sourceLabel?: string) => {
+    const current = teamTotals.get(unit) ?? { areaHa: 0, tappingTrees: 0, sourceLabel: sourceLabel ?? `Đội ${unit}`, hasUnknownTrees: teamSources.get(unit)?.hasUnknownTrees ?? false };
+    current.areaHa += areaHa;
+    current.tappingTrees += tappingTrees;
+    if (sourceLabel) current.sourceLabel = sourceLabel;
+    teamTotals.set(unit, current);
+  };
+  existingAllocations.forEach(existing => {
     const key = `${existing.workerId}::${existing.plotId}::${existing.gardenType}::${existing.rowStart}::${existing.rowEnd}`;
-    if (incomingKeys.has(key)) continue;
-    const current = totals.get(existing.plotId);
-    if (!current) continue;
-    current.areaHa += Number(existing.areaHa ?? 0);
-    current.tappingTrees += Number(existing.tappingTrees ?? 0);
-  }
-  for (const current of Array.from(totals.values())) {
-    if (current.areaHa > current.sourceAreaHa + 0.0000001)
-      throw new Error(`${current.sourceLabel}: Lô ${current.plotName} có tổng diện tích phân bổ ${current.areaHa} ha vượt diện tích gốc ${current.sourceAreaHa} ha`);
-    if (current.sourceTappingTrees != null && current.tappingTrees > current.sourceTappingTrees)
-      throw new Error(`${current.sourceLabel}: Lô ${current.plotName} có tổng số cây cạo phân bổ ${current.tappingTrees} vượt số cây gốc ${current.sourceTappingTrees}`);
+    if (!incomingByKey.has(key) && existing.unit) addTeamTotal(existing.unit, Number(existing.areaHa ?? 0), Number(existing.tappingTrees ?? 0));
+  });
+  Array.from(incomingByKey.values()).forEach(item => addTeamTotal(item.row.unit ?? item.plot.unit, Number(item.row.areaHa ?? 0), Number(item.row.tappingTrees ?? 0), item.sourceLabel));
+  for (const [unit, total] of Array.from(teamTotals.entries())) {
+    const source = teamSources.get(unit) ?? { areaHa: 0, tappingTrees: 0, hasUnknownTrees: false };
+    validateTeamGardenAllocationTotals({ unit, sourceLabel: total.sourceLabel, sourceAreaHa: source.areaHa, sourceTappingTrees: source.tappingTrees, hasUnknownSourceTappingTrees: source.hasUnknownTrees, allocatedAreaHa: total.areaHa, allocatedTappingTrees: total.tappingTrees });
   }
   for (const item of resolved)
     await db

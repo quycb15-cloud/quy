@@ -52,3 +52,17 @@ describe("groupPlotsByTeam", () => {
     ]);
   });
 });
+
+describe("groupPlotsByGarden filter", () => {
+  it("shows only the selected actual allocation garden", () => {
+    const plot = { unit: "Đội 3", name: "Lô 29 (2012)", code: "D3-29", plantedYear: 2012, areaHa: 13.17, gardenType: "C" as const, gardenAllocations: [{ gardenType: "B" as const, areaHa: 4.8 }, { gardenType: "C" as const, areaHa: 8.37 }] };
+    expect(groupPlotsByGarden([plot], "B").map(group => ({ gardenType: group.gardenType, areaHa: group.areaHa }))).toEqual([{ gardenType: "B", areaHa: 4.8 }]);
+    expect(groupPlotsByGarden([plot], "C").map(group => ({ gardenType: group.gardenType, areaHa: group.areaHa }))).toEqual([{ gardenType: "C", areaHa: 8.37 }]);
+  });
+
+  it("counts actual allocation gardens in team summaries", () => {
+    const groups = groupPlotsByTeam([{ unit: "Đội 3", name: "Lô 29", code: "D3-29", plantedYear: 2012, areaHa: 13.17, gardenType: "C" as const, gardenAllocations: [{ gardenType: "B" as const, areaHa: 4.8 }, { gardenType: "C" as const, areaHa: 8.37 }] }]);
+    expect(groups[0]?.gardenCounts).toEqual({ A: 0, B: 1, C: 1 });
+    expect(groups[0]?.gardenAreas).toEqual({ A: 0, B: 4.8, C: 8.37 });
+  });
+});

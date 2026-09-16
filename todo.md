@@ -9844,3 +9844,15 @@
 - [ ] Pending
 
 ##
+
+## Yêu cầu sửa bộ lọc Vườn và ngưỡng cảnh báo theo Đội — 2026-09-16
+
+- [x] Lọc nhóm Vườn theo `gardenType` của allocation thực tế, không dựa vào gardenType gốc của plantation plot
+- [x] Bảo đảm một Lô xuất hiện ở từng nhóm Vườn A/B/C tương ứng với allocation thực tế và đúng diện tích/số cây của phần đó
+- [x] Điều chỉnh kiểm tra cảnh báo: chỉ cảnh báo khi tổng diện tích allocation của một Đội vượt tổng diện tích nguồn của Đội
+- [x] Điều chỉnh kiểm tra cảnh báo: chỉ cảnh báo khi tổng cây cạo allocation của một Đội vượt tổng cây cạo nguồn của Đội
+- [x] Không cảnh báo chỉ vì tổng allocation của một Lô vượt tổng gốc của Lô nếu tổng theo Đội vẫn không vượt
+- [x] Bổ sung test backend/UI cho lọc Vườn theo allocation và ngưỡng cảnh báo theo Đội
+- [x] Chạy check, Vitest và build production
+- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [ ] Chờ xác nhận mới nếu người dùng muốn publish Public
