@@ -2,6 +2,8 @@ export type WorkerPlotAllocationRow = {
   unit?: string;
   workerName?: string;
   employeeCode?: string | null;
+  sourceRow?: number;
+  sourceOrdinal?: string;
   gardenType: "A" | "B" | "C";
   plotCode: string;
   rowStart: number;
@@ -54,7 +56,7 @@ export function parseWorkerPlotAllocationRows(rows: unknown[][]) {
         issues.push(`Dòng ${sheetRow} – Vườn ${slot.gardenType}: Hàng - hàng bắt đầu phải nhỏ hơn hoặc bằng hàng kết thúc`);
         return;
       }
-      parsed.push({ unit, workerName, employeeCode, gardenType: slot.gardenType, plotCode, rowStart: rowRange.start, rowEnd: rowRange.end, areaHa, tappingTrees: newLayout && Number.isFinite(tappingTrees) && tappingTrees >= 0 ? tappingTrees : undefined });
+      parsed.push({ unit, workerName, employeeCode, sourceRow: sheetRow, sourceOrdinal: text(row[0]) || undefined, gardenType: slot.gardenType, plotCode, rowStart: rowRange.start, rowEnd: rowRange.end, areaHa, tappingTrees: newLayout && Number.isFinite(tappingTrees) && tappingTrees >= 0 ? tappingTrees : undefined });
     });
   });
   return { parsed, issues };

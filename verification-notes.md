@@ -40,3 +40,9 @@ Public domain root and `/?source=pwa` return HTTP 200. `/manifest.webmanifest` r
 ## Kiểm tra trực quan Quản lý vườn — 2026-09-15
 
 Route `/plots` trong preview đã tải thành công sau khi chờ dữ liệu. Viewport hiển thị bảng Danh sách chung với các cột Vườn A, Vườn B, Vườn C theo từng Đội và các thao tác Xem riêng, Chỉnh sửa, Import. Screenshot này chưa hiển thị riêng dòng Lô 7, nên chưa coi là bằng chứng xác nhận riêng Lô 7 xuất hiện đồng thời ở A và B.
+
+## Phân tích lỗi file Phân chia nhân công
+
+Thông báo lỗi tại dòng 13 xuất phát từ validation trong `server/db.ts`: Lô `6 (2011)` được tìm thấy đúng theo tên hiển thị, nhưng bản ghi `plantation_plots.gardenType` của Lô đang là `A` trong khi dòng import đặt phần phân bổ ở cột Vườn B. Validation hiện tại coi `plantation_plots.gardenType` là Vườn cố định của Lô và còn dùng `desiredGardenType` để cấm cùng một Lô xuất hiện ở Vườn khác trong cùng file.
+
+Đây là lỗi quy tắc mapping/validation, không phải lỗi thiếu năm trồng hoặc lỗi đọc chuỗi. Theo mô hình phân bổ hiện tại, `worker_plot_allocations.gardenType` là Vườn của từng phần phân bổ và có thể cần khác `plantation_plots.gardenType`; vì vậy không nên dùng gardenType của bảng Lô để từ chối phân bổ A/B hoặc tự cập nhật gardenType của Lô trong lúc import. Chưa sửa mã nguồn, chưa xóa/ghi dữ liệu và chưa publish/đổi visibility.

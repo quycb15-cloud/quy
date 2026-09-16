@@ -2206,6 +2206,8 @@ export type WorkerPlotAllocationImportRow = {
   unit?: string;
   workerName?: string;
   employeeCode?: string | null;
+  sourceRow?: number;
+  sourceOrdinal?: string;
   gardenType: "A" | "B" | "C";
   plotCode: string;
   rowStart: number;
@@ -2265,8 +2267,10 @@ export async function bulkUpsertWorkerPlotAllocations(
   });
   const desiredGardenType = new Map<number, "A" | "B" | "C">();
   const resolved = resolvedWorkers.map(({ row, worker }, index) => {
+    const sourceRow = row.sourceRow ?? index + 2;
+    const sourceLabel = row.sourceOrdinal ? `Dòng Excel ${sourceRow} (TT ${row.sourceOrdinal})` : `Dòng Excel ${sourceRow}`;
     if (row.rowStart > row.rowEnd)
-      throw new Error(`Dòng ${index + 2}: Hàng từ phải nhỏ hơn hoặc bằng Hàng đến`);
+      throw new Error(`${sourceLabel} – Vườn ${row.gardenType}: Hàng từ phải nhỏ hơn hoặc bằng Hàng đến`);
     const rawPlotValue = row.plotCode.trim();
     const codePlot = plotsByUnitAndCode.get(`${worker.unit}::${rawPlotValue}`);
     const parsedPlot = parsePlotDisplayName(rawPlotValue);
@@ -2276,8 +2280,8 @@ export async function bulkUpsertWorkerPlotAllocations(
     if (!plot)
       throw new Error(
         displayCandidates.length > 1
-          ? `Dòng ${index + 2}: Tên Lô ${row.plotCode} thuộc ${worker.unit} bị trùng năm trồng; hãy ghi đúng dạng Tên Lô (Năm trồng)`
-          : `Dòng ${index + 2}: Không tìm thấy Lô ${row.plotCode} thuộc ${worker.unit}`
+          ? `${sourceLabel} – Vườn ${row.gardenType}: Tên Lô ${row.plotCode} thuộc ${worker.unit} bị trùng năm trồng; hãy ghi đúng dạng Tên Lô (Năm trồng)`
+          : `${sourceLabel} – Vườn ${row.gardenType}: Không tìm thấy Lô ${row.plotCode} thuộc ${worker.unit}`
       );
     const priorGarden = desiredGardenType.get(plot.id);
     if (
@@ -2285,7 +2289,7 @@ export async function bulkUpsertWorkerPlotAllocations(
       (priorGarden && priorGarden !== row.gardenType)
     )
       throw new Error(
-        `Dòng ${index + 2}: Lô ${formatPlotDisplayName(plot.name, plot.plantedYear)} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
+        `${sourceLabel} – Vườn ${row.gardenType}: Lô ${formatPlotDisplayName(plot.name, plot.plantedYear)} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
       );
     desiredGardenType.set(plot.id, row.gardenType);
     return { row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };

@@ -6,7 +6,7 @@ describe("parseWorkerPlotAllocationRows", () => {
     const rows = [["STT"], [""], [1, "Đội 2", "YIM RA", "NC-002", "LO-DOI-2-2012-7A", "", "", 1, 12, 2.35, "LO-DOI-2-2012-8", "", "", 13, 25, "3,40"]];
     const result = parseWorkerPlotAllocationRows(rows);
     expect(result.issues).toEqual([]);
-    expect(result.parsed).toEqual([{ unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", gardenType: "A", plotCode: "LO-DOI-2-2012-7A", rowStart: 1, rowEnd: 12, areaHa: 2.35 }, { unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", gardenType: "B", plotCode: "LO-DOI-2-2012-8", rowStart: 13, rowEnd: 25, areaHa: 3.4 }]);
+    expect(result.parsed).toEqual([{ unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", sourceRow: 3, sourceOrdinal: "1", gardenType: "A", plotCode: "LO-DOI-2-2012-7A", rowStart: 1, rowEnd: 12, areaHa: 2.35 }, { unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", sourceRow: 3, sourceOrdinal: "1", gardenType: "B", plotCode: "LO-DOI-2-2012-8", rowStart: 13, rowEnd: 25, areaHa: 3.4 }]);
   });
 
   it("đọc mẫu mới chỉ có Mã công nhân và ba nhóm Vườn", () => {
@@ -18,8 +18,8 @@ describe("parseWorkerPlotAllocationRows", () => {
     expect(parseWorkerPlotAllocationRows(rows)).toEqual({
       issues: [],
       parsed: [
-        { unit: undefined, workerName: undefined, employeeCode: "NC-002", gardenType: "A", plotCode: "LO-A", rowStart: 1, rowEnd: 12, areaHa: 2.35, tappingTrees: 1200 },
-        { unit: undefined, workerName: undefined, employeeCode: "NC-002", gardenType: "B", plotCode: "LO-B", rowStart: 13, rowEnd: 25, areaHa: 3.4, tappingTrees: 1500 },
+        { unit: undefined, workerName: undefined, employeeCode: "NC-002", sourceRow: 3, sourceOrdinal: "1", gardenType: "A", plotCode: "LO-A", rowStart: 1, rowEnd: 12, areaHa: 2.35, tappingTrees: 1200 },
+        { unit: undefined, workerName: undefined, employeeCode: "NC-002", sourceRow: 3, sourceOrdinal: "1", gardenType: "B", plotCode: "LO-B", rowStart: 13, rowEnd: 25, areaHa: 3.4, tappingTrees: 1500 },
       ],
     });
   });

@@ -454,3 +454,20 @@
 - [x] Sắp xếp Nhân công theo Mã số dạng chuỗi, giữ đúng thứ tự tự nhiên và dấu gạch nối
 - [x] Bổ sung test cho nhãn Tên phiên âm và thứ tự Mã số
 - [x] Chạy check/test/build và lưu checkpoint; chưa publish hoặc đổi visibility
+
+## Phân tích lỗi file Phân chia nhân công
+- [x] Đối chiếu dòng lỗi với quy tắc tên Lô kèm năm trồng và Vườn A/B/C
+- [x] Xác định nguyên nhân dòng Lô bị nhận sai Vườn
+- [x] Báo cáo dòng lỗi và khuyến nghị sửa file/parser; không publish, không đổi visibility
+
+## Kiểm tra lệch số dòng lỗi Import Phân chia nhân công
+- [x] Đối chiếu số dòng parser với số hàng Excel thực tế
+- [x] Xác định vì sao lỗi hiển thị Dòng 31 không trùng hàng nhìn thấy
+- [x] Báo cáo dòng Excel đúng và khuyến nghị sửa thông báo; không sửa dữ liệu/publish
+
+## Sửa thông báo dòng lỗi Import Phân chia nhân công
+- [x] Lưu metadata hàng Excel gốc, TT, Mã công nhân và nhóm Vườn khi parse
+- [x] Hiển thị lỗi theo hàng Excel gốc và đúng Lô/Vườn gây lỗi
+- [x] Rà soát dữ liệu phân chia hiện có, chỉ chỉnh bản ghi nếu xác định sai lệch
+- [x] Bổ sung test, chạy typecheck/build và lưu checkpoint
+- [ ] Xác nhận visibility và publish bản sửa
