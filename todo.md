@@ -9854,5 +9854,5 @@
 - [x] Không cảnh báo chỉ vì tổng allocation của một Lô vượt tổng gốc của Lô nếu tổng theo Đội vẫn không vượt
 - [x] Bổ sung test backend/UI cho lọc Vườn theo allocation và ngưỡng cảnh báo theo Đội
 - [x] Chạy check, Vitest và build production
-- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
 - [ ] Chờ xác nhận mới nếu người dùng muốn publish Public
