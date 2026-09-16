@@ -33,4 +33,13 @@ describe("parseWorkerPlotAllocationRows", () => {
     const rows = [["STT"], [""], [1, "Đội 2", "YIM RA", "", "LO-DOI-2-2012-7A", "", "", 1, 12, 2.35]];
     expect(parseWorkerPlotAllocationRows(rows).parsed[0]?.areaHa).toBe(2.35);
   });
+
+  it("chuẩn hóa Tổng cây cạo thập phân từ Excel theo cột định dạng số nguyên", () => {
+    const rows = [
+      ["TT", "Mã công nhân", "VƯỜN A", "", "", "", "VƯỜN B", "", "", "", "VƯỜN C"],
+      ["", "", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo", "Lô (Tên hiển thị)", "Hàng - hàng", "Diện tích", "Tổng cây cạo"],
+      [1, "D4-06", "52 (2012)", "14-16", 1.3517, 696, "53 (2013)", "1-19", 1.4778, 647, "54 (2012)", "46-70", 1.449, 764.7900000000001],
+    ];
+    expect(parseWorkerPlotAllocationRows(rows).parsed.map(row => row.tappingTrees)).toEqual([696, 647, 765]);
+  });
 });

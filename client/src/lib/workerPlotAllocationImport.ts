@@ -18,6 +18,10 @@ const number = (value: unknown) => {
   const raw = text(value);
   return Number(raw.includes(",") ? raw.replaceAll(".", "").replace(",", ".") : raw);
 };
+const integerNumber = (value: unknown) => {
+  const parsed = number(value);
+  return Number.isFinite(parsed) ? Math.round(parsed) : parsed;
+};
 
 function parseRowRange(value: unknown) {
   const raw = text(value).replace(/[–—]/g, "-");
@@ -45,7 +49,7 @@ export function parseWorkerPlotAllocationRows(rows: unknown[][]) {
       const plotCode = text(row[slot.start]);
       const rowRange = newLayout ? parseRowRange(row[slot.start + 1]) : { start: number(row[slot.start + 3]), end: number(row[slot.start + 4]) };
       const areaHa = number(row[newLayout ? slot.start + 2 : slot.start + 5]);
-      const tappingTrees = number(row[newLayout ? slot.start + 3 : -1]);
+      const tappingTrees = integerNumber(row[newLayout ? slot.start + 3 : -1]);
       const hasValue = [plotCode, newLayout ? row[slot.start + 1] : row[slot.start + 3], newLayout ? row[slot.start + 2] : row[slot.start + 5]].some(value => text(value));
       if (!hasValue) return;
       if ((newLayout ? !employeeCode : !unit || !workerName) || !plotCode || !rowRange || !Number.isInteger(rowRange.start) || !Number.isInteger(rowRange.end) || !Number.isFinite(areaHa) || areaHa <= 0) {

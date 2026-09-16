@@ -9856,3 +9856,13 @@
 - [x] Chạy check, Vitest và build production
 - [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
 - [ ] Chờ xác nhận mới nếu người dùng muốn publish Public
+
+## Sửa lỗi import mau-import-PhanchianhâncongvươncayD4.xlsx — 2026-09-16
+
+- [x] Đọc cấu trúc workbook, sheet, header và kiểu dữ liệu thực tế của file mẫu
+- [x] Xác định nguyên nhân lỗi validation `tappingTrees expected int, received number`
+- [x] Sửa parser/validation để chấp nhận số cây cạo hợp lệ từ Excel nhưng vẫn từ chối dữ liệu sai
+- [x] Giữ chính xác Dòng Excel + TT trong thông báo lỗi
+- [x] Bổ sung regression test bằng cấu trúc dữ liệu của file D4
+- [x] Chạy check, toàn bộ Vitest và build production
+- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility

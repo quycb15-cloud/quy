@@ -133,4 +133,11 @@ describe("dataToolsRouter", () => {
     await expect(appRouter.createCaller(context("admin")).dataTools.import.workerPlotAllocations({ rows })).resolves.toEqual({ success: true, imported: 1 });
     await expect(appRouter.createCaller(context("user")).dataTools.import.workerPlotAllocations({ rows })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
+
+  it("nhận số cây cạo thập phân từ Excel và chuẩn hóa về số nguyên trước khi lưu", async () => {
+    dbMocks.bulkUpsertWorkerPlotAllocations.mockResolvedValue(1);
+    const rows = [{ employeeCode: "NC-002", gardenType: "C" as const, plotCode: "LO-A", rowStart: 46, rowEnd: 70, areaHa: 1.449, tappingTrees: 764.79 }];
+    await expect(appRouter.createCaller(context("admin")).dataTools.import.workerPlotAllocations({ rows })).resolves.toEqual({ success: true, imported: 1 });
+    expect(dbMocks.bulkUpsertWorkerPlotAllocations).toHaveBeenCalledWith([{ ...rows[0], tappingTrees: 765 }], 1);
+  });
 });
