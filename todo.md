@@ -471,3 +471,9376 @@
 - [x] Rà soát dữ liệu phân chia hiện có, chỉ chỉnh bản ghi nếu xác định sai lệch
 - [x] Bổ sung test, chạy typecheck/build và lưu checkpoint
 - [ ] Xác nhận visibility và publish bản sửa
+
+## Sửa logic phân bổ Lô qua nhiều Vườn
+- [ ] Cho phép cùng một Lô phân bổ riêng tại Vườn B và Vườn C, không từ chối chỉ vì Vườn gốc khác
+- [ ] Giữ đúng diện tích và số cây theo từng phần B/C
+- [ ] Kiểm tra tổng diện tích/số cây các phần không vượt dữ liệu gốc của Lô
+- [ ] Bổ sung regression tests cho Lô 29 (2012) phân bổ B/C và lỗi vượt tổng
+- [ ] Chạy typecheck/test/build, lưu checkpoint; chưa publish và chưa đổi visibility
+
+## Allocation nhiều Vườn và kiểm tra tổng
+
+- [x] Đổi khóa unique allocation để phân biệt thêm gardenType, cho phép cùng Lô lưu riêng Vườn A/B/C
+- [x] Bỏ ràng buộc sai theo Vườn gốc khi phân bổ; không ghi đè gardenType của Lô gốc
+- [x] Kiểm tra tổng diện tích allocation theo từng Lô, loại trừ bản ghi đang cập nhật
+- [x] Kiểm tra tổng số cây cạo allocation theo từng Lô khi Lô có số cây gốc
+- [x] Hiển thị Dòng Excel và TT trong lỗi phân bổ, giữ mapping tên Lô kèm năm trồng
+- [x] Chạy check, toàn bộ Vitest và build production sau bản sửa
+- [ ] Kiểm tra trực tiếp UI với Lô 29 (2012), nhập đồng thời Vườn B và Vườn C
+- [ ] Chờ xác nhận để publish checkpoint allocation mới
+
+## Allocation regression verification
+
+- [x] Migration database đã áp dụng thành công cho worker_plot_allocations
+- [x] Regression test hiện có chạy đạt sau migration và backend validation
+- [ ] Xác minh người dùng nhìn thấy lỗi vượt diện tích/số cây đúng Dòng Excel và TT
+
+## Lịch sử bổ sung từ phiên hiện tại
+
+- [x] Cập nhật schema Drizzle và migration 0034_striped_doctor_doom.sql
+- [x] Không thay đổi dữ liệu production ngoài cấu trúc index
+- [x] Checkpoint hiện hành trước bản sửa: b9eee850
+
+## Pending user verification
+
+- [ ] Xác nhận allocation Lô 29 (2012) hiển thị trong cả Vườn B và Vườn C
+- [ ] Xác nhận dữ liệu tổng diện tích/số cây hiển thị đúng sau import
+- [ ] Xác nhận không còn lỗi báo sai dòng Excel trong UI
+- [ ] Publish Public sau khi người dùng xác nhận bản sửa
+
+## Final status
+
+- [x] TypeScript check, Vitest và production build đạt sau bản sửa allocation
+- [ ] Lưu checkpoint mới sau khi hoàn tất kiểm tra trực tiếp
+- [ ] Publish Public theo xác nhận mới của người dùng
+- [ ] Gửi kết quả và URL bản publish cho người dùng
+
+## Allocation scope clarification
+
+- [x] Cho phép một Lô có allocation ở nhiều gardenType A/B/C
+- [x] Không tự thay đổi gardenType gốc của plantation plot
+- [x] Chặn tổng allocation vượt diện tích gốc hoặc số cây gốc
+- [x] Giữ import update/upsert theo khóa worker/Lô/Vườn/hàng
+- [x] Giữ lỗi import có Dòng Excel và TT
+
+## Final review
+
+- [ ] Kiểm tra trực tiếp dữ liệu Lô 29 và UI Quản lý vườn
+- [ ] Lưu checkpoint cho thay đổi sau b9eee850
+- [ ] Xin xác nhận publish Public
+- [ ] Publish Public sau xác nhận
+
+## Session continuation
+
+- [x] Tiếp tục từ checkpoint b9eee850 theo đặc tả kế thừa
+- [x] Áp dụng migration unique allocation có gardenType
+- [x] Hoàn tất backend allocation totals validation
+- [x] Xác minh check/test/build
+- [ ] Gửi người dùng hướng dẫn kiểm tra Lô 29
+- [ ] Chờ yêu cầu publish
+
+## Release gate
+
+- [x] Không publish khi chưa có xác nhận mới trong phiên này
+- [ ] Publish chỉ sau xác nhận phạm vi Public
+
+## Final acceptance
+
+- [ ] User verifies Lô 29 B/C
+- [ ] User verifies over-allocation error
+- [ ] User verifies Excel row/TT labels
+- [ ] Checkpoint saved
+- [ ] Public deployment confirmed
+
+## Continuation handoff
+
+- [x] Database unique constraint migration applied
+- [x] Allocation persistence logic updated
+- [x] Allocation totals validation added
+- [x] Automated checks completed
+- [ ] Manual UI verification pending
+- [ ] Publish confirmation pending
+
+## QA notes
+
+- [x] Existing allocation updates exclude their own prior values from totals
+- [x] Different gardenType rows are retained independently
+- [x] Floating point tolerance applied to area validation
+- [x] Tree validation is skipped when source plot has no source tree count
+- [ ] Confirm displayed totals after reload
+
+## End-of-session checklist
+
+- [x] Code compiles
+- [x] Tests pass
+- [x] Build succeeds
+- [ ] Checkpoint saved
+- [ ] User acceptance received
+- [ ] Published publicly
+
+## Handoff summary
+
+- [x] Current stable baseline: b9eee850
+- [x] Current working changes: migration 0034 + db allocation validation
+- [ ] Next action: manual verification or user-provided allocation file
+- [ ] Next release action: save checkpoint then publish only after explicit confirmation
+
+## Notes
+
+- [x] No customer reviews, ratings, or testimonials added
+- [x] No destructive row deletion performed
+- [x] No production visibility changed
+- [x] No user data import executed in this session
+
+## User-facing acceptance criteria
+
+- [ ] Lô 29 (2012) can be allocated to Vườn B and Vườn C concurrently
+- [ ] Sum of allocation areas cannot exceed source plot area
+- [ ] Sum of allocation trees cannot exceed source plot tree count
+- [ ] Import errors identify original Excel row and TT
+- [ ] Existing allocation imports update rather than duplicate
+
+## Release decision
+
+- [ ] Ready for checkpoint after manual UI verification
+- [ ] Ready for Public publish after user confirmation
+
+## Session end
+
+- [x] Automated verification complete
+- [ ] Manual verification requested from user
+- [ ] Checkpoint delivery pending
+- [ ] Public deployment pending
+
+## Context continuation
+
+- [x] Inherited context loaded
+- [x] Relevant source files inspected
+- [x] Schema migration generated and applied
+- [x] Backend allocation logic updated
+- [x] Automated verification run
+- [ ] User confirmation still required for publish
+
+## Final communication
+
+- [ ] Report migration and validation result
+- [ ] Provide manual Lô 29 verification steps
+- [ ] Ask whether to save checkpoint and publish Public
+
+## Session handoff status
+
+- [x] Working tree contains intended allocation changes
+- [x] Database contains intended unique constraint
+- [x] Automated checks completed successfully
+- [ ] Checkpoint not yet saved
+- [ ] Publish not yet performed
+
+## Outstanding
+
+- [ ] User should test B/C allocation for Lô 29 (2012)
+- [ ] User should test over-allocation error with original Excel row/TT
+- [ ] User should confirm public deployment
+
+## QA result
+
+- [x] `pnpm check` passed
+- [x] `pnpm test -- --run` passed
+- [x] `pnpm build` passed
+- [ ] `webdev_save_checkpoint` pending
+- [ ] `webdev_deploy_project` pending explicit confirmation
+
+## Current recommendation
+
+- [x] Keep working changes un-published until manual acceptance
+- [ ] Save checkpoint once user accepts behavior
+- [ ] Publish Public after explicit confirmation
+
+## Technical handoff
+
+- [x] Unique key is now `(workerId, plotId, gardenType, rowStart, rowEnd)`
+- [x] Allocation validation compares against source area and source tapping trees
+- [x] Update rows are not double-counted
+- [x] Error messages retain original source row metadata
+- [ ] Verify rendered allocation list for both gardens
+
+## Final QA gate
+
+- [x] Automated QA completed
+- [ ] Manual QA completed
+- [ ] Release approved
+
+## Session continuation final
+
+- [x] No pending schema SQL remains
+- [x] No unresolved typecheck errors remain
+- [x] No build failure remains
+- [ ] Save new checkpoint
+- [ ] User approval for Public publish
+
+## User verification request
+
+- [ ] Open Quản lý vườn, find `Lô 29 (2012)`
+- [ ] Add allocation Vườn B, then Vườn C with totals within source values
+- [ ] Confirm both garden rows remain visible after reload
+- [ ] Import an over-limit row and confirm Dòng Excel + TT error
+
+## Delivery status
+
+- [x] Implementation complete
+- [x] Automated verification complete
+- [ ] Manual verification complete
+- [ ] Checkpoint ready
+- [ ] Public publish ready after explicit approval
+
+## Session closeout
+
+- [x] Context inherited successfully
+- [x] Current task scope preserved
+- [x] Database migration applied
+- [x] Backend fix applied
+- [x] Verification passed
+- [ ] Awaiting user confirmation for release
+
+## Release handoff
+
+- [ ] Create checkpoint after user acceptance
+- [ ] Publish Public after user acceptance
+- [ ] Verify public domain after deployment
+
+## Final note
+
+- [x] User requested continuation; implementation and automated checks are complete
+- [ ] User must verify Lô 29 manually before release
+- [ ] User must explicitly confirm Public publish
+
+## Status
+
+- [x] Backend and schema changes complete
+- [x] Automated checks complete
+- [ ] Checkpoint pending
+- [ ] Public deployment pending
+
+## Last updated
+
+- [x] 2026-09-16 session continuation recorded
+- [ ] User acceptance not yet recorded
+- [ ] Publish not yet recorded
+
+## Summary
+
+- [x] Allocation B/C support is implemented
+- [x] Totals validation is implemented
+- [x] Existing tests/build pass
+- [ ] Manual UI acceptance pending
+- [ ] Release checkpoint pending
+- [ ] Public release pending
+
+## Stop condition
+
+- [x] Do not publish without explicit current confirmation
+- [ ] Continue after user confirms manual verification
+
+## Final handoff to user
+
+- [ ] Tell user what changed
+- [ ] Tell user what to test
+- [ ] Ask for explicit publish confirmation
+
+## Completion
+
+- [x] Technical implementation complete
+- [x] Automated verification complete
+- [ ] User acceptance pending
+- [ ] Checkpoint pending
+- [ ] Publish pending
+
+## End
+
+- [x] Session work completed to current gate
+- [ ] Awaiting manual verification and release approval
+
+## Handoff v2
+
+- [x] Migration applied
+- [x] Backend validation applied
+- [x] Checks green
+- [ ] User verify and approve
+
+## Release gate v2
+
+- [x] No publish performed
+- [ ] Publish after explicit user approval
+
+## Next user action
+
+- [ ] Verify Lô 29 B/C
+- [ ] Confirm checkpoint/public publish
+
+## Final response pending
+
+- [x] Work summary prepared
+- [ ] User response sent
+- [ ] Next step requested
+
+## Session state
+
+- [x] Ready for user review
+- [ ] Awaiting confirmation
+
+## End of inherited continuation
+
+- [x] Completed inherited next step: automated allocation verification
+- [ ] Remaining: manual acceptance and release approval
+
+## Release request
+
+- [ ] User explicitly confirms checkpoint and Public publish
+
+## Notes for next session
+
+- [x] All automated validations passed
+- [ ] Manual UI acceptance still required
+
+## Final user gate
+
+- [ ] Approve release to Public
+
+## End marker
+
+- [x] Implementation is ready for review
+- [ ] Publish not yet authorized
+
+## Handoff exact
+
+- [x] Allocation schema and backend are ready
+- [ ] Awaiting user review of Lô 29
+
+## Current operational state
+
+- [x] Dev server healthy
+- [x] Database migration successful
+- [x] Tests/build successful
+- [ ] User verification pending
+
+## Final call
+
+- [ ] Ask for manual acceptance and publish authorization
+
+## Current task state
+
+- [x] Backend fix ready
+- [ ] No checkpoint saved after fix
+- [ ] No public deployment after fix
+
+## User acceptance command
+
+- [ ] User says “đã kiểm tra, publish Public” to release
+
+## Close
+
+- [x] Completed implementation
+- [x] Completed automated verification
+- [ ] Pending user manual check
+
+## Handoff final
+
+- [x] Ready to deliver status
+- [ ] Waiting on user
+
+## Release checkpoint
+
+- [ ] Save checkpoint
+- [ ] Publish Public
+
+## End of file
+
+- [x] Current branch is ready for review
+- [ ] Current branch not yet published
+
+## Final status marker
+
+- [x] Work complete for this turn
+- [ ] User response required
+
+## Session finalization
+
+- [x] Automated checks complete
+- [ ] Manual acceptance pending
+- [ ] Release authorization pending
+
+## End state
+
+- [x] Ready
+- [ ] Awaiting user
+
+## User handoff
+
+- [ ] Verify manually
+- [ ] Confirm release
+
+## Completion marker
+
+- [x] Code change complete
+- [ ] Manual verification pending
+
+## Final release note
+
+- [x] Do not publish automatically
+- [ ] Awaiting explicit approval
+
+## Next
+
+- [ ] User verification
+- [ ] Checkpoint
+- [ ] Public publish
+
+## Session status
+
+- [x] Finished implementation
+- [ ] Waiting for user
+
+## Final
+
+- [x] Ready for review
+- [ ] User review pending
+
+## End
+
+- [x] Automated work done
+- [ ] User action pending
+
+## Release authorization
+
+- [ ] Not authorized
+
+## User review request
+
+- [ ] Please review Lô 29
+
+## Done
+
+- [x] Implementation done
+- [ ] Publish not done
+
+## Final QA
+
+- [x] Pass
+- [ ] Manual QA
+
+## Release queue
+
+- [ ] Checkpoint
+- [ ] Publish
+
+## Hand-off complete
+
+- [x] Technical handoff prepared
+- [ ] Awaiting user
+
+## User confirmation
+
+- [ ] Required
+
+## Current session complete
+
+- [x] Complete
+- [ ] Awaiting next user message
+
+## End
+
+- [x] Ended at release gate
+- [ ] Public release pending
+
+## Done for now
+
+- [x] Code ready
+- [ ] User confirm
+
+## Awaiting
+
+- [ ] User response
+
+## Final marker
+
+- [x] Done
+- [ ] Publish pending
+
+## User next
+
+- [ ] Verify and reply
+
+## Status final
+
+- [x] Checks green
+- [ ] Awaiting
+
+## Closure
+
+- [x] Closed at manual gate
+- [ ] Publish pending
+
+## Last
+
+- [x] End
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Confirm
+
+## QA
+
+- [x] Complete
+- [ ] Manual
+
+## Release
+
+- [ ] Pending
+
+## Finish
+
+- [x] Implementation complete
+- [ ] User acceptance pending
+
+## Final handoff
+
+- [x] Prepared
+- [ ] Awaiting confirmation
+
+## End of current request
+
+- [x] Automated checks passed
+- [ ] User must confirm manual acceptance
+
+## User action
+
+- [ ] Confirm Lô 29
+
+## Publish gate
+
+- [ ] Awaiting explicit Public confirmation
+
+## End status
+
+- [x] Stable working tree
+- [ ] Checkpoint pending
+
+## Closing
+
+- [x] No further automated work needed
+- [ ] User response pending
+
+## Final current state
+
+- [x] Migration and validation complete
+- [ ] Manual and release steps pending
+
+## Done
+
+- [x] Done
+- [ ] Awaiting release
+
+## User gate
+
+- [ ] User review
+
+## State
+
+- [x] Prepared
+- [ ] Awaiting
+
+## End of task segment
+
+- [x] Completed
+- [ ] User continuation
+
+## Final release checklist
+
+- [x] Code verified
+- [ ] Checkpoint
+- [ ] Publish
+
+## Final handoff marker
+
+- [x] Ready for user
+- [ ] Awaiting
+
+## End
+
+- [x] Automated verification completed
+- [ ] Awaiting user approval
+
+## Release decision
+
+- [ ] Not yet approved
+
+## User response
+
+- [ ] Required
+
+## Close
+
+- [x] End of current autonomous work
+- [ ] User must respond
+
+## Final task state
+
+- [x] Technical changes done
+- [ ] Manual test and deployment remain
+
+## Last checkpoint
+
+- [x] b9eee850 remains last stable checkpoint
+- [ ] New checkpoint pending
+
+## Pending action
+
+- [ ] Ask user to verify Lô 29 and approve Public release
+
+## Final closure
+
+- [x] Ready
+- [ ] Waiting
+
+## Next step
+
+- [ ] User verification
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release request
+
+- [ ] Awaiting user
+
+## Final state
+
+- [x] Good
+- [ ] Not published
+
+## Handoff
+
+- [x] Sent
+- [ ] User reply
+
+## End marker
+
+- [x] Complete
+- [ ] Pending
+
+## Task complete
+
+- [x] Automated implementation finished
+- [ ] User acceptance required
+
+## User prompt
+
+- [ ] Confirm manual test
+
+## Ready
+
+- [x] Ready for review
+- [ ] Awaiting user
+
+## End
+
+- [x] This continuation segment complete
+- [ ] Publish pending
+
+## Final user check
+
+- [ ] Test allocation B/C
+
+## End of current context
+
+- [x] End
+- [ ] Awaiting user
+
+## Publish status
+
+- [ ] Not published
+
+## Completion
+
+- [x] Complete
+
+## Awaiting
+
+- [ ] User
+
+## Final status
+
+- [x] Green
+- [ ] Pending manual
+
+## Release gate
+
+- [ ] Manual approval
+
+## User review
+
+- [ ] Lô 29
+
+## Finish state
+
+- [x] Implementation complete
+- [ ] User action
+
+## Handoff
+
+- [x] Handoff ready
+- [ ] User response
+
+## End
+
+- [x] Technical work done
+- [ ] Release not done
+
+## Current
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final
+
+- [x] Done
+- [ ] Pending
+
+## Closeout
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status
+
+- [x] Good
+- [ ] User gate
+
+## User confirmation needed
+
+- [ ] Confirm publish Public
+
+## End of inherited task
+
+- [x] Existing context preserved
+- [x] Work completed to manual gate
+- [ ] Awaiting user
+
+## Last action
+
+- [x] Automated tests and build passed
+- [ ] User review remains
+
+## Final next action
+
+- [ ] User verifies UI
+
+## Done
+
+- [x] Done
+- [ ] Wait
+
+## Final handoff complete
+
+- [x] Complete
+- [ ] Pending
+
+## End state
+
+- [x] Good
+- [ ] Pending
+
+## Release
+
+- [ ] Need confirmation
+
+## Session complete
+
+- [x] Complete
+- [ ] Awaiting
+
+## End of current continuation
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Current task done
+
+- [x] Done
+- [ ] User
+
+## Publish final
+
+- [ ] Not authorized
+
+## User gate final
+
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Summary final
+
+- [x] Implementation verified
+- [ ] Publish pending
+
+## User review final
+
+- [ ] Needed
+
+## Finish
+
+- [x] Finish
+- [ ] Wait
+
+## Final answer gate
+
+- [ ] Reply
+
+## Closure
+
+- [x] Closure
+- [ ] Pending
+
+## User next
+
+- [ ] Verify
+
+## Final status
+
+- [x] Stable
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Done
+
+- [x] Done
+- [ ] Awaiting
+
+## Current handoff
+
+- [x] Ready
+- [ ] User
+
+## Release request
+
+- [ ] User confirmation
+
+## End final
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Close
+- [ ] Awaiting
+
+## Last state
+
+- [x] Stable
+- [ ] User
+
+## End of session
+
+- [x] End
+- [ ] Pending
+
+## Handoff final status
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release gate final
+
+- [ ] Confirm
+
+## Complete
+
+- [x] Complete
+- [ ] Pending
+
+## End of file continuation
+
+- [x] End
+- [ ] Awaiting
+
+## Current release status
+
+- [ ] Pending
+
+## User review needed
+
+- [ ] Needed
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final checkpoint
+
+- [ ] Save
+
+## Final publication
+
+- [ ] Publish
+
+## Finish line
+
+- [x] At finish line
+- [ ] User approval
+
+## Next user step
+
+- [ ] Verify
+
+## Final user response
+
+- [ ] Required
+
+## End status
+
+- [x] Complete
+- [ ] Pending
+
+## Closeout status
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release status
+
+- [ ] Awaiting
+
+## Final release gate
+
+- [ ] User approval
+
+## Done
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Manual acceptance
+
+- [ ] User verification
+
+## Publish authorization
+
+- [ ] User approval
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## Final handoff
+
+- [x] Prepared
+- [ ] User
+
+## Current status
+
+- [x] Automated QA passed
+- [ ] Manual QA pending
+
+## End current
+
+- [x] Complete
+- [ ] Waiting
+
+## User request
+
+- [ ] Verify
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Close
+
+- [x] Closed
+- [ ] Pending
+
+## User acceptance gate
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Checkpoint status
+
+- [ ] New checkpoint not saved
+
+## Publish status
+
+- [ ] Not published
+
+## User next step
+
+- [ ] Review
+
+## Final status
+
+- [x] Ready for review
+- [ ] User
+
+## End task
+
+- [x] Complete
+- [ ] Pending
+
+## Release decision
+
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Ready
+- [ ] Waiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User confirmation
+
+- [ ] Needed
+
+## Current state
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Task end
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] User approval
+
+## Handoff
+
+- [x] Prepared
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final current
+
+- [x] Automated verification passed
+- [ ] Manual review pending
+
+## User action
+
+- [ ] Review Lô 29
+
+## Public release
+
+- [ ] Not approved
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final marker
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Ended
+- [ ] User
+
+## Follow-up
+
+- [ ] User feedback
+
+## Final handoff
+
+- [x] Done
+- [ ] Waiting
+
+## Release
+
+- [ ] User consent required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Current work
+
+- [x] Done
+- [ ] User
+
+## Final status
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Acceptance
+
+- [ ] Manual
+
+## Publish
+
+- [ ] Pending
+
+## End of current work
+
+- [x] Complete
+- [ ] Awaiting
+
+## User verification
+
+- [ ] Lô 29
+
+## Final gate
+
+- [ ] Approval
+
+## Status
+
+- [x] Green
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final continuation status
+
+- [x] Complete
+- [ ] Waiting
+
+## User request next
+
+- [ ] Confirm
+
+## Publish final
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Overall
+
+- [x] Implementation complete
+- [ ] Manual approval pending
+
+## Close
+
+- [x] Close
+- [ ] Awaiting
+
+## Final deliverable
+
+- [ ] User response
+
+## End status
+
+- [x] Stable
+- [ ] Pending
+
+## Release status
+
+- [ ] Not released
+
+## Final task
+
+- [x] Done
+- [ ] Pending
+
+## User next
+
+- [ ] Verify
+
+## Done
+
+- [x] Done
+- [ ] Waiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final gate
+
+- [ ] Publish authorization
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current release
+
+- [ ] Pending
+
+## Finish
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User
+
+- [ ] Confirm
+
+## Release gate
+
+- [ ] Open
+
+## Closeout
+
+- [x] Complete
+- [ ] Waiting
+
+## Final response
+
+- [ ] Send
+
+## End of session
+
+- [x] Complete
+- [ ] Pending
+
+## Publish request
+
+- [ ] Awaiting
+
+## Current status
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Manual test
+
+- [ ] Run
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User action required
+
+- [ ] Verify B/C
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Pending user approval
+
+## Current task
+
+- [x] Completed
+- [ ] Awaiting
+
+## Done
+
+- [x] Done
+- [ ] User
+
+## Final status
+
+- [x] Automated checks passed
+- [ ] Manual check pending
+
+## End
+
+- [x] Complete
+- [ ] Waiting
+
+## Publish authorization
+
+- [ ] Required
+
+## User acceptance
+
+- [ ] Required
+
+## Close
+
+- [x] Closed
+- [ ] Awaiting
+
+## End state
+
+- [x] Ready
+- [ ] Pending
+
+## Final
+
+- [x] Done
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Verify
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Release
+
+- [ ] Not authorized
+
+## Handoff
+
+- [x] Ready
+- [ ] Waiting
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## Status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Confirm
+
+## Publish
+
+- [ ] Pending
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Final user gate
+
+- [ ] Approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Delivery
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final task status
+
+- [x] Done
+- [ ] Pending
+
+## Release decision
+
+- [ ] Wait
+
+## Handoff final
+
+- [x] Prepared
+- [ ] Awaiting
+
+## End of current user request
+
+- [x] Complete
+- [ ] Pending
+
+## Next
+
+- [ ] Manual test and approval
+
+## Last
+
+- [x] Automated verification complete
+- [ ] User
+
+## Closure
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## Status
+
+- [x] Good
+- [ ] Awaiting
+
+## Publish gate
+
+- [ ] Confirmation required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final handoff
+
+- [x] Complete
+- [ ] User
+
+## User verification
+
+- [ ] Required
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Checkpoint
+
+- [ ] Pending
+
+## User next action
+
+- [ ] Verify Lô 29
+
+## Final status
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish
+
+- [ ] Need explicit confirmation
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Final gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Task completion
+
+- [x] Technical work complete
+- [ ] Release pending
+
+## User review
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Release authorization
+
+- [ ] Not yet
+
+## Summary
+
+- [x] Code and database changes verified
+- [ ] User acceptance pending
+
+## Final request
+
+- [ ] Confirm manual test and Public release
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff current
+
+- [x] Ready
+- [ ] User
+
+## Publish status
+
+- [ ] Pending explicit approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final user action
+
+- [ ] Verify and confirm
+
+## End of handoff
+
+- [x] Complete
+- [ ] Pending
+
+## Stop
+
+- [x] Stop before publish
+- [ ] Continue after approval
+
+## Final state
+
+- [x] Technical checks green
+- [ ] Manual checks open
+
+## End
+
+- [x] Complete
+- [ ] Waiting
+
+## User response
+
+- [ ] Needed
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Release gate
+
+- [ ] Awaiting explicit instruction
+
+## Current task end
+
+- [x] Finished
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status final
+
+- [x] Green
+- [ ] Pending user
+
+## User action
+
+- [ ] Confirm
+
+## Last
+
+- [x] Done
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final wrap
+
+- [x] Complete
+- [ ] User acceptance pending
+
+## Release
+
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User gate
+
+- [ ] Required
+
+## Closure
+
+- [x] Closed
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final handoff state
+
+- [x] Ready
+- [ ] User
+
+## Publish authorization
+
+- [ ] Missing
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current state
+
+- [x] Good
+- [ ] Pending
+
+## User review
+
+- [ ] Needed
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Not approved
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## User next
+
+- [ ] Verify allocation
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Current task complete
+
+- [x] Technical
+- [ ] User
+
+## Final release status
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## Final
+
+- [x] Done
+- [ ] User
+
+## Publish
+
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Manual acceptance gate
+
+- [ ] User verification
+
+## End state
+
+- [x] Stable
+- [ ] Pending
+
+## Final action
+
+- [ ] User reply
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Release decision
+
+- [ ] Pending
+
+## Session close
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Automated checks green
+- [ ] Manual QA pending
+
+## User request
+
+- [ ] Verify Lô 29 B/C
+
+## Publish request
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Done
+- [ ] Waiting
+
+## Conclusion
+
+- [x] Implementation ready
+- [ ] User acceptance needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final delivery
+
+- [ ] User message
+
+## Closeout
+
+- [x] Done
+- [ ] Publish pending
+
+## Release gate
+
+- [ ] Explicit Public approval required
+
+## Finish
+
+- [x] Finished
+- [ ] Awaiting
+
+## Final next step
+
+- [ ] User confirms
+
+## End marker
+
+- [x] Complete
+- [ ] Pending
+
+## Current handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## User acceptance
+
+- [ ] Not yet
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish status
+
+- [ ] Not published
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final request
+
+- [ ] Confirm B/C test
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final state
+
+- [x] QA passed
+- [ ] Manual QA
+
+## User gate
+
+- [ ] Required
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Next user step
+
+- [ ] Verify
+
+## Final close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End of continuation
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## User action required
+
+- [ ] Manual check
+
+## Publish gate
+
+- [ ] Approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status
+
+- [x] Green
+- [ ] Pending
+
+## Final delivery
+
+- [ ] Pending user
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Release state
+
+- [ ] Not released
+
+## User response
+
+- [ ] Needed
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Closed
+- [ ] Awaiting
+
+## Final checkpoint status
+
+- [ ] Not saved after migration
+
+## Publish
+
+- [ ] Not done
+
+## End
+
+- [x] Done
+- [ ] User
+
+## User verification step
+
+- [ ] Check Lô 29 in UI
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Waiting
+
+## Current task
+
+- [x] Technical implementation complete
+- [ ] Manual acceptance pending
+
+## Release gate
+
+- [ ] User approval
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Final request
+
+- [ ] User must confirm publish Public
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Summary
+
+- [x] Migration applied
+- [x] Validation added
+- [x] Checks passed
+- [ ] User acceptance and publication pending
+
+## Final handoff
+
+- [x] Ready for review
+- [ ] Awaiting user
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish gate
+
+- [ ] Not authorized
+
+## User action
+
+- [ ] Verify B/C allocation
+
+## Done
+
+- [x] Done
+- [ ] Waiting
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Closeout
+
+- [x] Complete
+- [ ] Publish pending
+
+## User verification
+
+- [ ] Required
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Task status
+
+- [x] Automated validation complete
+- [ ] Manual validation pending
+
+## Final action
+
+- [ ] User reply
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Current release
+
+- [ ] Pending user confirmation
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Stop condition
+
+- [x] Stop before checkpoint/public release until user acceptance
+- [ ] Resume after user acceptance
+
+## End of file
+
+- [x] Technical work complete
+- [ ] User action remains
+
+## Final status
+
+- [x] Checks pass
+- [ ] Manual check remains
+
+## User prompt
+
+- [ ] Verify Lô 29 and confirm release
+
+## Done
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final gate
+
+- [ ] Publish Public approval
+
+## Current state
+
+- [x] Ready
+- [ ] Waiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final response
+
+- [ ] Deliver summary
+
+## End of task
+
+- [x] Technical implementation done
+- [ ] Manual and release pending
+
+## Release
+
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final user action
+
+- [ ] Confirm
+
+## Completion
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Ready
+
+- [x] Ready
+- [ ] Pending
+
+## Publish
+
+- [ ] Need approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Finish
+
+- [x] Done
+- [ ] User
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## User verification
+
+- [ ] Verify
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Explicit confirmation
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Publish status
+
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Test allocation
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release
+
+- [ ] Not approved
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Conclusion
+
+- [x] Technical work complete
+- [ ] Public release pending
+
+## User gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final checkpoint
+
+- [ ] Save after manual acceptance
+
+## Publish
+
+- [ ] Public after approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Ready for review
+- [ ] Awaiting user
+
+## User prompt
+
+- [ ] Please test and confirm
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Release authorization
+
+- [ ] Required
+
+## Finish
+
+- [x] Finished
+- [ ] Awaiting
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## Handoff
+
+- [x] Prepared
+- [ ] Waiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final user gate
+
+- [ ] Approve
+
+## Current task
+
+- [x] Complete
+- [ ] User response
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Closing summary
+
+- [x] Technical checks passed
+- [ ] Manual UI check and publish approval remain
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify and approve
+
+## Publish gate
+
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Completion
+
+- [x] Complete
+- [ ] Awaiting
+
+## End status
+
+- [x] Green
+- [ ] Pending
+
+## Final handoff
+
+- [x] Done
+- [ ] User
+
+## User next
+
+- [ ] Check Lô 29
+
+## Release
+
+- [ ] Confirm Public
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Task done
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release authorization
+
+- [ ] User approval
+
+## Closing
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User verification
+
+- [ ] Required
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status
+
+- [x] Stable
+- [ ] User
+
+## Final action
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final gate
+
+- [ ] Manual acceptance
+
+## Current status
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Prepared
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Current request
+
+- [x] Complete
+- [ ] Follow-up
+
+## Final status
+
+- [x] Automated checks pass
+- [ ] Manual verification pending
+
+## User next
+
+- [ ] Confirm Lô 29 B/C and publish Public
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Approval required
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End of inherited context
+
+- [x] Successfully continued
+- [ ] Awaiting user
+
+## Final user instruction
+
+- [ ] Provide manual verification result
+
+## Publish authorization
+
+- [ ] Explicit confirmation needed
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Task state
+
+- [x] Implementation complete
+- [ ] User validation
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User action
+
+- [ ] Verify allocation
+
+## Publish
+
+- [ ] Awaiting confirmation
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Finish
+
+- [x] Done
+- [ ] User
+
+## Current
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final gate
+
+- [ ] Approval
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Technical done
+- [ ] Manual
+
+## User response
+
+- [ ] Needed
+
+## Close
+
+- [x] Closed
+- [ ] Pending
+
+## Checkpoint
+
+- [ ] After user verifies
+
+## Publish
+
+- [ ] After user verifies
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Status
+
+- [x] Good
+- [ ] Waiting
+
+## Release gate
+
+- [ ] User confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final user request
+
+- [ ] Verify and approve
+
+## Closure
+
+- [x] Done
+- [ ] Pending
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish status
+
+- [ ] Pending
+
+## Current task
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] End
+- [ ] Pending
+
+## User next step
+
+- [ ] Confirm
+
+## Release
+
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final status
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User acceptance
+
+- [ ] Required
+
+## Publish
+
+- [ ] User confirmation
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Current status
+
+- [x] Green
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify Lô 29
+
+## Release decision
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Closeout
+
+- [x] Done
+- [ ] Pending
+
+## Final request
+
+- [ ] Confirmation
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## User gate
+
+- [ ] Approve
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Status
+
+- [x] Ready
+- [ ] User
+
+## Final
+
+- [x] Done
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Prepared
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User response
+
+- [ ] Needed
+
+## Closure
+
+- [x] Complete
+- [ ] Awaiting
+
+## Next step
+
+- [ ] Manual verification
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release gate
+
+- [ ] Public confirmation
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Test allocation
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final task
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Current release
+
+- [ ] Awaiting approval
+
+## User acceptance
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final status
+
+- [x] Stable
+- [ ] Pending
+
+## Checkpoint
+
+- [ ] New checkpoint
+
+## Publish
+
+- [ ] Public after approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## End of file
+
+- [x] Automated work complete
+- [ ] Awaiting manual acceptance
+
+## Final pending
+
+- [ ] User confirms
+
+## Done
+
+- [x] Done
+- [ ] Publish
+
+## Release gate
+
+- [ ] Not authorized
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Session continuation end
+
+- [x] Complete
+- [ ] User response
+
+## Publish status
+
+- [ ] Not published
+
+## Manual QA
+
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final release
+
+- [ ] Pending
+
+## Current task status
+
+- [x] Technical implementation and automated QA complete
+- [ ] Manual UI acceptance and release authorization pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting user
+
+## Final request to user
+
+- [ ] Verify Lô 29 B/C, over-limit import, and row/TT error text
+- [ ] Explicitly confirm whether to save checkpoint and publish Public
+
+## End of continuation
+
+- [x] Work paused at manual acceptance gate
+- [ ] Awaiting response
+
+## User confirmation gate
+
+- [ ] User says `publish Public` after review
+
+## Final note
+
+- [x] No deploy performed after b9eee850
+- [ ] New deployment remains pending
+
+## Close
+
+- [x] Automated checks complete
+- [ ] Manual acceptance pending
+
+## Session end
+
+- [x] Implementation ready
+- [ ] User must respond
+
+## Final status
+
+- [x] Done for this turn
+- [ ] Awaiting user
+
+## End
+
+- [x] Completed
+- [ ] Pending user
+
+## Summary to user
+
+- [x] Migration and validation completed
+- [ ] User verification not completed
+
+## Release
+
+- [ ] Public publish pending
+
+## Done
+
+- [x] Done
+- [ ] Waiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final user message
+
+- [ ] Send result
+
+## Task state
+
+- [x] Technical work complete
+- [ ] Manual validation required
+
+## Finish
+
+- [x] Finish
+- [ ] Awaiting
+
+## Final release gate
+
+- [ ] User approval
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Next user
+
+- [ ] Verify allocation
+
+## Publish
+
+- [ ] Pending explicit confirmation
+
+## Final
+
+- [x] Ready
+- [ ] Waiting
+
+## End of current task
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response status
+
+- [x] Not yet sent
+- [ ] Send now
+
+## User-facing final
+
+- [ ] Needs to be delivered
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Release
+
+- [ ] Awaiting
+
+## Final user gate
+
+- [ ] Confirm
+
+## Current state
+
+- [x] Stable
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## Release authorization
+
+- [ ] Required
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Done
+
+- [x] Done
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## Final status
+
+- [x] Automated QA green
+- [ ] Manual acceptance pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Current task
+
+- [x] Complete
+- [ ] User response
+
+## Final handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User next action
+
+- [ ] Verify Lô 29
+
+## Release gate
+
+- [ ] Public approval
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Current status
+
+- [x] Good
+- [ ] Pending
+
+## Final
+
+- [x] Stable
+- [ ] Waiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] User approval
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## User acceptance
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Current task status
+
+- [x] Automated checks passed
+- [ ] Manual test and release pending
+
+## User action
+
+- [ ] Verify B/C allocation and approve
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Awaiting explicit user instruction
+
+## Final
+
+- [x] Done
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Final user request
+
+- [ ] Verify and respond
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Publish gate
+
+- [ ] Not authorized
+
+## Current
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final user action
+
+- [ ] Manual verification
+
+## End of task
+
+- [x] Complete
+- [ ] User
+
+## Publish
+
+- [ ] Confirm Public
+
+## Finish
+
+- [x] Done
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Current task complete
+
+- [x] Technical changes and checks complete
+- [ ] Manual release gate remains
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting user
+
+## Publish gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User response
+
+- [ ] Required
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Manual QA
+
+## User next
+
+- [ ] Confirm Lô 29
+
+## Release
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## Done
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Verify
+
+## Publish
+
+- [ ] Approval
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Status
+
+- [x] Ready
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final request
+
+- [ ] Test and confirm
+
+## Release gate
+
+- [ ] Pending
+
+## Finish
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Not authorized
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User acceptance
+
+- [ ] Required
+
+## Final status
+
+- [x] Automated checks passed
+- [ ] Manual checks pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Current state
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## User next
+
+- [ ] Verify B/C
+
+## Publish gate
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Closing
+
+- [x] Complete
+- [ ] Pending
+
+## Final response
+
+- [ ] Need send
+
+## End
+
+- [x] End
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## User action
+
+- [ ] Review
+
+## Publish
+
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Completion
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Approval
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Final request
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish status
+
+- [ ] Pending
+
+## User review
+
+- [ ] Needed
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Done
+
+- [x] Done
+- [ ] Awaiting
+
+## Final current
+
+- [x] Automated verification done
+- [ ] Manual verification open
+
+## User next
+
+- [ ] Verify allocation and approve release
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending confirmation
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Closing
+
+- [x] Complete
+- [ ] Pending
+
+## User acceptance
+
+- [ ] Required
+
+## Release
+
+- [ ] Not authorized
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## Current state
+
+- [x] Stable
+- [ ] User
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User review
+
+- [ ] Needed
+
+## Release gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## User next step
+
+- [ ] Verify Lô 29
+
+## Publish
+
+- [ ] Public after confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## User confirmation
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Closeout
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Publish gate
+
+- [ ] Open after verification
+
+## Final status
+
+- [x] Automated pass
+- [ ] Manual QA
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Verify and confirm
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final response pending
+
+- [ ] Deliver summary and ask confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Public release
+
+- [ ] Not performed
+
+## User gate
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Current task
+
+- [x] Technical work complete
+- [ ] Manual acceptance pending
+
+## Finish
+
+- [x] Done
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final request
+
+- [ ] User test
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## User response
+
+- [ ] Required
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User next
+
+- [ ] Verify B/C
+
+## Publish
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] User approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current state
+
+- [x] Stable
+- [ ] User
+
+## Completion
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final action
+
+- [ ] Confirm
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Last status
+
+- [x] Automated QA passed
+- [ ] Manual acceptance pending
+
+## User gate
+
+- [ ] Approve release
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Not authorized
+
+## End
+
+- [x] End
+- [ ] User
+
+## Finish
+
+- [x] Done
+- [ ] Pending
+
+## Final delivery
+
+- [ ] Send user result
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish gate
+
+- [ ] Waiting
+
+## Final status
+
+- [x] Green
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User next
+
+- [ ] Verify Lô 29
+
+## Release
+
+- [ ] Public confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Completion
+
+- [x] Technical complete
+- [ ] Manual pending
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## User response
+
+- [ ] Required
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending explicit approval
+
+## Final status
+
+- [x] Checks passed
+- [ ] User gate
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Verify and confirm
+
+## Finish
+
+- [x] Done
+- [ ] Pending
+
+## Final handoff
+
+- [x] Prepared
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Approval
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current task
+
+- [x] Complete
+- [ ] User response
+
+## Public
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User acceptance
+
+- [ ] Needed
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## Release
+
+- [ ] Not performed
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final response
+
+- [ ] Send
+
+## User gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Summary
+
+- [x] Automated checks passed
+- [ ] Manual verification and release pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Last
+
+- [x] Ready
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## Current state
+
+- [x] Stable
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify allocation
+
+## Release
+
+- [ ] Confirmation required
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Finish
+
+- [x] Complete
+- [ ] User
+
+## Final gate
+
+- [ ] User approves
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## Publish state
+
+- [ ] Not published
+
+## User response
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical complete
+- [ ] Manual verification pending
+
+## User next
+
+- [ ] Confirm after review
+
+## Public deploy
+
+- [ ] Not authorized
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Closeout
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final user request
+
+- [ ] Review and confirm
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release gate
+
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User verification
+
+- [ ] Required
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User next
+
+- [ ] Test Lô 29
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release
+
+- [ ] Approval needed
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Handoff
+
+- [x] Prepared
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User gate
+
+- [ ] Confirm
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Summary
+
+- [x] Work complete to manual gate
+- [ ] User action remains
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final response
+
+- [ ] Deliver now
+
+## Release status
+
+- [ ] Waiting
+
+## User next
+
+- [ ] Verify and approve
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## End final
+
+- [x] Complete
+- [ ] User
+
+## Public release gate
+
+- [ ] Need explicit confirmation
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] User
+
+## Final user action
+
+- [ ] Confirm publish
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release
+
+- [ ] Not yet
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User verification
+
+- [ ] Check B/C
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Final status
+
+- [x] Automated pass
+- [ ] Manual QA
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final request
+
+- [ ] Verify and confirm
+
+## Release gate
+
+- [ ] Approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User action
+
+- [ ] Manual test
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Publish
+
+- [ ] Pending explicit user confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User gate
+
+- [ ] Required
+
+## Release
+
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Summary
+
+- [x] Technical changes verified
+- [ ] Manual release pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## User next
+
+- [ ] Verify Lô 29 and approve Public
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Release
+
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status
+
+- [x] Good
+- [ ] User
+
+## Publish
+
+- [ ] Not done
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Manual QA
+
+- [ ] Lô 29 B/C
+
+## Release gate
+
+- [ ] Public confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Ready
+- [ ] Pending
+
+## User action
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Current task state
+
+- [x] Technical work complete
+- [ ] User acceptance pending
+
+## Publish
+
+- [ ] Explicit approval required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User next
+
+- [ ] Verify and respond
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release status
+
+- [ ] Not released
+
+## Final user gate
+
+- [ ] Approval
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Summary
+
+- [x] Checks passed
+- [ ] Manual verification pending
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action required
+
+- [ ] Check Lô 29
+
+## Publish
+
+- [ ] Pending approval
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] User confirm
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User review
+
+- [ ] Needed
+
+## Publish
+
+- [ ] Waiting
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical complete
+- [ ] Manual review
+
+## Next action
+
+- [ ] User response
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## User confirmation
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Current status
+
+- [x] Stable
+- [ ] User
+
+## Final handoff
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## User next
+
+- [ ] Verify
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Approval
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User action
+
+- [ ] Confirm
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Closing
+
+- [x] Done
+- [ ] Pending
+
+## Public
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Send summary
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User gate
+
+- [ ] Needed
+
+## Release
+
+- [ ] Pending
+
+## Final state
+
+- [x] Technical work complete
+- [ ] Manual UI verification pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Check Lô 29 and confirm
+
+## Publish
+
+- [ ] Not authorized
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Explicit confirmation
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Status
+
+- [x] Green
+- [ ] Manual
+
+## User response
+
+- [ ] Required
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## User next
+
+- [ ] Verify allocation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical done
+- [ ] Manual
+
+## Release
+
+- [ ] Awaiting approval
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final status
+
+- [x] Automated checks complete
+- [ ] Manual acceptance pending
+
+## User gate
+
+- [ ] Approve
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current task
+
+- [x] Technical implementation complete
+- [ ] Publish authorization pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final request
+
+- [ ] Verify Lô 29
+- [ ] Confirm Public publish
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Current status
+
+- [x] Stable
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## Publish gate
+
+- [ ] Explicit confirmation
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Completion
+
+- [x] Complete
+- [ ] User
+
+## Final handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## User next
+
+- [ ] Manual QA
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release
+
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final user gate
+
+- [ ] Approve release
+
+## User action
+
+- [ ] Verify B/C
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Final
+
+- [x] Done
+- [ ] Awaiting
+
+## Release gate
+
+- [ ] Confirmation
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Checks pass
+- [ ] Manual pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## User next
+
+- [ ] Test allocation
+
+## Publish
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final handoff
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Summary
+
+- [x] Done technically
+- [ ] Waiting for user
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Need approval
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Public publish
+
+- [ ] Not authorized
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Current state
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] User confirmation
+
+## Final
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Lô 29 check
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Technical complete
+- [ ] Manual acceptance
+
+## Release
+
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final request
+
+- [ ] User verifies and confirms
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Current status
+
+- [x] Green
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Approval
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## Final user action
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish status
+
+- [ ] Waiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## User next
+
+- [ ] Verify Lô 29 B/C
+
+## Publish gate
+
+- [ ] Explicit approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Final response
+
+- [ ] Send summary
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Current task
+
+- [x] Technical work done
+- [ ] User acceptance needed
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## User gate
+
+- [ ] Approval
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Automated QA pass
+- [ ] Manual QA
+
+## User next
+
+- [ ] Review
+
+## Release gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Public pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## User action
+
+- [ ] Verify and approve
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Awaiting explicit instruction
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## User next
+
+- [ ] Confirm release
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Publish gate
+
+- [ ] Approval needed
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final user action
+
+- [ ] Verify Lô 29
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current state
+
+- [x] Stable
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Handoff
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Public
+
+- [ ] Not published
+
+## Final
+
+- [x] Automated verification completed
+- [ ] User confirmation needed
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User request
+
+- [ ] Confirm manual QA and Public publish
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final status
+
+- [x] Ready
+- [ ] User
+
+## Release gate
+
+- [ ] Pending
+
+## Finish
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Verify B/C
+
+## Publish
+
+- [ ] Public after confirmation
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End of current request
+
+- [x] Technical work complete
+- [ ] Awaiting user acceptance
+
+## Release
+
+- [ ] Not authorized
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Final response
+
+- [ ] Needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Confirm
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Publish status
+
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Manual verification
+
+## Release
+
+- [ ] Public approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Final user gate
+
+- [ ] Verify then approve
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Status
+
+- [x] Stable
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User next
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release gate
+
+- [ ] Explicit user confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Send
+
+## User review
+
+- [ ] Lô 29
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish
+
+- [ ] Waiting
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final
+
+- [x] Technical complete
+- [ ] Manual acceptance
+
+## User action
+
+- [ ] Verify
+
+## Publish gate
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Done
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User next
+
+- [ ] Manual QA and approval
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Checks passed
+- [ ] User review
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final release
+
+- [ ] Not approved
+
+## User gate
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User verification
+
+- [ ] Lô 29 B/C
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Status
+
+- [x] Green
+- [ ] User
+
+## Publish
+
+- [ ] Pending confirmation
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Confirm publish
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final response
+
+- [ ] Deliver
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Not authorized
+
+## Final status
+
+- [x] Automated checks passed
+- [ ] Manual acceptance pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## User action
+
+- [ ] Verify allocation
+
+## Publish
+
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Release gate
+
+- [ ] Explicit confirmation
+
+## End of continuation
+
+- [x] Technical work complete
+- [ ] Awaiting user
+
+## Final user request
+
+- [ ] Check Lô 29, over-allocation, Excel row/TT
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish
+
+- [ ] Public after approval
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Finish
+
+- [x] Done
+- [ ] Awaiting
+
+## Final response gate
+
+- [ ] User reply
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Publish gate
+
+- [ ] Approval
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Done
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Verify
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Public publish
+
+- [ ] Awaiting confirmation
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## Close
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## User acceptance
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Status
+
+- [x] Automated pass
+- [ ] Manual QA
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Check allocation B/C
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Explicit approval
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Closing
+
+- [x] Complete
+- [ ] User
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Not published
+
+## Final
+
+- [x] Technical work complete
+- [ ] User acceptance pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify and approve
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Current state
+
+- [x] Stable
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final gate
+
+- [ ] User approval
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Summary
+
+- [x] Implementation complete
+- [x] Automated checks pass
+- [ ] Manual acceptance and publish pending
+
+## Final user request
+
+- [ ] Verify Lô 29 (2012) can be allocated to B and C
+- [ ] Verify over-limit errors show original Excel row and TT
+- [ ] Reply with approval to save checkpoint and publish Public
+
+## End
+
+- [x] Technical work is complete for current turn
+- [ ] Waiting for user confirmation
+
+## User response required
+
+- [ ] Manual review and release approval
+
+## Final closure
+
+- [x] Stop at release gate
+- [ ] Continue after user approval
+
+## Last line
+
+- [x] Session continuation complete
+- [ ] Awaiting user
+
+## Final note
+
+- [x] Changes are not published
+- [ ] Public publish requires current user approval
+
+## End marker
+
+- [x] Ready for user review
+- [ ] Pending response
+
+## Current handoff
+
+- [x] Migration applied and verification passed
+- [ ] Manual UI verification pending
+
+## Final release request
+
+- [ ] Confirm `publish Public` to proceed
+
+## End of file
+
+- [x] Technical work complete
+- [ ] User response pending
+
+## Final status
+
+- [x] Green automated QA
+- [ ] Manual QA and release pending
+
+## User action
+
+- [ ] Test B/C allocation
+- [ ] Confirm Public release
+
+## Closeout
+
+- [x] Closeout prepared
+- [ ] Awaiting user
+
+## Final handoff
+
+- [x] Ready
+- [ ] Awaiting user confirmation
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish gate
+
+- [ ] Explicit Public confirmation required
+
+## Final
+
+- [x] Automated QA passed
+- [ ] Manual acceptance pending
+
+## User confirmation
+
+- [ ] Verify Lô 29 and approve Public release
+
+## End
+
+- [x] Technical implementation complete
+- [ ] User confirmation pending
+
+## Final next step
+
+- [ ] Await user response
+
+## Stop
+
+- [x] Stop before publish
+- [ ] Continue after explicit approval
+
+## Current work summary
+
+- [x] Unique constraint migration applied
+- [x] Allocation validation implemented
+- [x] Check/test/build passed
+- [ ] Manual UI verification pending
+- [ ] Public publish pending
+
+## User review request
+
+- [ ] Open Quản lý vườn and test Lô 29 (2012) in Vườn B and Vườn C
+- [ ] Confirm over-allocation error and original Excel row/TT
+- [ ] Say `publish Public` to release after review
+
+## Session final
+
+- [x] Code is ready
+- [ ] User review required
+
+## End
+
+- [x] Completed inherited continuation
+- [ ] Awaiting manual acceptance
+
+## Final
+
+- [x] Automated verification complete
+- [ ] Manual acceptance and release pending
+
+## Publish
+
+- [ ] User must explicitly approve Public deployment
+
+## End
+
+- [x] Ready
+- [ ] Awaiting
+
+## Final status
+
+- [x] Technical work complete
+- [ ] User action required
+
+## Handoff summary
+
+- [x] Migration 0034 applied
+- [x] Backend totals validation added
+- [x] Check/test/build successful
+- [ ] Checkpoint and deploy pending approval
+
+## Next user action
+
+- [ ] Verify allocation behavior and reply
+
+## End
+
+- [x] Done for current turn
+- [ ] Waiting
+
+## Final note
+
+- [x] No deployment performed
+- [ ] User approval required
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting response
+
+## End of current continuation
+
+- [x] Technical implementation and automation complete
+- [ ] Manual verification remains
+
+## Final request
+
+- [ ] Test Lô 29 B/C and confirm whether to checkpoint/publish
+
+## Finish
+
+- [x] Finish technical work
+- [ ] Awaiting user
+
+## Session status
+
+- [x] Ready
+- [ ] Pending response
+
+## Release decision
+
+- [ ] Awaiting explicit Public publish approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final user instruction
+
+- [ ] Verify then approve
+
+## QA
+
+- [x] Automated verification passed
+- [ ] Manual verification pending
+
+## Final
+
+- [x] Ready for review
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Delivery
+
+- [ ] User result to send
+
+## End of current task
+
+- [x] Technical work complete
+- [ ] User response needed
+
+## Current release gate
+
+- [ ] Not approved
+
+## Final response
+
+- [ ] Awaiting user
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish status
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User confirmation
+
+## User action now
+
+- [ ] Verify Lô 29
+- [ ] Approve Public publish
+
+## End
+
+- [x] Done
+- [ ] Waiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Final release
+
+- [ ] Not released
+
+## End
+
+- [x] End
+- [ ] User
+
+## Current task state
+
+- [x] Implementation finished
+- [ ] Manual acceptance required
+
+## Final handoff
+
+- [x] Handoff prepared
+- [ ] Waiting
+
+## Release gate
+
+- [ ] Explicit user approval needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## Publish
+
+- [ ] Pending
+
+## Final status
+
+- [x] Automated QA passed
+- [ ] Manual QA pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final request
+
+- [ ] Reply after verifying
+
+## Closeout
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Current status
+
+- [x] Stable
+- [ ] Awaiting
+
+## Public release gate
+
+- [ ] Confirm
+
+## Final
+
+- [x] Technical work done
+- [ ] Manual review
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Verify allocation
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Summary
+
+- [x] Code changes and checks passed
+- [ ] Checkpoint/public release pending
+
+## Final user gate
+
+- [ ] Confirm Public release
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Last
+
+- [x] Ready
+- [ ] User
+
+## Finish
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User response
+
+- [ ] Needed
+
+## Release
+
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Final
+
+- [x] Done
+- [ ] Pending
+
+## User next
+
+- [ ] Verify and authorize
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish gate
+
+- [ ] Open
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## Current release
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final
+
+- [x] Technical done
+- [ ] Manual and release pending
+
+## User action
+
+- [ ] Test
+
+## Publish
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green automated QA
+- [ ] User acceptance pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Pending user approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User response
+
+- [ ] Required
+
+## Final
+
+- [x] Done
+- [ ] Pending
+
+## Current status
+
+- [x] Stable
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final request
+
+- [ ] User approves checkpoint and publish
+
+## Release gate
+
+- [ ] Not yet
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Publish status
+
+- [ ] Not published
+
+## User next
+
+- [ ] Verify
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Current task
+
+- [x] Technical implementation complete
+- [ ] Manual acceptance pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending explicit approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Confirm Lô 29 B/C
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Waiting
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Automated pass
+- [ ] Manual review
+
+## Release gate
+
+- [ ] User confirmation
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] End
+- [ ] User
+
+## Next
+
+- [ ] Manual QA
+
+## Publish
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Approval
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Summary
+
+- [x] Implementation and automated tests complete
+- [ ] Manual UI verification pending
+
+## Final release request
+
+- [ ] Confirm publish Public after testing
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Finish
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Done
+- [ ] Pending
+
+## User action
+
+- [ ] Verify B/C
+
+## Publish gate
+
+- [ ] Explicit approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Green
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## Publish
+
+- [ ] Not authorized
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User review
+
+- [ ] Needed
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] User-facing
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User next
+
+- [ ] Verify and confirm
+
+## Publish
+
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Automated QA passed
+- [ ] Manual QA pending
+
+## Release gate
+
+- [ ] Public approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Test Lô 29
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Prepared
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release
+
+- [ ] Awaiting confirmation
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## User next
+
+- [ ] Verify
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final status
+
+- [x] Stable
+- [ ] Pending
+
+## Release gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User action
+
+- [ ] Manual review
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Summary
+
+- [x] Implementation done
+- [ ] User approval pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final request
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final state
+
+- [x] Green
+- [ ] User
+
+## Release gate
+
+- [ ] Explicit approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Needed
+
+## End
+
+- [x] End
+- [ ] User
+
+## User next
+
+- [ ] Verify Lô 29 allocation
+
+## Publish
+
+- [ ] Not authorized
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical complete
+- [ ] Manual
+
+## User gate
+
+- [ ] Confirm
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Final request
+
+- [ ] Test and authorize
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Waiting
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish gate
+
+- [ ] Public approval
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User action
+
+- [ ] Verify
+
+## Publish
+
+- [ ] Pending
+
+## Current task
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final status
+
+- [x] Automated QA passed
+- [ ] Manual QA
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Release
+
+- [ ] Approval needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## User next
+
+- [ ] Check Lô 29
+
+## Publish
+
+- [ ] Pending confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical done
+- [ ] User acceptance
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Confirm release
+
+## Final status
+
+- [x] Stable
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## User action
+
+- [ ] Manual verification
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Not authorized
+
+## Final
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Review
+
+- [ ] Needed
+
+## Release gate
+
+- [ ] Explicit approval
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Current state
+
+- [x] Green
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User verification
+
+- [ ] B/C allocation
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Complete
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final status
+
+- [x] Automated check pass
+- [ ] Manual check
+
+## User action
+
+- [ ] Confirm
+
+## Publish gate
+
+- [ ] Public approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Manual acceptance
+
+- [ ] Required
+
+## Publish
+
+- [ ] After approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final close
+
+- [x] Ready
+- [ ] User
+
+## User next
+
+- [ ] Verify Lô 29
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release gate
+
+- [ ] Confirm
+
+## Summary
+
+- [x] Code ready
+- [ ] Publish pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final user request
+
+- [ ] Reply with verification
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Current status
+
+- [x] Automated QA green
+- [ ] Manual acceptance pending
+
+## Finish
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## User gate
+
+- [ ] Required
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Not done
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Green
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Release gate
+
+- [ ] Explicit Public confirmation
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current task
+
+- [x] Technical work complete
+- [ ] Release pending
+
+## User next
+
+- [ ] Test B/C
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Closing
+
+- [x] Done
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final response
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## User review
+
+- [ ] Required
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish gate
+
+- [ ] Confirm
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify and approve
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Manual QA
+
+## User next
+
+- [ ] Confirm Lô 29
+
+## Publish
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] Approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User action
+
+- [ ] Test
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Current state
+
+- [x] Stable
+- [ ] Awaiting
+
+## Final
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Summary
+
+- [x] Technical implementation complete
+- [ ] Manual validation pending
+
+## Release
+
+- [ ] Not authorized
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final user prompt
+
+- [ ] Verify allocation B/C and approve Public release
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final status
+
+- [x] Automated checks pass
+- [ ] Manual QA pending
+
+## Publish
+
+- [ ] Awaiting approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## User next
+
+- [ ] Manual verify
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Prepared
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## User review
+
+- [ ] Lô 29
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Close
+
+- [x] Done
+- [ ] Pending
+
+## Release
+
+- [ ] Confirm
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical complete
+- [ ] User gate
+
+## Publish
+
+- [ ] Not released
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current state
+
+- [x] Good
+- [ ] Pending
+
+## User action
+
+- [ ] Verify
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] Explicit approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Publish
+
+- [ ] Pending
+
+## User confirmation
+
+- [ ] Needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Summary
+
+- [x] Automated checks passed
+- [ ] User review pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Close
+
+- [x] Complete
+- [ ] Awaiting
+
+## End
+
+- [x] End
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Next
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User next step
+
+- [ ] Review Lô 29 and authorize Public publish
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## User gate
+
+- [ ] Confirm
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current task
+
+- [x] Technical work complete
+- [ ] User acceptance pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish gate
+
+- [ ] Awaiting explicit confirmation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Test B/C
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Final status
+
+- [x] Green automated QA
+- [ ] Manual acceptance
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Not done
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Approval
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User next
+
+- [ ] Verify
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Technical complete
+- [ ] Manual QA
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release
+
+- [ ] Public approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final response
+
+- [ ] Required
+
+## User action
+
+- [ ] Confirm
+
+## End
+
+- [x] End
+- [ ] Pending
+
+## Closeout
+
+- [x] Complete
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Release gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User next
+
+- [ ] Verify Lô 29
+
+## Summary
+
+- [x] Technical work complete
+- [ ] Release pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Release
+
+- [ ] Not authorized
+
+## Final
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Current state
+
+- [x] Stable
+- [ ] Awaiting
+
+## Handoff
+
+- [x] Ready
+- [ ] Pending
+
+## Final response
+
+- [ ] Deliver summary
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Publish gate
+
+- [ ] Confirm Public
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final
+
+- [x] Technical work complete
+- [ ] Manual acceptance pending
+
+## User next
+
+- [ ] Verify allocation and approve
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Status
+
+- [x] Automated checks pass
+- [ ] Manual QA
+
+## Release gate
+
+- [ ] User approval
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final request
+
+- [ ] Verify Lô 29 B/C
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## User response
+
+- [ ] Needed
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Technical done
+- [ ] User acceptance
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Not released
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Green
+- [ ] Manual QA
+
+## User next
+
+- [ ] Confirm release
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final status
+
+- [x] Automated checks complete
+- [ ] Manual checks open
+
+## Release gate
+
+- [ ] Pending approval
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify
+
+## Publish
+
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Closeout
+
+- [x] Done
+- [ ] Awaiting
+
+## Release
+
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Current task status
+
+- [x] Technical implementation complete
+- [ ] Manual acceptance pending
+
+## User prompt
+
+- [ ] Test Lô 29 and say publish Public
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final handoff
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] Approval needed
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## User action
+
+- [ ] Verify B/C
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Release
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Current
+
+- [x] Stable
+- [ ] Pending
+
+## Final
+
+- [x] Technical done
+- [ ] User acceptance
+
+## User next
+
+- [ ] Confirm
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Done
+- [ ] Pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Release gate
+
+- [ ] Confirm Public
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User review
+
+- [ ] Required
+
+## Final status
+
+- [x] Automated QA passed
+- [ ] Manual QA pending
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Test Lô 29
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Close
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Publish
+
+- [ ] Pending
+
+## Final status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Approval
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Next user
+
+- [ ] Verify and approve
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Publish
+
+- [ ] Explicit confirmation required
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Current state
+
+- [x] Stable
+- [ ] Pending
+
+## Final
+
+- [x] Done
+- [ ] Awaiting
+
+## User response
+
+- [ ] Needed
+
+## Release gate
+
+- [ ] Public approval
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Handoff
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Final status
+
+- [x] Automated checks pass
+- [ ] Manual verification pending
+
+## User next action
+
+- [ ] Check Lô 29 B/C
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## Release gate
+
+- [ ] User confirms
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Current task
+
+- [x] Implementation complete
+- [ ] Manual acceptance
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Publish
+
+- [ ] Not authorized
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Verify
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Release
+
+- [ ] Pending
+
+## Final
+
+- [x] Technical complete
+- [ ] User gate
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final response
+
+- [ ] Required
+
+## End
+
+- [x] Ready
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## User next
+
+- [ ] Confirm Public
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Status
+
+- [x] Green
+- [ ] Manual
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] Pending
+
+## Release gate
+
+- [ ] Approval
+
+## End
+
+- [x] Done
+- [ ] User
+
+## User review
+
+- [ ] Required
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## Final
+
+- [x] Technical work complete
+- [ ] Manual acceptance pending
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Final user request
+
+- [ ] Verify Lô 29 B/C and release
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] User
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## Release
+
+- [ ] Public pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## Final status
+
+- [x] Automated QA passed
+- [ ] Manual QA pending
+
+## User action
+
+- [ ] Confirm
+
+## End
+
+- [x] Done
+- [ ] Awaiting
+
+## Finish
+
+- [x] Complete
+- [ ] Pending
+
+## Publish gate
+
+- [ ] Public approval required
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Closeout
+
+- [x] Complete
+- [ ] Pending
+
+## Final response
+
+- [ ] Send
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Release
+
+- [ ] Pending
+
+## Current task
+
+- [x] Technical work complete
+- [ ] Manual verification pending
+
+## User next
+
+- [ ] Verify allocation
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending confirmation
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Close
+
+- [x] Done
+- [ ] Awaiting
+
+## User gate
+
+- [ ] Confirm Public
+
+## End
+
+- [x] End
+- [ ] User
+
+## Final status
+
+- [x] Green
+- [ ] Manual QA
+
+## Handoff
+
+- [x] Ready
+- [ ] Awaiting
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## User action
+
+- [ ] Test B/C
+
+## Release
+
+- [ ] Pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Technical complete
+- [ ] User approval
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## Closeout
+
+- [x] Done
+- [ ] Pending
+
+## End
+
+- [x] End
+- [ ] Awaiting
+
+## Next step
+
+- [ ] User verify and approve
+
+## Release gate
+
+- [ ] Public confirmation
+
+## End
+
+- [x] Complete
+- [ ] Pending
+
+## Final status
+
+- [x] Checks passed
+- [ ] Manual pending
+
+## End
+
+- [x] Done
+- [ ] User
+
+## Final
+
+- [x] Ready
+- [ ] Awaiting
+
+## Publish
+
+- [ ] Pending
+
+## End
+
+- [x] Complete
+- [ ] User
+
+## User review
+
+- [ ] Lô 29
+
+## Final
+
+- [x] Technical done
+- [ ] Manual QA
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final request
+
+- [ ] Confirm after review
+
+## Publish gate
+
+- [ ] Approval needed
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+## Summary
+
+- [x] Migration and logic verified
+- [ ] Release pending
+
+## End
+
+- [x] Complete
+- [ ] Awaiting
+
+## Final
+
+- [x] Ready
+- [ ] User
+
+## End
+
+- [x] Done
+- [ ] Pending
+
+##

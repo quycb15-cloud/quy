@@ -2249,6 +2249,8 @@ export async function bulkUpsertWorkerPlotAllocations(
       name: plantationPlots.name,
       plantedYear: plantationPlots.plantedYear,
       gardenType: plantationPlots.gardenType,
+      areaHa: plantationPlots.areaHa,
+      tappingTrees: plantationPlots.tappingTrees,
     })
     .from(plantationPlots)
     .where(inArray(plantationPlots.unit, resolvedUnits));
@@ -2265,7 +2267,6 @@ export async function bulkUpsertWorkerPlotAllocations(
     candidates.push(plot);
     plotsByUnitAndDisplayName.set(key, candidates);
   });
-  const desiredGardenType = new Map<number, "A" | "B" | "C">();
   const resolved = resolvedWorkers.map(({ row, worker }, index) => {
     const sourceRow = row.sourceRow ?? index + 2;
     const sourceLabel = row.sourceOrdinal ? `Dòng Excel ${sourceRow} (TT ${row.sourceOrdinal})` : `Dòng Excel ${sourceRow}`;
@@ -2283,22 +2284,37 @@ export async function bulkUpsertWorkerPlotAllocations(
           ? `${sourceLabel} – Vườn ${row.gardenType}: Tên Lô ${row.plotCode} thuộc ${worker.unit} bị trùng năm trồng; hãy ghi đúng dạng Tên Lô (Năm trồng)`
           : `${sourceLabel} – Vườn ${row.gardenType}: Không tìm thấy Lô ${row.plotCode} thuộc ${worker.unit}`
       );
-    const priorGarden = desiredGardenType.get(plot.id);
-    if (
-      (plot.gardenType && plot.gardenType !== row.gardenType) ||
-      (priorGarden && priorGarden !== row.gardenType)
-    )
-      throw new Error(
-        `${sourceLabel} – Vườn ${row.gardenType}: Lô ${formatPlotDisplayName(plot.name, plot.plantedYear)} đang thuộc Vườn ${plot.gardenType ?? priorGarden}, không thể phân vào Vườn ${row.gardenType}`
-      );
-    desiredGardenType.set(plot.id, row.gardenType);
-    return { row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };
+    return { plot, sourceLabel, row: { ...row, unit: worker.unit, workerName: worker.name }, workerId: worker.id, plotId: plot.id };
   });
-  for (const [plotId, gardenType] of Array.from(desiredGardenType.entries()))
-    await db
-      .update(plantationPlots)
-      .set({ gardenType })
-      .where(eq(plantationPlots.id, plotId));
+  const plotIds = Array.from(new Set(resolved.map(item => item.plotId)));
+  const existingAllocations = plotIds.length
+    ? await db
+        .select({ id: workerPlotAllocations.id, workerId: workerPlotAllocations.workerId, plotId: workerPlotAllocations.plotId, gardenType: workerPlotAllocations.gardenType, rowStart: workerPlotAllocations.rowStart, rowEnd: workerPlotAllocations.rowEnd, areaHa: workerPlotAllocations.areaHa, tappingTrees: workerPlotAllocations.tappingTrees })
+        .from(workerPlotAllocations)
+        .where(inArray(workerPlotAllocations.plotId, plotIds))
+    : [];
+  const incomingKeys = new Set(resolved.map(item => `${item.workerId}::${item.plotId}::${item.row.gardenType}::${item.row.rowStart}::${item.row.rowEnd}`));
+  const totals = new Map<number, { areaHa: number; tappingTrees: number; sourceAreaHa: number; sourceTappingTrees: number | null; sourceLabel: string; plotName: string }>();
+  for (const item of resolved) {
+    const current = totals.get(item.plotId) ?? { areaHa: 0, tappingTrees: 0, sourceAreaHa: Number(item.plot.areaHa ?? 0), sourceTappingTrees: item.plot.tappingTrees ?? null, sourceLabel: item.sourceLabel, plotName: formatPlotDisplayName(item.plot.name, item.plot.plantedYear) };
+    current.areaHa += Number(item.row.areaHa ?? 0);
+    current.tappingTrees += Number(item.row.tappingTrees ?? 0);
+    totals.set(item.plotId, current);
+  }
+  for (const existing of existingAllocations) {
+    const key = `${existing.workerId}::${existing.plotId}::${existing.gardenType}::${existing.rowStart}::${existing.rowEnd}`;
+    if (incomingKeys.has(key)) continue;
+    const current = totals.get(existing.plotId);
+    if (!current) continue;
+    current.areaHa += Number(existing.areaHa ?? 0);
+    current.tappingTrees += Number(existing.tappingTrees ?? 0);
+  }
+  for (const current of Array.from(totals.values())) {
+    if (current.areaHa > current.sourceAreaHa + 0.0000001)
+      throw new Error(`${current.sourceLabel}: Lô ${current.plotName} có tổng diện tích phân bổ ${current.areaHa} ha vượt diện tích gốc ${current.sourceAreaHa} ha`);
+    if (current.sourceTappingTrees != null && current.tappingTrees > current.sourceTappingTrees)
+      throw new Error(`${current.sourceLabel}: Lô ${current.plotName} có tổng số cây cạo phân bổ ${current.tappingTrees} vượt số cây gốc ${current.sourceTappingTrees}`);
+  }
   for (const item of resolved)
     await db
       .insert(workerPlotAllocations)

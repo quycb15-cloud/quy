@@ -1,0 +1,2 @@
+ALTER TABLE `worker_plot_allocations` DROP INDEX `worker_plot_alloc_rows_unique`;--> statement-breakpoint
+ALTER TABLE `worker_plot_allocations` ADD CONSTRAINT `worker_plot_alloc_rows_unique` UNIQUE(`workerId`,`plotId`,`gardenType`,`rowStart`,`rowEnd`);

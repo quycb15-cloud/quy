@@ -638,6 +638,7 @@ export const workerPlotAllocations = mysqlTable(
     workerPlotRowsUnique: uniqueIndex("worker_plot_alloc_rows_unique").on(
       table.workerId,
       table.plotId,
+      table.gardenType,
       table.rowStart,
       table.rowEnd
     ),
