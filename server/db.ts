@@ -33,6 +33,7 @@ import {
 import { ENV } from "./_core/env";
 import { sortReportPeriods } from "../shared/reportPeriod";
 import { filterProductionRows } from "../shared/productionPeriod";
+import { compareWorkersByCode } from "../shared/workerDisplay";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import * as XLSX from "xlsx";
 import { calculateLatexTotals } from "./rubberMath";
@@ -2447,8 +2448,7 @@ export async function getWorkerPlotAreaDistribution(
     })),
     workers: Array.from(workerById.values()).sort(
       (a, b) =>
-        a.unit.localeCompare(b.unit, "vi") ||
-        a.workerName.localeCompare(b.workerName, "vi")
+        a.unit.localeCompare(b.unit, "vi") || compareWorkersByCode(a, b)
     ),
   };
 }

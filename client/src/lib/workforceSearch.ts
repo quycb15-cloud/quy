@@ -1,6 +1,9 @@
+import { compareWorkersByCode, workerDisplayName } from "@shared/workerDisplay";
+
 export type SearchableWorker = {
   phoneticName: string | null;
   employeeCode: string | null;
+  name?: string | null;
 };
 
 export type TeamWorker = {
@@ -17,9 +20,11 @@ export function matchesWorkerSearch(worker: SearchableWorker, keyword: string) {
     .includes(normalizedKeyword);
 }
 
-export function workersInTeam<Worker extends TeamWorker>(workers: readonly Worker[], unit: string) {
-  return workers.filter(worker => worker.unit === unit);
+export function workersInTeam<Worker extends TeamWorker & { employeeCode?: string | null; phoneticName?: string | null; name?: string | null }>(workers: readonly Worker[], unit: string) {
+  return workers.filter(worker => worker.unit === unit).sort(compareWorkersByCode);
 }
+
+export { compareWorkersByCode, workerDisplayName };
 
 export function makeTeamWorkerExportRows(workers: ReadonlyArray<{ employeeCode: string | null; phoneticName: string | null; roleTitle: string; status: "active" | "inactive" }>) {
   return workers.map(worker => ({

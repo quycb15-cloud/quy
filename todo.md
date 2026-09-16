@@ -448,3 +448,9 @@
 - [x] Giữ mapping backend đúng Lô thực tế, không tạo Lô trùng khi import tên hiển thị
 - [x] Bổ sung test cho tên Lô có năm trồng và chạy check/test/build
 - [x] Lưu checkpoint; chưa publish và chưa đổi visibility
+
+## Hiển thị Nhân công theo Tên phiên âm và Mã số
+- [x] Dùng Tên phiên âm trong biểu đồ, danh sách và các bảng hiển thị Nhân công phù hợp
+- [x] Sắp xếp Nhân công theo Mã số dạng chuỗi, giữ đúng thứ tự tự nhiên và dấu gạch nối
+- [x] Bổ sung test cho nhãn Tên phiên âm và thứ tự Mã số
+- [x] Chạy check/test/build và lưu checkpoint; chưa publish hoặc đổi visibility
