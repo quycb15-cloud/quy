@@ -9896,3 +9896,13 @@
 - [x] Kiểm tra responsive desktop/mobile và trạng thái có nhiều dòng dữ liệu
 - [x] Chạy test, typecheck và build production
 - [x] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
+
+## Tổng cộng bảng Theo dõi cạo mủ
+
+- [x] Bổ sung dòng Tổng cộng theo phạm vi ngày lọc cho bảng Theo dõi cạo mủ
+- [x] Cộng đúng KH, Cạo xong, Chưa cạo, Cạo chưa xong, KH tiếp và TH tiếp
+- [x] Tính % Hoàn thành từ tổng Cạo xong / tổng KH, không cộng phần trăm từng dòng
+- [x] Giữ nguyên thao tác Sửa, lọc ngày và xuất Excel
+- [x] Bổ sung test helper/UI và kiểm tra responsive
+- [x] Chạy check, toàn bộ Vitest và build production
+- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
