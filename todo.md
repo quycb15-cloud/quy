@@ -9982,3 +9982,24 @@
 - [x] Bổ sung regression tests theo workbook mẫu
 - [x] Chạy check, toàn bộ Vitest và build production
 - [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+
+## Import Theo dõi cạo mủ theo workbook một dòng mới — 2026-09-17
+
+- [ ] Đọc toàn bộ sheet và header thực tế của workbook mới
+- [ ] Đồng bộ mẫu Excel tạo từ ứng dụng với 5 sheet thực tế và cột Theo dõi cạo mủ một dòng
+- [ ] Sửa parser nhận đúng sheet `Theo dõi cạo mủ` và các cột Vườn/Diện tích/Phần cạo
+- [ ] Chấp nhận ô số liệu trống và dấu gạch khi import
+- [ ] Giữ báo lỗi Sheet + Dòng Excel và validation Ngày/Đội/Vườn
+- [ ] Bổ sung regression tests theo workbook mới
+- [ ] Chạy check, toàn bộ Vitest, build và xác minh file thật
+- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
+
+## Mẫu 5 sheet — chỉ sửa Theo dõi cạo mủ theo file Tong_hop_so_lieu_theodõicạomủ — 2026-09-17
+
+- [x] Đọc trực tiếp workbook 5 sheet mới và ghi nhận header/dòng dữ liệu của từng sheet
+- [x] Giữ nguyên bốn sheet Rập thiết kế, trang bị; Chăm sóc; Phun, bôi thuốc; Bón phân
+- [x] Cập nhật sheet Theo dõi cạo mủ theo header một dòng của file mới
+- [x] Sửa parser riêng cho sheet Theo dõi cạo mủ và chấp nhận ô số liệu trống/dấu gạch
+- [x] Bổ sung test xác nhận đúng 5 sheet và không đổi bốn sheet còn lại
+- [x] Chạy check, toàn bộ Vitest, build và xác minh file mẫu
+- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility

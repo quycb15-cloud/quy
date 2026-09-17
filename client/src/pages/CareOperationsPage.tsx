@@ -8,7 +8,7 @@ import { buildCareDailyExportRows, careDailyExportMeta } from "@/lib/careDailyEx
 import { summarizeCareDaily, dailyCompletionPercent } from "@/lib/careDailySummary";
 import { filterCareRecordsByDateRange, latestCareDate } from "@/lib/careDateRange";
 import { buildCareWorkbookSheets } from "@/lib/careWorkbook";
-import { buildCareImportTemplateRows, careImportSheetNames, parseCareWorkbook } from "@/lib/careExcel";
+import { buildCareTemplateSheets, parseCareWorkbook } from "@/lib/careExcel";
 import { monthlyCompletionPercent, summarizeMonthlyTapping } from "@/lib/careMonthlySummary";
 import { readLastSelectedCareTeam, writeLastSelectedCareTeam } from "@/lib/lastSelectedTeam";
 import { formatPercent, formatQuantity } from "@/lib/rubber";
@@ -115,7 +115,7 @@ export default function CareOperationsPage() {
   };
   const downloadCareTemplate = async () => {
     const XLSX = await import("xlsx"); const book = XLSX.utils.book_new();
-    (Object.keys(careImportSheetNames) as Category[]).forEach(templateCategory => { const name = careImportSheetNames[templateCategory]; XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(buildCareImportTemplateRows(templateCategory)), name.slice(0, 31)); });
+    buildCareTemplateSheets().forEach(sheet => { XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(sheet.rows), sheet.name.slice(0, 31)); });
     XLSX.writeFile(book, "mau-import-khai-thac-cham-soc.xlsx"); toast.success("Đã tải mẫu Excel Khai thác và chăm sóc");
   };
   const importCareFile = async (event: React.ChangeEvent<HTMLInputElement>) => {

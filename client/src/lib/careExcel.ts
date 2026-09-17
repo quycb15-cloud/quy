@@ -25,6 +25,10 @@ function categoryForSheet(sheetName: string, fallback: CareCategory): CareCatego
   return (Object.entries(careImportSheetNames).find(([, label]) => normalize(label) === key)?.[0] as CareCategory | undefined) ?? fallback;
 }
 
+export function buildCareTemplateSheets() {
+  return (Object.keys(careImportSheetNames) as CareCategory[]).map(category => ({ category, name: careImportSheetNames[category], rows: buildCareImportTemplateRows(category) }));
+}
+
 export function buildCareImportTemplateRows(category: CareCategory) {
   const base = { Ngày: "2026-09-17", Đội: "Đội 1", KH: 0, TH: 0, "Lũy kế": 0, "Đơn vị tính": category === "tapping" ? "Vườn" : "Ha", "% hoàn thành": 0, "Ghi chú": "" };
   if (category === "tapping") return [{ ...base, Vườn: "Vườn A", "Diện tích (ha)": "", "Phần cạo": "", "Chưa cạo": 0, "Cạo chưa xong": 0, "Cạo tiếp vườn": "", "KH tiếp (Vườn)": "", "TH tiếp (Vườn)": "" }];
@@ -39,6 +43,18 @@ export function parseCareWorkbook(workbook: any, fallback: CareCategory, xlsxMod
   for (const sheetName of workbook.SheetNames as string[]) {
     const category = categoryForSheet(sheetName, fallback);
     const sheet = workbook.Sheets[sheetName];
+    if (category === "tapping" && normalize(sheetName) === normalize("Theo dõi cạo mủ")) {
+      const rows = utils.sheet_to_json(sheet, { defval: "", raw: true }) as Array<Record<string, unknown>>;
+      rows.forEach((row, index) => {
+        const sourceRow = index + 2;
+        try {
+          const unit = text(row["Đội"]); if (!unit) throw new Error("thiếu Đội");
+          const gardenName = text(row["Vườn"]); if (!gardenName) throw new Error("thiếu Vườn");
+          output.push({ category, activityDate: parseDate(row["Ngày"], dateCodec), unit, gardenName, areaHa: number(row["Diện tích (ha)"]) || null, tappingSection: number(row["Phần cạo"]) || null, planQuantity: number(row.KH), actualQuantity: number(row.TH), cumulativeQuantity: number(row["Lũy kế"]) || number(row.TH), metricUnit: text(row["Đơn vị tính"]) || "Vườn", pendingGardens: number(row["Chưa cạo"]) || null, partialGardens: number(row["Cạo chưa xong"]) || null, nextGarden: text(row["Cạo tiếp vườn"]) || null, nextGardenPlanQuantity: number(row["KH tiếp (Vườn)"]) || null, nextGardenActualQuantity: number(row["TH tiếp (Vườn)"]) || null, workContent: null, note: text(row["Ghi chú"]) || null, sourceRow });
+        } catch (error) { throw new Error(`Sheet ${sheetName}, Dòng Excel ${sourceRow}: ${error instanceof Error ? error.message : "dữ liệu không hợp lệ"}`); }
+      });
+      continue;
+    }
     if (category === "tapping" && normalize(sheetName) === normalize("Theo dõi số liệu")) {
       const rows = utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true }) as unknown[][];
       const groups = [{ start: 2, end: 7 }, { start: 8, end: 13 }, { start: 14, end: 19 }];

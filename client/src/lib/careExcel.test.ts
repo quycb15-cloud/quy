@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
-import { parseCareWorkbook } from "./careExcel";
+import { buildCareTemplateSheets, parseCareWorkbook } from "./careExcel";
 
 describe("parseCareWorkbook", () => {
   it("đọc mẫu Theo dõi số liệu có header hai tầng và tách ba nhóm Vườn", () => {
@@ -14,6 +14,19 @@ describe("parseCareWorkbook", () => {
     const result = parseCareWorkbook(workbook, "tapping");
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ unit: "Đội 1", gardenName: "A", planQuantity: 57, actualQuantity: 0, pendingGardens: 57, partialGardens: null, nextGarden: "B / C", nextGardenPlanQuantity: 114, nextGardenActualQuantity: null, sourceRow: 4 });
+  });
+
+  it("đọc sheet Theo dõi cạo mủ một dòng và map cột Vườn/Diện tích/Phần cạo", () => {
+    const sheet = XLSX.utils.json_to_sheet([{ Ngày: "2026-09-10", Đội: "Đội 1", KH: "", TH: "-", "Lũy kế": "", "Đơn vị tính": "Vườn", "% hoàn thành": "", "Ghi chú": "ghi chú", Vườn: "Vườn A", "Diện tích (ha)": 12.5, "Phần cạo": 2, "Chưa cạo": 4, "Cạo chưa xong": "", "Cạo tiếp vườn": "Vườn B", "KH tiếp (Vườn)": "", "TH tiếp (Vườn)": 3 }]);
+    const workbook = { SheetNames: ["Theo dõi cạo mủ"], Sheets: { "Theo dõi cạo mủ": sheet }, utils: XLSX.utils, SSF: XLSX.SSF };
+    const result = parseCareWorkbook(workbook, "tapping");
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ unit: "Đội 1", gardenName: "Vườn A", areaHa: 12.5, tappingSection: 2, planQuantity: 0, actualQuantity: 0, pendingGardens: 4, nextGarden: "Vườn B", nextGardenActualQuantity: 3, note: "ghi chú", sourceRow: 2 });
+  });
+
+  it("giữ đủ năm sheet trong mẫu import", () => {
+    expect(buildCareTemplateSheets().map(sheet => sheet.name)).toEqual(["Theo dõi cạo mủ", "Rập thiết kế, trang bị", "Chăm sóc", "Phun, bôi thuốc", "Bón phân"]);
+    expect(buildCareTemplateSheets().slice(1).map(sheet => sheet.rows[0]["Nội dung công việc"])).toEqual([undefined, "Làm cỏ", "", ""]);
   });
 
   it("chấp nhận số liệu trống và dấu gạch như không phát sinh", () => {
