@@ -9865,4 +9865,4 @@
 - [x] Giữ chính xác Dòng Excel + TT trong thông báo lỗi
 - [x] Bổ sung regression test bằng cấu trúc dữ liệu của file D4
 - [x] Chạy check, toàn bộ Vitest và build production
-- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
