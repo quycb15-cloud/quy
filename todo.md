@@ -9906,3 +9906,12 @@
 - [x] Bổ sung test helper/UI và kiểm tra responsive
 - [x] Chạy check, toàn bộ Vitest và build production
 - [x] Lưu checkpoint, chưa publish và chưa đổi visibility
+
+## Thiết kế biểu tượng PWA xanh lá — 2026-09-17
+
+- [x] Tạo icon PWA vuông màu xanh lá, hình lá cây và số 386 nổi bật
+- [x] Thay thế icon PWA/favicon/manifest tham chiếu icon cũ bằng icon mới
+- [x] Kiểm tra icon hiển thị ở favicon và luồng cài đặt PWA
+- [x] Giữ nguyên asset icon mới ở các checkpoint sau, không publish theo yêu cầu này
+- [x] Chạy test, typecheck và build production
+- [ ] Lưu checkpoint icon mới, chưa publish và chưa đổi visibility

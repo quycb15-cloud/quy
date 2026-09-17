@@ -1,5 +1,5 @@
-const CACHE_NAME = "cn386-shell-v2";
-const SHELL_ASSETS = ["/manifest.webmanifest", "/cn386-icon.svg"];
+const CACHE_NAME = "cn386-shell-v3";
+const SHELL_ASSETS = ["/manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
