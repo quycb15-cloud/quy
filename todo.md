@@ -9895,4 +9895,4 @@
 - [x] Giữ nguyên dữ liệu cộng dồn và công thức % Hoàn thành hiện tại
 - [x] Kiểm tra responsive desktop/mobile và trạng thái có nhiều dòng dữ liệu
 - [x] Chạy test, typecheck và build production
-- [ ] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
