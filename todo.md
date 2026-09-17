@@ -9948,4 +9948,4 @@
 - [x] Bổ sung nút Thêm/Sửa ghi chú tại khu vực bên dưới Tổng cộng
 - [x] Kiểm soát thêm/sửa ghi chú theo quyền và phạm vi Đội
 - [x] Bổ sung test và chạy check/Vitest/build
-- [ ] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
+- [x] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
