@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { buildCareDailyExportRows, careDailyExportMeta } from "@/lib/careDailyExport";
 import { summarizeCareDaily, dailyCompletionPercent } from "@/lib/careDailySummary";
-import { filterCareRecordsByDateRange, formatCareDate, latestCareDate } from "@/lib/careDateRange";
+import { careDateFromKey, careDateKey, filterCareRecordsByDateRange, formatCareDate, latestCareDate } from "@/lib/careDateRange";
 import { buildCareWorkbookSheets } from "@/lib/careWorkbook";
 import { buildCareTemplateSheets, parseCareWorkbook } from "@/lib/careExcel";
 import { monthlyCompletionPercent, summarizeMonthlyTapping } from "@/lib/careMonthlySummary";
@@ -32,7 +32,7 @@ const config: Record<Category, { label: string; metric: string; description: str
 const categories = Object.keys(config) as Category[];
 const num = (value: string) => Number(value) || 0;
 const displayQuantity = (value: number | null | undefined) => value ? formatQuantity(value) : "—";
-const blankForm = (): CareForm => ({ date: new Date().toISOString().slice(0, 10), unit: "", gardenName: "", plan: "", actual: "", cumulative: "", pending: "", partial: "", nextGarden: "", nextGardenPlan: "", nextGardenActual: "", workContent: "", note: "" });
+const blankForm = (): CareForm => ({ date: careDateKey(new Date()), unit: "", gardenName: "", plan: "", actual: "", cumulative: "", pending: "", partial: "", nextGarden: "", nextGardenPlan: "", nextGardenActual: "", workContent: "", note: "" });
 
 export default function CareOperationsPage() {
   const [category, setCategory] = useState<Category>("tapping");
@@ -77,14 +77,14 @@ export default function CareOperationsPage() {
   const update = (key: keyof CareForm, value: string) => setForm(current => ({ ...current, [key]: value }));
   const loadRecord = (row: typeof records[number]) => {
     setEditingId(row.id);
-    setEditingKey(`${row.category}|${row.unit}|${row.gardenName}|${new Date(row.activityDate).toISOString().slice(0, 10)}`);
-    setForm({ date: new Date(row.activityDate).toISOString().slice(0, 10), unit: row.unit, gardenName: row.gardenName ?? "", plan: String(row.planQuantity ?? ""), actual: String(row.actualQuantity ?? ""), cumulative: String(row.cumulativeQuantity ?? ""), pending: String(row.pendingGardens ?? ""), partial: String(row.partialGardens ?? ""), nextGarden: row.nextGarden ?? "", nextGardenPlan: String(row.nextGardenPlanQuantity ?? ""), nextGardenActual: String(row.nextGardenActualQuantity ?? ""), workContent: row.workContent ?? "", note: row.note ?? "" });
+    setEditingKey(`${row.category}|${row.unit}|${row.gardenName}|${careDateKey(row.activityDate)}`);
+    setForm({ date: careDateKey(row.activityDate), unit: row.unit, gardenName: row.gardenName ?? "", plan: String(row.planQuantity ?? ""), actual: String(row.actualQuantity ?? ""), cumulative: String(row.cumulativeQuantity ?? ""), pending: String(row.pendingGardens ?? ""), partial: String(row.partialGardens ?? ""), nextGarden: row.nextGarden ?? "", nextGardenPlan: String(row.nextGardenPlanQuantity ?? ""), nextGardenActual: String(row.nextGardenActualQuantity ?? ""), workContent: row.workContent ?? "", note: row.note ?? "" });
   };
   const submit = () => {
     if (!form.unit || (isTapping && !form.gardenName) || (needsWorkContent && !form.workContent)) return toast.error(isTapping ? "Vui lòng nhập đội và Vườn A/B/C" : needsWorkContent ? "Vui lòng nhập đội và nội dung công việc" : "Vui lòng nhập đội");
     save.mutate({
       category,
-      activityDate: new Date(`${form.date}T00:00:00.000Z`),
+      activityDate: careDateFromKey(form.date),
       unit: form.unit,
       gardenName: isTapping ? form.gardenName : config[category].label,
       areaHa: null,

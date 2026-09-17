@@ -1,4 +1,5 @@
 import type { CareCategory } from "./careDailyExport";
+import { careDateFromKey, careDateKey } from "./careDateRange";
 
 export const careImportSheetNames: Record<CareCategory, string> = {
   tapping: "Theo dõi cạo mủ",
@@ -13,11 +14,17 @@ const text = (value: unknown) => String(value ?? "").trim();
 const number = (value: unknown) => { if (value === "" || value == null || value === "-" || value === "—") return 0; const parsed = Number(String(value).replace(/,/g, "")); if (!Number.isFinite(parsed)) throw new Error("phải là số"); return parsed; };
 
 function parseDate(value: unknown, XLSX: any): Date {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-  if (typeof value === "number") { const parsed = XLSX.SSF.parse_date_code(value); if (parsed) return new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d)); }
-  const raw = text(value); const match = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/); const date = match ? new Date(Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]))) : new Date(raw);
+  const toBusinessDate = (year: number, month: number, day: number) => careDateFromKey(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return toBusinessDate(value.getFullYear(), value.getMonth() + 1, value.getDate());
+  if (typeof value === "number") { const parsed = XLSX.SSF.parse_date_code(value); if (parsed) return toBusinessDate(parsed.y, parsed.m, parsed.d); }
+  const raw = text(value);
+  const vietnameseMatch = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (vietnameseMatch) return toBusinessDate(Number(vietnameseMatch[3]), Number(vietnameseMatch[2]), Number(vietnameseMatch[1]));
+  const isoDateMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoDateMatch) return toBusinessDate(Number(isoDateMatch[1]), Number(isoDateMatch[2]), Number(isoDateMatch[3]));
+  const date = new Date(raw);
   if (Number.isNaN(date.getTime())) throw new Error("Ngày không hợp lệ");
-  return date;
+  return careDateFromKey(careDateKey(date));
 }
 
 function categoryForSheet(sheetName: string, fallback: CareCategory): CareCategory {

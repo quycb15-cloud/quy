@@ -1,3 +1,5 @@
+import { careDateKey } from "./careDateRange";
+
 export type CareCategory = "tapping" | "reinforcement" | "care" | "treatment" | "fertilization";
 export type CareDailyExportRecord = { activityDate: Date | string; unit: string; gardenName?: string | null; areaHa?: number | null; tappingSection?: number | null; workContent?: string | null; planQuantity: number; actualQuantity: number; cumulativeQuantity: number; metricUnit: string; progressPercent?: number | null; pendingGardens?: number | null; partialGardens?: number | null; nextGarden?: string | null; nextGardenPlanQuantity?: number | null; nextGardenActualQuantity?: number | null; note?: string | null };
 
@@ -11,7 +13,7 @@ export const careDailyExportMeta: Record<CareCategory, { fileName: string; sheet
 
 export function buildCareDailyExportRows(category: CareCategory, records: CareDailyExportRecord[]) {
   return records.map(row => {
-    const base = { Ngày: new Date(row.activityDate).toISOString().slice(0, 10), Đội: row.unit, KH: row.planQuantity, TH: row.actualQuantity, "Lũy kế": row.cumulativeQuantity, "Đơn vị tính": row.metricUnit, "% hoàn thành": Number(Number(row.progressPercent ?? 0).toFixed(2)), "Ghi chú": row.note ?? "" };
+    const base = { Ngày: careDateKey(row.activityDate), Đội: row.unit, KH: row.planQuantity, TH: row.actualQuantity, "Lũy kế": row.cumulativeQuantity, "Đơn vị tính": row.metricUnit, "% hoàn thành": Number(Number(row.progressPercent ?? 0).toFixed(2)), "Ghi chú": row.note ?? "" };
     if (category === "tapping") return { ...base, Vườn: row.gardenName ?? "", "Diện tích (ha)": row.areaHa ?? "", "Phần cạo": row.tappingSection ?? "", "Chưa cạo": row.pendingGardens ?? "", "Cạo chưa xong": row.partialGardens ?? "", "Cạo tiếp vườn": row.nextGarden ?? "", "KH tiếp (Vườn)": row.nextGardenPlanQuantity ?? "", "TH tiếp (Vườn)": row.nextGardenActualQuantity ?? "" };
     if (category === "care" || category === "treatment" || category === "fertilization") return { ...base, "Nội dung công việc": row.workContent ?? "" };
     return base;
