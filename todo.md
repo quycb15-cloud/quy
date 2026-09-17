@@ -9939,3 +9939,13 @@
 - [x] Bổ sung test quyền, tách nội dung và ghi chú theo Đội
 - [x] Chạy check, toàn bộ Vitest, build production và kiểm tra responsive
 - [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+
+## Ghi chú dưới Tổng cộng theo ngày và nội dung — 2026-09-17
+
+- [x] Hiển thị ghi chú đã nhập từ dữ liệu theo ngày và nội dung công việc bên dưới Tổng cộng
+- [x] Sắp xếp khu vực ghi chú theo thứ tự Đội 1 đến Đội 6
+- [x] Không hiển thị ghi chú trong cột Thao tác cuối bảng
+- [x] Bổ sung nút Thêm/Sửa ghi chú tại khu vực bên dưới Tổng cộng
+- [x] Kiểm soát thêm/sửa ghi chú theo quyền và phạm vi Đội
+- [x] Bổ sung test và chạy check/Vitest/build
+- [ ] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
