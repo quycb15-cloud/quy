@@ -9887,3 +9887,12 @@
 - [x] Kiểm tra responsive desktop/mobile và bảo đảm nút nhập, sửa, xóa, lọc vẫn dễ thao tác
 - [x] Chạy test, typecheck và build production
 - [x] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
+
+## Tối ưu Tổng hợp cạo mủ trong tháng
+
+- [x] Mở rộng khu vực tổng hợp tháng để không bị co hẹp theo cột nhập dữ liệu
+- [x] Cân đối chiều rộng các cột Đội, Vườn, KH, Cạo xong và các chỉ tiêu còn lại
+- [x] Giữ nguyên dữ liệu cộng dồn và công thức % Hoàn thành hiện tại
+- [x] Kiểm tra responsive desktop/mobile và trạng thái có nhiều dòng dữ liệu
+- [x] Chạy test, typecheck và build production
+- [ ] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
