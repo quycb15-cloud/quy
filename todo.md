@@ -10012,4 +10012,4 @@
 - [x] Chấp nhận ô số liệu trống hoặc dấu gạch khi không phát sinh
 - [x] Bổ sung test cấu trúc ba nhóm và bốn sheet còn lại
 - [x] Chạy check, toàn bộ Vitest và build
-- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint `d91605d9`, chưa publish và chưa đổi visibility
