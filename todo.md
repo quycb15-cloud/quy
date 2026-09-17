@@ -9886,4 +9886,4 @@
 - [x] Tối ưu các khu vực/tổng hợp khác trên trang theo cùng hệ thống khoảng cách và kích thước
 - [x] Kiểm tra responsive desktop/mobile và bảo đảm nút nhập, sửa, xóa, lọc vẫn dễ thao tác
 - [x] Chạy test, typecheck và build production
-- [ ] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
