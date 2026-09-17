@@ -9959,3 +9959,13 @@
 - [x] Giữ dữ liệu ghi chú trong bản ghi công việc và không đưa ghi chú vào cột Thao tác
 - [x] Chạy check, Vitest, build và kiểm tra giao diện
 - [x] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
+
+## Ghi chú ngay dưới Tổng cộng và Excel Khai thác–Chăm sóc — 2026-09-17
+
+- [x] Đặt khối Ghi chú ngay sau dòng Tổng cộng của bảng Theo dõi cạo mủ, trước các khu vực khác
+- [x] Không để khối Ghi chú ở cuối bảng/tổng hợp như ảnh hiện tại
+- [x] Thêm nút Tải mẫu Excel cho dữ liệu Khai thác và chăm sóc hằng ngày
+- [x] Thêm nút Chọn tệp Excel và import dữ liệu cho các nội dung hằng ngày
+- [x] Giữ kiểm tra quyền, phạm vi Đội, ngày, nội dung công việc và chống ghi trùng khi import
+- [x] Chụp ảnh phần Khai thác và chăm sóc sau khi hoàn thành để người dùng duyệt trước publish
+- [x] Chạy check, Vitest và build; lưu checkpoint chưa publish
