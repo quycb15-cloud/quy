@@ -9915,3 +9915,13 @@
 - [x] Giữ nguyên asset icon mới ở các checkpoint sau, không publish theo yêu cầu này
 - [x] Chạy test, typecheck và build production
 - [x] Lưu checkpoint icon mới, chưa publish và chưa đổi visibility
+
+## Chẩn đoán không mở được trên điện thoại — 2026-09-17
+
+- [x] Kiểm tra domain Public, DNS, HTTPS và phản hồi production
+- [x] Kiểm tra manifest, service worker và asset icon PWA
+- [x] Đối chiếu nguyên nhân lỗi theo thiết bị/mạng/cache và xác định hướng xử lý
+- [x] Hướng dẫn người dùng mở lại an toàn, không làm mất dữ liệu
+
+- [x] Đồng bộ MIME khai báo của icon PWA với định dạng thực tế WebP để tránh Android từ chối manifest/icon
+- [x] Xác minh lại response icon sau khi sửa và hướng dẫn xóa shortcut/PWA cache cũ
