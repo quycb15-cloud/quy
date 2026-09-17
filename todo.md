@@ -9914,4 +9914,4 @@
 - [x] Kiểm tra icon hiển thị ở favicon và luồng cài đặt PWA
 - [x] Giữ nguyên asset icon mới ở các checkpoint sau, không publish theo yêu cầu này
 - [x] Chạy test, typecheck và build production
-- [ ] Lưu checkpoint icon mới, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint icon mới, chưa publish và chưa đổi visibility
