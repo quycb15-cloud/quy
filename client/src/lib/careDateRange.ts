@@ -4,6 +4,11 @@ export function careDateKey(value: Date | string) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
+export function formatCareDate(value: Date | string) {
+  const [year, month, day] = careDateKey(value).split("-");
+  return `${Number(day)}/${Number(month)}/${year}`;
+}
+
 export function latestCareDate<T extends DatedCareRecord>(records: T[]) {
   return records.reduce<string | undefined>((latest, record) => {
     const key = careDateKey(record.activityDate);
