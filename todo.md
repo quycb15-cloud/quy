@@ -9971,3 +9971,14 @@
 - [x] Chạy check, Vitest và build; lưu checkpoint chưa publish
 
 - [x] Đã lưu checkpoint `ab69cd98`; chưa publish, chờ người dùng duyệt ảnh trang Khai thác và chăm sóc.
+
+## Import Theo dõi cạo mủ theo mẫu Tong_hop_so_lieu_hang_ngay_2026 — 2026-09-17
+
+- [x] Đọc sheet, header, dòng dữ liệu và kiểu ô thực tế của workbook mẫu
+- [x] Đối chiếu tên cột mẫu với parser careExcel hiện tại
+- [x] Cho phép các cột số liệu để trống khi không có số liệu
+- [x] Giữ kiểm tra bắt buộc cho Ngày, Đội và Vườn khi cần
+- [x] Giữ báo lỗi đúng Sheet + Dòng Excel và không ghi dữ liệu ngoài phạm vi
+- [x] Bổ sung regression tests theo workbook mẫu
+- [x] Chạy check, toàn bộ Vitest và build production
+- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility

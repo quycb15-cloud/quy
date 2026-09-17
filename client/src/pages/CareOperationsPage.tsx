@@ -121,7 +121,7 @@ export default function CareOperationsPage() {
   const importCareFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; if (!file) return;
     try {
-      const XLSX = await import("xlsx"); const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true }); const rows = parseCareWorkbook(workbook, category);
+      const XLSX = await import("xlsx"); const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true }); const rows = parseCareWorkbook(workbook, category, XLSX);
       if (!rows.length) throw new Error("File không có dòng dữ liệu hợp lệ");
       for (const row of rows) {
         const { sourceRow: _sourceRow, category: rowCategory, ...payload } = row as typeof row & { sourceRow: number; category: Category };
