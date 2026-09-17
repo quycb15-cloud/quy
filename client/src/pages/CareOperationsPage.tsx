@@ -115,7 +115,7 @@ export default function CareOperationsPage() {
   };
   const downloadCareTemplate = async () => {
     const XLSX = await import("xlsx"); const book = XLSX.utils.book_new();
-    buildCareTemplateSheets().forEach(sheet => { XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(sheet.rows), sheet.name.slice(0, 31)); });
+    buildCareTemplateSheets().forEach(sheet => { const worksheet = sheet.matrix ? XLSX.utils.aoa_to_sheet(sheet.matrix) : XLSX.utils.json_to_sheet(sheet.rows); XLSX.utils.book_append_sheet(book, worksheet, sheet.name.slice(0, 31)); });
     XLSX.writeFile(book, "mau-import-khai-thac-cham-soc.xlsx"); toast.success("Đã tải mẫu Excel Khai thác và chăm sóc");
   };
   const importCareFile = async (event: React.ChangeEvent<HTMLInputElement>) => {

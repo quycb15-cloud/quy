@@ -26,7 +26,16 @@ function categoryForSheet(sheetName: string, fallback: CareCategory): CareCatego
 }
 
 export function buildCareTemplateSheets() {
-  return (Object.keys(careImportSheetNames) as CareCategory[]).map(category => ({ category, name: careImportSheetNames[category], rows: buildCareImportTemplateRows(category) }));
+  return (Object.keys(careImportSheetNames) as CareCategory[]).map(category => ({ category, name: careImportSheetNames[category], rows: buildCareImportTemplateRows(category), matrix: category === "tapping" ? buildTappingTemplateMatrix() : null }));
+}
+
+function buildTappingTemplateMatrix() {
+  return [
+    ["Ngày", "Đội", "Theo dõi cạo mủ hàng ngày", "", "", "", "", "", "Cạo tiếp vườn", "", "", "", "", "", "Cạo tiếp vườn", "", "", "", "", ""],
+    ["", "", "Vườn cạo", "KH (Vườn)", "Cạo xong (Vườn)", "Chưa cạo (Vườn)", "Cạo chưa xong (Vườn)", "% hoàn thành thực hiện xong", "Vườn cạo", "KH (Vườn)", "Cạo xong (Vườn)", "Chưa cạo (Vườn)", "Cạo chưa xong (Vườn)", "% hoàn thành thực hiện xong", "Vườn cạo", "KH (Vườn)", "Cạo xong (Vườn)", "Chưa cạo (Vườn)", "Cạo chưa xong (Vườn)", "% hoàn thành thực hiện xong"],
+    ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["2026-09-17", "Đội 1", "Vườn C", 0, "", 0, 0, 0, "Vườn C", 0, "", 0, 0, 0, "Vườn C", 0, "", 0, 0, 0],
+  ];
 }
 
 export function buildCareImportTemplateRows(category: CareCategory) {
@@ -44,15 +53,30 @@ export function parseCareWorkbook(workbook: any, fallback: CareCategory, xlsxMod
     const category = categoryForSheet(sheetName, fallback);
     const sheet = workbook.Sheets[sheetName];
     if (category === "tapping" && normalize(sheetName) === normalize("Theo dõi cạo mủ")) {
-      const rows = utils.sheet_to_json(sheet, { defval: "", raw: true }) as Array<Record<string, unknown>>;
-      rows.forEach((row, index) => {
-        const sourceRow = index + 2;
-        try {
-          const unit = text(row["Đội"]); if (!unit) throw new Error("thiếu Đội");
-          const gardenName = text(row["Vườn"]); if (!gardenName) throw new Error("thiếu Vườn");
-          output.push({ category, activityDate: parseDate(row["Ngày"], dateCodec), unit, gardenName, areaHa: number(row["Diện tích (ha)"]) || null, tappingSection: number(row["Phần cạo"]) || null, planQuantity: number(row.KH), actualQuantity: number(row.TH), cumulativeQuantity: number(row["Lũy kế"]) || number(row.TH), metricUnit: text(row["Đơn vị tính"]) || "Vườn", pendingGardens: number(row["Chưa cạo"]) || null, partialGardens: number(row["Cạo chưa xong"]) || null, nextGarden: text(row["Cạo tiếp vườn"]) || null, nextGardenPlanQuantity: number(row["KH tiếp (Vườn)"]) || null, nextGardenActualQuantity: number(row["TH tiếp (Vườn)"]) || null, workContent: null, note: text(row["Ghi chú"]) || null, sourceRow });
-        } catch (error) { throw new Error(`Sheet ${sheetName}, Dòng Excel ${sourceRow}: ${error instanceof Error ? error.message : "dữ liệu không hợp lệ"}`); }
-      });
+      const matrix = utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true }) as unknown[][];
+      const isGrouped = String(matrix[0]?.[2] ?? "").includes("Theo dõi cạo mủ");
+      if (isGrouped) {
+        const groups = [{ start: 2 }, { start: 8 }, { start: 14 }];
+        matrix.slice(3).forEach((values, index) => {
+          const sourceRow = index + 4; const unit = text(values[1]); if (!unit) return;
+          try {
+            const main = groups[0]; const gardenName = text(values[main.start]); if (!gardenName) throw new Error("thiếu Vườn cạo");
+            const nextGroups = groups.slice(1).filter(group => text(values[group.start]) || [1, 2, 3, 4, 5].some(offset => values[group.start + offset] !== "" && values[group.start + offset] != null && values[group.start + offset] !== "-" && values[group.start + offset] !== "—"));
+            const nextNames = Array.from(new Set(nextGroups.map(group => text(values[group.start])).filter(Boolean)));
+            const nextPlan = nextGroups.reduce((sum, group) => sum + number(values[group.start + 1]), 0); const nextActual = nextGroups.reduce((sum, group) => sum + number(values[group.start + 2]), 0);
+            output.push({ category, activityDate: parseDate(values[0], dateCodec), unit, gardenName, areaHa: null, tappingSection: null, planQuantity: number(values[main.start + 1]), actualQuantity: number(values[main.start + 2]), cumulativeQuantity: number(values[main.start + 2]), metricUnit: "Vườn", pendingGardens: number(values[main.start + 3]) || null, partialGardens: number(values[main.start + 4]) || null, nextGarden: nextNames.length ? nextNames.join(" / ") : null, nextGardenPlanQuantity: nextPlan || null, nextGardenActualQuantity: nextActual || null, workContent: null, note: null, sourceRow });
+          } catch (error) { throw new Error(`Sheet ${sheetName}, Dòng Excel ${sourceRow}: ${error instanceof Error ? error.message : "dữ liệu không hợp lệ"}`); }
+        });
+      } else {
+        const rows = utils.sheet_to_json(sheet, { defval: "", raw: true }) as Array<Record<string, unknown>>;
+        rows.forEach((row, index) => {
+          const sourceRow = index + 2;
+          try {
+            const unit = text(row["Đội"]); if (!unit) throw new Error("thiếu Đội"); const gardenName = text(row["Vườn"]); if (!gardenName) throw new Error("thiếu Vườn");
+            output.push({ category, activityDate: parseDate(row["Ngày"], dateCodec), unit, gardenName, areaHa: number(row["Diện tích (ha)"]) || null, tappingSection: number(row["Phần cạo"]) || null, planQuantity: number(row.KH), actualQuantity: number(row.TH), cumulativeQuantity: number(row["Lũy kế"]) || number(row.TH), metricUnit: text(row["Đơn vị tính"]) || "Vườn", pendingGardens: number(row["Chưa cạo"]) || null, partialGardens: number(row["Cạo chưa xong"]) || null, nextGarden: text(row["Cạo tiếp vườn"]) || null, nextGardenPlanQuantity: number(row["KH tiếp (Vườn)"]) || null, nextGardenActualQuantity: number(row["TH tiếp (Vườn)"]) || null, workContent: null, note: text(row["Ghi chú"]) || null, sourceRow });
+          } catch (error) { throw new Error(`Sheet ${sheetName}, Dòng Excel ${sourceRow}: ${error instanceof Error ? error.message : "dữ liệu không hợp lệ"}`); }
+        });
+      }
       continue;
     }
     if (category === "tapping" && normalize(sheetName) === normalize("Theo dõi số liệu")) {

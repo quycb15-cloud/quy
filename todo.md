@@ -10003,3 +10003,13 @@
 - [x] Bổ sung test xác nhận đúng 5 sheet và không đổi bốn sheet còn lại
 - [x] Chạy check, toàn bộ Vitest, build và xác minh file mẫu
 - [x] Lưu checkpoint `095d41ea`, chưa publish và chưa đổi visibility
+
+## Theo dõi cạo mủ theo mẫu ba nhóm cột — 2026-09-17
+
+- [x] Tạo mẫu sheet Theo dõi cạo mủ với ba nhóm cột: theo dõi cạo mủ hàng ngày, Cạo tiếp vườn 1 và Cạo tiếp vườn 2
+- [x] Giữ nguyên bốn sheet còn lại trong workbook 5 sheet
+- [x] Parser nhận ba nhóm cột và không tạo dòng trùng; map nhóm chính và Cạo tiếp vào đúng trường
+- [x] Chấp nhận ô số liệu trống hoặc dấu gạch khi không phát sinh
+- [x] Bổ sung test cấu trúc ba nhóm và bốn sheet còn lại
+- [x] Chạy check, toàn bộ Vitest và build
+- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
