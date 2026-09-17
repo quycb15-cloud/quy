@@ -821,6 +821,7 @@ export type TeamImportPayload = {
   recordDate: Date;
   frozenLatex: number;
   latexThread: number;
+  note?: string | null;
 };
 export type TeamExportPayload = {
   unit: string;
@@ -844,6 +845,7 @@ export async function bulkUpsertTeamImports(
         ...row,
         frozenLatex: asQuantity(row.frozenLatex),
         latexThread: asQuantity(row.latexThread),
+        note: row.note?.trim() || null,
         createdBy: userId,
       })
       .onDuplicateKeyUpdate({
@@ -851,6 +853,8 @@ export async function bulkUpsertTeamImports(
           periodLabel: row.periodLabel,
           frozenLatex: asQuantity(row.frozenLatex),
           latexThread: asQuantity(row.latexThread),
+          note: row.note?.trim() || null,
+          createdBy: userId,
         },
       });
 }
@@ -880,6 +884,88 @@ export async function bulkUpsertTeamExports(
           createdBy: userId,
         },
       });
+}
+
+export async function getLatexImport(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  return (await db.select().from(latexImports).where(eq(latexImports.id, id)).limit(1))[0];
+}
+
+export async function updateLatexImport(id: number, input: ImportPayload, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.update(latexImports).set({
+    plotId: input.plotId,
+    recordDate: input.recordDate,
+    periodLabel: input.periodLabel,
+    frozenLatex: asQuantity(input.frozenLatex),
+    latexThread: asQuantity(input.latexThread),
+    note: input.note?.trim() || null,
+    createdBy: userId,
+  }).where(eq(latexImports.id, id));
+}
+
+export async function removeLatexImport(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.delete(latexImports).where(eq(latexImports.id, id));
+  return { id };
+}
+
+export async function getTeamImport(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  return (await db.select().from(teamLatexImports).where(eq(teamLatexImports.id, id)).limit(1))[0];
+}
+
+export async function updateTeamImport(id: number, input: TeamImportSavePayload, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.update(teamLatexImports).set({
+    unit: input.unit.trim(),
+    gardenName: input.gardenName.trim(),
+    periodLabel: input.periodLabel,
+    recordDate: input.recordDate,
+    frozenLatex: asQuantity(input.frozenLatex),
+    latexThread: asQuantity(input.latexThread),
+    note: input.note?.trim() || null,
+    createdBy: userId,
+  }).where(eq(teamLatexImports.id, id));
+}
+
+export async function removeTeamImport(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.delete(teamLatexImports).where(eq(teamLatexImports.id, id));
+  return { id };
+}
+
+export async function getTeamExport(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  return (await db.select().from(teamLatexExports).where(eq(teamLatexExports.id, id)).limit(1))[0];
+}
+
+export async function updateTeamExport(id: number, input: TeamExportPayload, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.update(teamLatexExports).set({
+    unit: input.unit.trim(),
+    periodLabel: input.periodLabel,
+    recordDate: input.recordDate,
+    frozenContaminatedLatex: asQuantity(input.frozenContaminatedLatex),
+    latexThread: asQuantity(input.latexThread),
+    note: input.note?.trim() || null,
+    createdBy: userId,
+  }).where(eq(teamLatexExports.id, id));
+}
+
+export async function removeTeamExport(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  await db.delete(teamLatexExports).where(eq(teamLatexExports.id, id));
+  return { id };
 }
 
 export async function getExcelDataSummary() {
@@ -3417,15 +3503,17 @@ export async function listCombinedLatexImports(periodLabel?: string) {
     listLatexImports(periodLabel),
     listTeamImports(),
   ]);
+  const mappedPlotRows = plotRows.map(row => ({ ...row, source: "plot" as const }));
   const mappedTeamRows = teamRows
     .filter(row => !periodLabel || row.periodLabel === periodLabel)
     .map(row => ({
       ...row,
+      source: "team" as const,
       plotId: null,
       plotCode: "—",
       plotName: row.gardenName,
     }));
-  return [...plotRows, ...mappedTeamRows].sort(
+  return [...mappedPlotRows, ...mappedTeamRows].sort(
     (left, right) => right.recordDate.getTime() - left.recordDate.getTime()
   );
 }

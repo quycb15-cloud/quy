@@ -7,6 +7,12 @@ const dbMocks = vi.hoisted(() => ({
   updatePlotGardenType: vi.fn(),
   logActivity: vi.fn(),
   saveLatexImport: vi.fn(),
+  getLatexImport: vi.fn(),
+  updateLatexImport: vi.fn(),
+  removeLatexImport: vi.fn(),
+  getTeamImport: vi.fn(),
+  updateTeamImport: vi.fn(),
+  removeTeamImport: vi.fn(),
   getPlotById: vi.fn(),
   getInternalAccountByUserId: vi.fn(),
   getProgressReport: vi.fn(),
@@ -26,6 +32,9 @@ const dbMocks = vi.hoisted(() => ({
   listTeamExports: vi.fn(),
   getTeamLatexBalance: vi.fn(),
   bulkUpsertTeamExports: vi.fn(),
+  getTeamExport: vi.fn(),
+  updateTeamExport: vi.fn(),
+  removeTeamExport: vi.fn(),
   listPlotLatexProductions: vi.fn(),
   savePlotLatexProduction: vi.fn(),
   bulkUpsertPlotLatexProductions: vi.fn(),
@@ -253,6 +262,26 @@ describe("rubberRouter authorization and business procedures", () => {
     await caller.rubber.reports.progress({ periodLabel: "Đợt 1" });
     expect(dbMocks.saveLatexImport).toHaveBeenCalledWith(expect.objectContaining({ plotId: 8, frozenLatex: 125, latexThread: 8 }), 2);
     expect(dbMocks.getProgressReport).toHaveBeenCalledWith("Đợt 1", undefined, undefined);
+  });
+
+  it("cho phép sửa và xóa nhập mủ theo Đội đúng quyền latex:write", async () => {
+    dbMocks.getTeamImport.mockResolvedValue({ id: 41, unit: "Đội 1", gardenName: "Vườn A" });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    const data = { unit: "Đội 1", gardenName: "Vườn A", periodLabel: "Đợt 2", recordDate: new Date("2026-08-06T12:00:00.000Z"), frozenLatex: 25, latexThread: 2, note: "Đã cân" };
+    await expect(caller.rubber.imports.updateTeam({ id: 41, data })).resolves.toEqual({ success: true });
+    await expect(caller.rubber.imports.removeTeam({ id: 41 })).resolves.toEqual({ success: true });
+    expect(dbMocks.updateTeamImport).toHaveBeenCalledWith(41, data, 1);
+    expect(dbMocks.removeTeamImport).toHaveBeenCalledWith(41);
+  });
+
+  it("cho phép sửa và xóa xuất mủ theo Đội", async () => {
+    dbMocks.getTeamExport.mockResolvedValue({ id: 52, unit: "Đội 2" });
+    const caller = appRouter.createCaller(makeContext("admin"));
+    const data = { unit: "Đội 2", periodLabel: "Đợt 1", recordDate: new Date("2026-08-07T12:00:00.000Z"), frozenContaminatedLatex: 30, latexThread: 3, note: "Đã đối chiếu" };
+    await expect(caller.rubber.exports.teamUpdate({ id: 52, data })).resolves.toEqual({ success: true });
+    await expect(caller.rubber.exports.teamRemove({ id: 52 })).resolves.toEqual({ success: true });
+    expect(dbMocks.updateTeamExport).toHaveBeenCalledWith(52, data, 1);
+    expect(dbMocks.removeTeamExport).toHaveBeenCalledWith(52);
   });
 
   it("lọc báo cáo tiến độ theo Năm, Tháng và Đợt All", async () => {

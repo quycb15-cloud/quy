@@ -519,6 +519,7 @@ export const teamLatexImports = mysqlTable(
     recordDate: timestamp("recordDate").notNull(),
     frozenLatex: decimal("frozenLatex", { precision: 14, scale: 2 }).notNull(),
     latexThread: decimal("latexThread", { precision: 14, scale: 2 }).notNull(),
+    note: text("note"),
     source: varchar("source", { length: 100 })
       .default("Excel import")
       .notNull(),

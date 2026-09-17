@@ -68,6 +68,16 @@ const importInput = z.object({
   note: z.string().max(1000).optional().nullable(),
 });
 
+const teamImportInput = z.object({
+  unit: requiredText("Đội", 120),
+  gardenName: requiredText("Vườn / đơn vị", 160),
+  recordDate: dateInput,
+  periodLabel: requiredText("Đợt", 80),
+  frozenLatex: quantity,
+  latexThread: quantity,
+  note: z.string().max(1000).optional().nullable(),
+});
+
 const exportInput = z.object({
   plotId: z.number().int().positive(),
   periodLabel: requiredText("Đợt", 80),
@@ -448,6 +458,50 @@ export const rubberRouter = router({
         }
         return { success: true };
       }),
+    updatePlot: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), data: importInput.extend({ plotId: z.number().int().positive() }) }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getLatexImport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi nhập mủ" });
+        const plot = await db.getPlotById(input.data.plotId);
+        if (!plot) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy Lô" });
+        await requirePermission(ctx, "latex:write", plot.unit);
+        await db.updateLatexImport(input.id, input.data, ctx.user.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.import.update", entityType: "latex_import", entityId: input.id, summary: `Sửa nhập mủ theo Lô ${input.data.periodLabel}`, metadata: { plotId: input.data.plotId, frozenLatex: input.data.frozenLatex, latexThread: input.data.latexThread } });
+        return { success: true };
+      }),
+    removePlot: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getLatexImport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi nhập mủ" });
+        const plot = await db.getPlotById(existing.plotId);
+        if (!plot) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy Lô của bản ghi" });
+        await requirePermission(ctx, "latex:write", plot.unit);
+        await db.removeLatexImport(input.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.import.remove", entityType: "latex_import", entityId: input.id, summary: "Xóa bản ghi nhập mủ theo Lô", metadata: { plotId: existing.plotId, recordDate: existing.recordDate } });
+        return { success: true };
+      }),
+    updateTeam: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), data: teamImportInput }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getTeamImport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi nhập mủ" });
+        await requirePermission(ctx, "latex:write", input.data.unit);
+        await db.updateTeamImport(input.id, input.data, ctx.user.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.import.team_update", entityType: "team_latex_import", entityId: input.id, summary: `Sửa nhập mủ theo ${input.data.gardenName} ${input.data.periodLabel}`, metadata: { unit: input.data.unit, gardenName: input.data.gardenName, frozenLatex: input.data.frozenLatex, latexThread: input.data.latexThread } });
+        return { success: true };
+      }),
+    removeTeam: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getTeamImport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi nhập mủ" });
+        await requirePermission(ctx, "latex:write", existing.unit);
+        await db.removeTeamImport(input.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.import.team_remove", entityType: "team_latex_import", entityId: input.id, summary: "Xóa bản ghi nhập mủ theo Vườn/Đội", metadata: { unit: existing.unit, gardenName: existing.gardenName, recordDate: existing.recordDate } });
+        return { success: true };
+      }),
   }),
   exports: router({
     list: protectedProcedure
@@ -517,6 +571,26 @@ export const rubberRouter = router({
             note: input.note ?? null,
           },
         });
+        return { success: true };
+      }),
+    teamUpdate: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), data: teamExportInput }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getTeamExport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi xuất mủ" });
+        await requirePermission(ctx, "latex:write", input.data.unit);
+        await db.updateTeamExport(input.id, input.data, ctx.user.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.export.team_update", entityType: "team_latex_export", entityId: input.id, summary: `Sửa xuất mủ ${input.data.unit} ${input.data.periodLabel}`, metadata: { unit: input.data.unit, frozenContaminatedLatex: input.data.frozenContaminatedLatex, latexThread: input.data.latexThread, note: input.data.note ?? null } });
+        return { success: true };
+      }),
+    teamRemove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getTeamExport(input.id);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Không tìm thấy bản ghi xuất mủ" });
+        await requirePermission(ctx, "latex:write", existing.unit);
+        await db.removeTeamExport(input.id);
+        await db.logActivity(ctx.user.id, { eventType: "latex.export.team_remove", entityType: "team_latex_export", entityId: input.id, summary: "Xóa bản ghi xuất mủ theo Đội", metadata: { unit: existing.unit, recordDate: existing.recordDate } });
         return { success: true };
       }),
   }),

@@ -260,6 +260,13 @@
       "when": 1789618112824,
       "tag": "0036_glamorous_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1789640947675,
+      "tag": "0037_exotic_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }
