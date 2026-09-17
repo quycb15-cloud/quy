@@ -27,6 +27,7 @@ import { INSTALL_MENU_LABEL, INSTALL_PAGE_PATH } from "@/lib/installSupport";
 import { trpc } from "@/lib/trpc";
 import {
   BarChart3,
+  BookOpenCheck,
   ClipboardCheck,
   ClipboardList,
   Download,
@@ -95,6 +96,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: "Hệ thống",
     items: [
+      { icon: BookOpenCheck, label: "Hướng dẫn sử dụng", path: "/user-guide" },
       { icon: FileSpreadsheet, label: "Import & Excel", path: "/data-tools" },
       { icon: Download, label: INSTALL_MENU_LABEL, path: INSTALL_PAGE_PATH },
       {

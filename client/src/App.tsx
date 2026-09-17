@@ -24,6 +24,7 @@ const TechnicalSkillReportPage = lazy(
 const AccountsPage = lazy(() => import("@/pages/AccountsPage"));
 const ActivityLogPage = lazy(() => import("@/pages/ActivityLogPage"));
 const InstallAppPage = lazy(() => import("@/pages/InstallAppPage"));
+const UserGuidePage = lazy(() => import("@/pages/UserGuidePage"));
 
 function ScreenLoader() {
   return (
@@ -62,6 +63,7 @@ function Router() {
           <Route path="/technical-skill" component={TechnicalSkillReportPage} />
           <Route path="/accounts" component={AccountsPage} />
           <Route path="/activity-log" component={ActivityLogPage} />
+          <Route path="/user-guide" component={UserGuidePage} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
