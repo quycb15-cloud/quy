@@ -23,11 +23,11 @@ export function PageHeader({
   );
 }
 
-export function Panel({ title, description, children, className = "" }: { title?: string; description?: string; children: ReactNode; className?: string }) {
+export function Panel({ title, description, children, className = "", compact = false }: { title?: string; description?: string; children: ReactNode; className?: string; compact?: boolean }) {
   return (
-    <section className={`rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_28px_-20px_rgba(15,23,42,0.32)] sm:p-5 ${className}`}>
+    <section className={`rounded-2xl border border-slate-200/80 bg-white ${compact ? "p-3 sm:p-4" : "p-4 sm:p-5"} shadow-[0_10px_28px_-20px_rgba(15,23,42,0.32)] ${className}`}>
       {title ? (
-        <div className="mb-5">
+        <div className={compact ? "mb-3" : "mb-5"}>
           <h2 className="font-display text-base font-bold text-slate-900">{title}</h2>
           {description ? <p className="mt-1 text-sm leading-5 text-slate-500">{description}</p> : null}
         </div>

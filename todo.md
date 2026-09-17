@@ -9878,3 +9878,12 @@
 - [x] Bổ sung test cho xóa, ngày gần nhất, lọc khoảng ngày và cộng dồn cạo mủ
 - [x] Chạy check, toàn bộ Vitest và build production
 - [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+
+## Tối ưu mật độ hiển thị Khai thác và chăm sóc hằng ngày
+
+- [x] Thu gọn khu vực Nhập dữ liệu hằng ngày, giảm khoảng cách và chiều cao trường nhập nhưng giữ nguyên thao tác
+- [x] Tối ưu phần bộ lọc và bảng theo dõi để hiển thị nhiều dữ liệu hơn trên cùng diện tích
+- [x] Tối ưu các khu vực/tổng hợp khác trên trang theo cùng hệ thống khoảng cách và kích thước
+- [x] Kiểm tra responsive desktop/mobile và bảo đảm nút nhập, sửa, xóa, lọc vẫn dễ thao tác
+- [x] Chạy test, typecheck và build production
+- [ ] Lưu checkpoint giao diện, chưa publish và chưa đổi visibility
