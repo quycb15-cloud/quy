@@ -10002,4 +10002,4 @@
 - [x] Sửa parser riêng cho sheet Theo dõi cạo mủ và chấp nhận ô số liệu trống/dấu gạch
 - [x] Bổ sung test xác nhận đúng 5 sheet và không đổi bốn sheet còn lại
 - [x] Chạy check, toàn bộ Vitest, build và xác minh file mẫu
-- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint `095d41ea`, chưa publish và chưa đổi visibility
