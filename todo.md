@@ -9925,3 +9925,17 @@
 
 - [x] Đồng bộ MIME khai báo của icon PWA với định dạng thực tế WebP để tránh Android từ chối manifest/icon
 - [x] Xác minh lại response icon sau khi sửa và hướng dẫn xóa shortcut/PWA cache cũ
+
+- [x] Đã lưu checkpoint sửa MIME PWA `177219cc`, chưa publish và chưa đổi visibility.
+
+## Tách nội dung công việc và ghi chú theo Đội — 2026-09-17
+
+- [x] Hiển thị riêng từng nội dung công việc của Chăm sóc theo ngày có dữ liệu, không gộp nhiều nội dung thành một dòng
+- [x] Hiển thị riêng từng nội dung công việc của Phun, bôi thuốc theo ngày có dữ liệu, không gộp sai số liệu
+- [x] Bổ sung tổng hợp đầy đủ theo từng nội dung công việc và đúng ngày/Đội/Vườn khi lọc
+- [x] Hiển thị khu vực ghi chú bên dưới Tổng cộng của các nội dung Khai thác và chăm sóc
+- [x] Sắp xếp ghi chú theo thứ tự Đội 1 đến Đội 6
+- [x] Cho phép bổ sung/chỉnh sửa ghi chú theo đúng thẩm quyền người dùng
+- [x] Bổ sung test quyền, tách nội dung và ghi chú theo Đội
+- [x] Chạy check, toàn bộ Vitest, build production và kiểm tra responsive
+- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility

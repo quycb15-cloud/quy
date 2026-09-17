@@ -257,12 +257,30 @@ export const dailyCareRecords = mysqlTable(
       table.unit,
       table.activityDate
     ),
-    uniqueDailyEntry: uniqueIndex("daily_care_unique_entry").on(
+    uniqueDailyEntry: uniqueIndex("daily_care_unique_entry_v2").on(
       table.category,
       table.unit,
       table.gardenName,
-      table.activityDate
+      table.activityDate,
+      table.workContent
     ),
+  })
+);
+
+export const dailyCareTeamNotes = mysqlTable(
+  "daily_care_team_notes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    activityDate: timestamp("activityDate").notNull(),
+    unit: varchar("unit", { length: 120 }).notNull(),
+    note: text("note").notNull(),
+    createdBy: int("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    unitDateIndex: index("daily_care_team_notes_unit_date_index").on(table.unit, table.activityDate),
+    uniqueUnitDate: uniqueIndex("daily_care_team_notes_unique_unit_date").on(table.unit, table.activityDate),
   })
 );
 

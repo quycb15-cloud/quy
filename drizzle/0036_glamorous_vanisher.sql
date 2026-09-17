@@ -1,0 +1,2 @@
+ALTER TABLE `daily_care_records` DROP INDEX `daily_care_unique_entry`;--> statement-breakpoint
+ALTER TABLE `daily_care_records` ADD CONSTRAINT `daily_care_unique_entry_v2` UNIQUE(`category`,`unit`,`gardenName`,`activityDate`,`workContent`);

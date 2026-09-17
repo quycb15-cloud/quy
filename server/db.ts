@@ -6,6 +6,7 @@ import {
   dataBackups,
   dataBackupSchedule,
   dailyCareRecords,
+  dailyCareTeamNotes,
   InsertUser,
   internalAccounts,
   latexExports,
@@ -1195,10 +1196,20 @@ export async function saveDailyCareRecord(
     note: input.note?.trim() || null,
     createdBy: userId,
   };
-  await db
-    .insert(dailyCareRecords)
-    .values(values)
-    .onDuplicateKeyUpdate({ set: values });
+  const normalizedWorkContent = values.workContent ?? null;
+  const existing = await db
+    .select({ id: dailyCareRecords.id })
+    .from(dailyCareRecords)
+    .where(and(
+      eq(dailyCareRecords.category, values.category),
+      eq(dailyCareRecords.unit, values.unit),
+      eq(dailyCareRecords.gardenName, values.gardenName),
+      eq(dailyCareRecords.activityDate, values.activityDate),
+      normalizedWorkContent == null ? sql`(${dailyCareRecords.workContent} IS NULL OR ${dailyCareRecords.workContent} = '')` : eq(dailyCareRecords.workContent, normalizedWorkContent),
+    ))
+    .limit(1);
+  if (existing[0]) await db.update(dailyCareRecords).set(values).where(eq(dailyCareRecords.id, existing[0].id));
+  else await db.insert(dailyCareRecords).values(values);
 }
 
 export async function getDailyCareRecord(id: number) {
@@ -1244,6 +1255,33 @@ export async function listDailyCareRecords(
     nextGardenPlanQuantity: row.nextGardenPlanQuantity == null ? null : numberValue(row.nextGardenPlanQuantity),
     nextGardenActualQuantity: row.nextGardenActualQuantity == null ? null : numberValue(row.nextGardenActualQuantity),
   }));
+}
+
+export type DailyCareTeamNotePayload = {
+  activityDate: Date;
+  unit: string;
+  note: string;
+};
+
+export async function listDailyCareTeamNotes() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(dailyCareTeamNotes).orderBy(desc(dailyCareTeamNotes.activityDate), asc(dailyCareTeamNotes.unit));
+}
+
+export async function saveDailyCareTeamNote(input: DailyCareTeamNotePayload, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  const note = input.note.trim();
+  if (!note) {
+    const existing = await db.select({ id: dailyCareTeamNotes.id }).from(dailyCareTeamNotes)
+      .where(and(eq(dailyCareTeamNotes.unit, input.unit), eq(dailyCareTeamNotes.activityDate, input.activityDate))).limit(1);
+    if (existing[0]) await db.delete(dailyCareTeamNotes).where(eq(dailyCareTeamNotes.id, existing[0].id));
+    return { deleted: true };
+  }
+  const values = { activityDate: input.activityDate, unit: input.unit.trim(), note, createdBy: userId };
+  await db.insert(dailyCareTeamNotes).values(values).onDuplicateKeyUpdate({ set: { note, createdBy: userId } });
+  return { deleted: false };
 }
 
 export async function getProductionChangeReport() {
