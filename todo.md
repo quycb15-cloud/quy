@@ -9949,3 +9949,13 @@
 - [x] Kiểm soát thêm/sửa ghi chú theo quyền và phạm vi Đội
 - [x] Bổ sung test và chạy check/Vitest/build
 - [x] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
+
+## Ghi chú ngay dưới Tổng cộng theo ảnh 1 — 2026-09-17
+
+- [x] Đưa khối Ghi chú ngay dưới dòng Tổng cộng của bảng Theo dõi cạo mủ
+- [x] Hiển thị ghi chú chung theo ngày và từng Đội có ghi chú, không hiển thị Đội chưa có ghi chú
+- [x] Thêm nút Thêm Ghi chú ở bên phải khối ghi chú và cho phép thêm/sửa theo quyền
+- [x] Bỏ hoàn toàn panel Ghi chú theo ngày và nội dung riêng bên dưới như ảnh 2
+- [x] Giữ dữ liệu ghi chú trong bản ghi công việc và không đưa ghi chú vào cột Thao tác
+- [x] Chạy check, Vitest, build và kiểm tra giao diện
+- [ ] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
