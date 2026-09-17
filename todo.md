@@ -9981,4 +9981,4 @@
 - [x] Giữ báo lỗi đúng Sheet + Dòng Excel và không ghi dữ liệu ngoài phạm vi
 - [x] Bổ sung regression tests theo workbook mẫu
 - [x] Chạy check, toàn bộ Vitest và build production
-- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
