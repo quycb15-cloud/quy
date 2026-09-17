@@ -9938,4 +9938,4 @@
 - [x] Cho phép bổ sung/chỉnh sửa ghi chú theo đúng thẩm quyền người dùng
 - [x] Bổ sung test quyền, tách nội dung và ghi chú theo Đội
 - [x] Chạy check, toàn bộ Vitest, build production và kiểm tra responsive
-- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
