@@ -9866,3 +9866,15 @@
 - [x] Bổ sung regression test bằng cấu trúc dữ liệu của file D4
 - [x] Chạy check, toàn bộ Vitest và build production
 - [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+
+## Khai thác và chăm sóc hằng ngày — yêu cầu mới
+
+- [x] Cho phép xóa bản ghi cập nhật ngay trong nội dung Sửa, có xác nhận và giới hạn đúng phạm vi quyền
+- [x] Mặc định các bảng theo dõi về ngày gần nhất có dữ liệu, không mặc định theo ngày hệ thống nếu ngày đó chưa có số liệu
+- [x] Bổ sung lọc từ ngày đến ngày cho các nội dung theo dõi liên quan
+- [x] Tổng hợp cạo mủ tháng cộng dồn KH, Cạo xong, Chưa cạo, Cạo chưa xong theo từng Đội và Vườn A/B/C
+- [x] Tính % Hoàn thành = Tổng Cạo xong / Tổng KH và bỏ hiển thị Cạo tiếp vườn trong tổng hợp tháng
+- [x] Tối ưu kích thước khu vực hiển thị theo dữ liệu thực tế và ẩn các giá trị 0 không cần thiết
+- [x] Bổ sung test cho xóa, ngày gần nhất, lọc khoảng ngày và cộng dồn cạo mủ
+- [x] Chạy check, toàn bộ Vitest và build production
+- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility

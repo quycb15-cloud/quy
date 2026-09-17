@@ -1201,6 +1201,21 @@ export async function saveDailyCareRecord(
     .onDuplicateKeyUpdate({ set: values });
 }
 
+export async function getDailyCareRecord(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  return (await db.select().from(dailyCareRecords).where(eq(dailyCareRecords.id, id)).limit(1))[0];
+}
+
+export async function removeDailyCareRecord(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
+  const record = await getDailyCareRecord(id);
+  if (!record) throw new Error("Không tìm thấy dữ liệu cập nhật");
+  await db.delete(dailyCareRecords).where(eq(dailyCareRecords.id, id));
+  return { id, category: record.category, unit: record.unit, gardenName: record.gardenName, activityDate: record.activityDate };
+}
+
 export async function listDailyCareRecords(
   category?: DailyCarePayload["category"]
 ) {

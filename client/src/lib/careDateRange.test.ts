@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterCareRecordsByDateRange } from "./careDateRange";
+import { filterCareRecordsByDateRange, latestCareDate } from "./careDateRange";
 
 describe("filterCareRecordsByDateRange", () => {
   const records = [{ id: 1, activityDate: "2026-08-01T00:00:00.000Z" }, { id: 2, activityDate: "2026-08-15T00:00:00.000Z" }, { id: 3, activityDate: "2026-08-31T00:00:00.000Z" }];
@@ -8,5 +8,9 @@ describe("filterCareRecordsByDateRange", () => {
   });
   it("giữ nguyên dữ liệu khi chưa chọn khoảng ngày", () => {
     expect(filterCareRecordsByDateRange(records)).toHaveLength(3);
+  });
+  it("chọn ngày gần nhất có dữ liệu", () => {
+    expect(latestCareDate(records)).toBe("2026-08-31");
+    expect(latestCareDate([])).toBeUndefined();
   });
 });
