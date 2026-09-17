@@ -9958,4 +9958,4 @@
 - [x] Bỏ hoàn toàn panel Ghi chú theo ngày và nội dung riêng bên dưới như ảnh 2
 - [x] Giữ dữ liệu ghi chú trong bản ghi công việc và không đưa ghi chú vào cột Thao tác
 - [x] Chạy check, Vitest, build và kiểm tra giao diện
-- [ ] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
+- [x] Lưu checkpoint mới, chưa publish cho đến khi xác nhận
