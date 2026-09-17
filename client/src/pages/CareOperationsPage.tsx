@@ -10,6 +10,7 @@ import { filterCareRecordsByDateRange, latestCareDate } from "@/lib/careDateRang
 import { buildCareWorkbookSheets } from "@/lib/careWorkbook";
 import { buildCareTemplateSheets, parseCareWorkbook } from "@/lib/careExcel";
 import { monthlyCompletionPercent, summarizeMonthlyTapping } from "@/lib/careMonthlySummary";
+import { compareCareRecordRows } from "@/lib/careRecordOrdering";
 import { readLastSelectedCareTeam, writeLastSelectedCareTeam } from "@/lib/lastSelectedTeam";
 import { formatPercent, formatQuantity } from "@/lib/rubber";
 import { trpc } from "@/lib/trpc";
@@ -135,7 +136,7 @@ export default function CareOperationsPage() {
   const confirmRemove = () => { if (editingId == null) return; if (window.confirm("Bạn có chắc muốn xóa dữ liệu cập nhật này không?")) remove.mutate({ id: editingId }); };
   const totals = useMemo(() => ({ plan: filteredRecords.reduce((sum, row) => sum + row.planQuantity, 0), actual: filteredRecords.reduce((sum, row) => sum + row.cumulativeQuantity, 0) }), [filteredRecords]);
   const dailySummary = useMemo(() => summarizeCareDaily(filteredRecords), [filteredRecords]);
-  const orderedRecords = useMemo(() => [...filteredRecords].sort((left, right) => new Date(right.activityDate).getTime() - new Date(left.activityDate).getTime() || compareTeamName(left.unit, right.unit) || (left.workContent ?? "").localeCompare(right.workContent ?? "", "vi")), [filteredRecords]);
+  const orderedRecords = useMemo(() => [...filteredRecords].sort(compareCareRecordRows), [filteredRecords]);
   const actualLabel = isTapping ? "Cạo xong (Vườn)" : `TH (${config[category].metric})`;
   const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
   const monthEnd = new Date(); monthEnd.setHours(23, 59, 59, 999);
