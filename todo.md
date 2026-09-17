@@ -9877,4 +9877,4 @@
 - [x] Tối ưu kích thước khu vực hiển thị theo dữ liệu thực tế và ẩn các giá trị 0 không cần thiết
 - [x] Bổ sung test cho xóa, ngày gần nhất, lọc khoảng ngày và cộng dồn cạo mủ
 - [x] Chạy check, toàn bộ Vitest và build production
-- [ ] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint bản sửa, chưa publish và chưa đổi visibility
