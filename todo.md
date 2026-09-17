@@ -9969,3 +9969,5 @@
 - [x] Giữ kiểm tra quyền, phạm vi Đội, ngày, nội dung công việc và chống ghi trùng khi import
 - [x] Chụp ảnh phần Khai thác và chăm sóc sau khi hoàn thành để người dùng duyệt trước publish
 - [x] Chạy check, Vitest và build; lưu checkpoint chưa publish
+
+- [x] Đã lưu checkpoint `ab69cd98`; chưa publish, chờ người dùng duyệt ảnh trang Khai thác và chăm sóc.
