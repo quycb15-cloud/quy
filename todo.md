@@ -9905,4 +9905,4 @@
 - [x] Giữ nguyên thao tác Sửa, lọc ngày và xuất Excel
 - [x] Bổ sung test helper/UI và kiểm tra responsive
 - [x] Chạy check, toàn bộ Vitest và build production
-- [ ] Lưu checkpoint, chưa publish và chưa đổi visibility
+- [x] Lưu checkpoint, chưa publish và chưa đổi visibility
