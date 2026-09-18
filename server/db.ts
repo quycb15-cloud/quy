@@ -39,6 +39,7 @@ import { storageGetSignedUrl, storagePut } from "./storage";
 import * as XLSX from "xlsx";
 import { calculateLatexTotals } from "./rubberMath";
 import { aggregateWarehouseLoss } from "./warehouseLossMath";
+import { buildMonthlyProductionSeries } from "./productionChartMath";
 import {
   summarizeWorkforceByTeam,
   WorkforceTeamTarget,
@@ -2780,11 +2781,10 @@ export async function getDashboard(
     row => row.periodLabel,
     row => row.totalImport
   ).sort((left, right) => comparePeriodLabel(left.label, right.label));
-  const monthlyProduction = aggregate(
-    selectedImports,
-    row => monthKey(row.recordDate),
-    row => row.totalImport
-  ).sort((left, right) => left.label.localeCompare(right.label));
+  const monthlyProduction = buildMonthlyProductionSeries([
+    ...selectedImports.map(row => ({ recordDate: row.recordDate, totalImport: row.totalImport })),
+    ...selectedExports.map(row => ({ recordDate: row.recordDate, totalExport: row.totalExport })),
+  ]);
   const unitList = TEAM_ORDER.filter(
     unit => !hasScope || scopeUnits?.includes(unit)
   );

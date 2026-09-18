@@ -13,7 +13,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { useLocation } from "wouter";
 
-const monthlyConfig = { production: { label: "Sản lượng", color: "#059669" } };
+const monthlyConfig = {
+  totalImport: { label: "Sản lượng tổng (Nhập)", color: "#059669" },
+  totalExport: { label: "Sản lượng All (Xuất)", color: "#0284c7" },
+  warehouseLoss: { label: "Hao kho", color: "#dc2626" },
+};
 const periodConfig = { production: { label: "Sản lượng", color: "#0f766e" } };
 const teamChartConfig = Object.fromEntries(TEAM_ORDER.map((unit, index) => [`team${index + 1}`, { label: unit, color: ["#047857", "#0d9488", "#0284c7", "#7c3aed", "#ea580c", "#be123c"][index] }])) as Record<string, { label: string; color: string }>;
 const workforceTrendConfig = { activeCount: { label: "Nhân công hoạt động", color: "#7c3aed" } };
@@ -97,9 +101,9 @@ export default function Home() {
         <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4"><p className="text-sm font-semibold text-emerald-900">Tổng quản lý và nhân công</p><div className="mt-3 grid grid-cols-4 gap-2"><MiniMetric label="Biên chế" value={workforceTotal.staffingTarget || "—"} /><MiniMetric label="Hiện có" value={workforceTotal.currentCount} /><MiniMetric label="Thừa" value={workforceTotal.surplusCount} /><MiniMetric label="Thiếu" value={workforceTotal.shortageCount} /></div></div>
         <ChartPanel title="Xu hướng biến động nhân công theo tháng" empty={!workforceTrendData.length}><ChartContainer config={workforceTrendConfig} className="h-44 w-full"><LineChart data={workforceTrendData}><CartesianGrid vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} /><YAxis allowDecimals={false} width={42} /><ChartTooltip content={<ChartTooltipContent formatter={(value) => `${exactNumber(Number(value))} người`} />} /><Line type="monotone" dataKey="activeCount" name="activeCount" stroke="var(--color-activeCount)" strokeWidth={2.5} dot={{ r: 4 }} /></LineChart></ChartContainer></ChartPanel>
       </Panel>
-      <Panel title="Phân tích sản lượng" description={`Sản lượng tổng và diễn biến ${periodLabel} đang xem; giá trị giữ nguyên độ chính xác dữ liệu nguồn.`}>
-        <div className="grid gap-3 sm:grid-cols-2"><SummaryBlock label="Sản lượng tổng" value={summary.totalProduction} accent="text-emerald-700" /><SummaryBlock label={`Sản lượng ${periodLabel}`} value={summary.totalImport} accent="text-sky-700" /></div>
-        <ChartPanel title={`Sản lượng theo tháng · ${periodLabel}`} empty={!summary.monthlyProduction.length}><ChartContainer config={monthlyConfig} className="h-56 w-full"><LineChart data={summary.monthlyProduction}><CartesianGrid vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} /><YAxis tickFormatter={exactNumber} width={64} /><ChartTooltip content={<ChartTooltipContent formatter={(value) => `${exactNumber(Number(value))} kg`} />} /><Line type="monotone" dataKey="value" name="production" stroke="var(--color-production)" strokeWidth={2.5} dot={{ r: 3 }} /></LineChart></ChartContainer></ChartPanel>
+      <Panel title="Phân tích sản lượng" description={`Sản lượng Nhập, Xuất và Hao kho theo tháng trong phạm vi ${periodLabel} đang xem; giá trị giữ nguyên độ chính xác dữ liệu nguồn.`}>
+        <div className="grid gap-3 sm:grid-cols-3"><SummaryBlock label="Sản lượng tổng" value={summary.totalImport} accent="text-emerald-700" /><SummaryBlock label="Sản lượng All" value={summary.totalExport} accent="text-sky-700" /><SummaryBlock label="Hao kho" value={summary.totalImport - summary.totalExport} accent="text-red-600" /></div>
+        <ChartPanel title={`Sản lượng theo tháng · ${periodLabel}`} empty={!summary.monthlyProduction.length}><ChartContainer config={monthlyConfig} className="h-56 w-full"><LineChart data={summary.monthlyProduction}><CartesianGrid vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} /><YAxis tickFormatter={exactNumber} width={64} /><ChartTooltip content={<ChartTooltipContent formatter={(value) => `${exactNumber(Number(value))} kg`} />} /><Line type="monotone" dataKey="totalImport" name="totalImport" stroke="var(--color-totalImport)" strokeWidth={2.5} dot={{ r: 3 }} /><Line type="monotone" dataKey="totalExport" name="totalExport" stroke="var(--color-totalExport)" strokeWidth={2.5} dot={{ r: 3 }} /><Line type="monotone" dataKey="warehouseLoss" name="warehouseLoss" stroke="var(--color-warehouseLoss)" strokeWidth={2.5} dot={{ r: 3 }} /></LineChart></ChartContainer></ChartPanel>
       </Panel>
     </div>
 
