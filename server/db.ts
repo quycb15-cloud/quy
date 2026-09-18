@@ -2971,9 +2971,24 @@ export async function getLatexProductionManagement(
     0
   );
   const yearTotalImport = yearImports.reduce((sum, row) => sum + row.totalImport, 0);
+  const previousExports = periodExports.filter(
+    row =>
+      getYear(row.recordDate) === previousYear &&
+      (previousMonth === 0 || getMonth(row.recordDate) === previousMonth) &&
+      (!selectedUnit || row.unit === selectedUnit)
+  );
   const totalExport = exportsForView.reduce((sum, row) => sum + row.totalExport, 0);
   const yearExports = periodExports.filter(row => getYear(row.recordDate) === selectedYear && (!selectedUnit || row.unit === selectedUnit));
   const yearTotalExport = yearExports.reduce((sum, row) => sum + row.totalExport, 0);
+  const previousTotalExport = previousExports.reduce((sum, row) => sum + row.totalExport, 0);
+  const frozenContaminatedLatex = exportsForView.reduce(
+    (sum, row) => sum + row.frozenContaminatedLatex,
+    0
+  );
+  const exportLatexThread = exportsForView.reduce(
+    (sum, row) => sum + row.latexThread,
+    0
+  );
   const availableUnits = TEAM_ORDER.filter(
     unit => !hasScope || scopeUnits?.includes(unit)
   );
@@ -3017,10 +3032,15 @@ export async function getLatexProductionManagement(
     frozenLatex,
     latexThread,
     totalImport,
+    frozenContaminatedLatex,
+    exportLatexThread,
+    totalExport,
     previousMonth,
     previousYear,
     previousTotalImport,
     importChange: totalImport - previousTotalImport,
+    previousTotalExport,
+    exportChange: totalExport - previousTotalExport,
     importRecordCount: importsForView.length,
     exportRecordCount: exportsForView.length,
     teamComparisons,
