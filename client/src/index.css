@@ -70,10 +70,19 @@
 
 @layer base {
   * { @apply border-border; }
-  html { font-family: var(--font-sans); }
-  body { @apply bg-background text-foreground antialiased; }
+  html { font-family: var(--font-sans); overflow-x: hidden; }
+  body { @apply bg-background text-foreground antialiased; min-width: 0; overflow-x: hidden; }
   button, input, select, textarea { font: inherit; }
   button { cursor: pointer; }
+}
+
+@media (max-width: 639px) {
+  button,
+  [role="button"],
+  [data-slot="button"],
+  select,
+  textarea,
+  input:not([type="hidden"]):not([type="file"]) { min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

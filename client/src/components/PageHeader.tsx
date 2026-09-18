@@ -12,24 +12,24 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="mb-5 flex flex-col gap-4 border-b border-slate-200/80 pb-5 md:mb-7 md:flex-row md:items-end md:justify-between md:pb-6">
-      <div>
+    <header className="mb-5 flex min-w-0 flex-col gap-4 border-b border-slate-200/80 pb-5 md:mb-7 md:flex-row md:items-end md:justify-between md:pb-6">
+      <div className="min-w-0 break-words">
         <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-700">{eyebrow}</p>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl md:text-[2rem]">{title}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{description}</p>
+        <h1 className="break-words font-display text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl md:text-[2rem]">{title}</h1>
+        <p className="mt-2 max-w-2xl break-words text-sm leading-6 text-slate-500">{description}</p>
       </div>
-      {action ? <div className="w-full shrink-0 sm:w-auto [&>button]:w-full sm:[&>button]:w-auto">{action}</div> : null}
+      {action ? <div className="w-full min-w-0 shrink-0 [&>button]:min-h-11 [&>button]:w-full sm:w-auto sm:[&>button]:w-auto">{action}</div> : null}
     </header>
   );
 }
 
 export function Panel({ title, description, children, className = "", compact = false }: { title?: string; description?: string; children: ReactNode; className?: string; compact?: boolean }) {
   return (
-    <section className={`rounded-2xl border border-slate-200/80 bg-white ${compact ? "p-3 sm:p-4" : "p-4 sm:p-5"} shadow-[0_10px_28px_-20px_rgba(15,23,42,0.32)] ${className}`}>
+    <section className={`min-w-0 rounded-2xl border border-slate-200/80 bg-white ${compact ? "p-3 sm:p-4" : "p-4 sm:p-5"} shadow-[0_10px_28px_-20px_rgba(15,23,42,0.32)] ${className}`}>
       {title ? (
         <div className={compact ? "mb-3" : "mb-5"}>
-          <h2 className="font-display text-base font-bold text-slate-900">{title}</h2>
-          {description ? <p className="mt-1 text-sm leading-5 text-slate-500">{description}</p> : null}
+          <h2 className="break-words font-display text-base font-bold text-slate-900">{title}</h2>
+          {description ? <p className="mt-1 break-words text-sm leading-5 text-slate-500">{description}</p> : null}
         </div>
       ) : null}
       {children}
@@ -42,8 +42,8 @@ export function EmptyState({ title, description }: { title: string; description:
     <div className="grid min-h-48 place-items-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center">
       <div>
         <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-emerald-100 text-lg text-emerald-700">+</div>
-        <p className="mt-3 font-semibold text-slate-700">{title}</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">{description}</p>
+        <p className="mt-3 break-words font-semibold text-slate-700">{title}</p>
+        <p className="mx-auto mt-1 max-w-sm break-words text-sm leading-6 text-slate-500">{description}</p>
       </div>
     </div>
   );

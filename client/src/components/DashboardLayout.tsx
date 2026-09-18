@@ -230,16 +230,16 @@ function DashboardLayoutContent({
 
   return (
     <>
-      <div className="relative" ref={sidebarRef}>
+      <div className="relative min-w-0" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
           className="border-r border-emerald-950/10 bg-[#0d2f25] text-emerald-50"
         >
-          <SidebarHeader className="h-[76px] justify-center border-b border-white/10 px-3">
+          <SidebarHeader className="h-[76px] min-w-0 justify-center border-b border-white/10 px-3">
             <div className="flex items-center gap-3 px-1">
               <button
                 onClick={toggleSidebar}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-300 to-lime-200 text-emerald-950 shadow-lg shadow-black/15 transition hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-300 to-lime-200 text-emerald-950 shadow-lg shadow-black/15 transition hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 aria-label="Thu gọn điều hướng"
               >
                 <Leaf className="h-5 w-5" />
@@ -256,7 +256,7 @@ function DashboardLayoutContent({
               ) : null}
             </div>
           </SidebarHeader>
-          <SidebarContent className="px-2 py-3">
+          <SidebarContent className="min-w-0 px-2 py-3">
             {visibleGroups.map((group, groupIndex) => (
               <div
                 key={group.label}
@@ -276,7 +276,7 @@ function DashboardLayoutContent({
                         isActive={location === item.path}
                         onClick={() => setLocation(item.path)}
                         tooltip={item.label}
-                        className="h-9 rounded-lg px-3 text-[13px] font-medium text-emerald-100 hover:bg-white/10 hover:text-white data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:shadow-sm"
+                        className="min-h-11 rounded-lg px-3 text-[13px] font-medium text-emerald-100 hover:bg-white/10 hover:text-white data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:shadow-sm"
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -287,10 +287,10 @@ function DashboardLayoutContent({
               </div>
             ))}
           </SidebarContent>
-          <SidebarFooter className="border-t border-white/10 p-3">
+          <SidebarFooter className="min-w-0 border-t border-white/10 p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-3 rounded-xl p-1.5 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 group-data-[collapsible=icon]:justify-center">
+                <button className="flex min-h-11 w-full min-w-0 items-center gap-3 rounded-xl p-1.5 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 group-data-[collapsible=icon]:justify-center">
                   <Avatar className="h-8 w-8 shrink-0 border border-emerald-300/25">
                     <AvatarFallback className="bg-emerald-100 text-xs font-bold text-emerald-900">
                       {user?.name?.charAt(0).toUpperCase() || "U"}
@@ -327,8 +327,8 @@ function DashboardLayoutContent({
       </div>
       <SidebarInset className="min-w-0 bg-[#f6f8f4]">
         {isMobile ? (
-          <div className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200/80 bg-[#f6f8f4]/95 px-3 shadow-sm backdrop-blur">
-            <SidebarTrigger className="rounded-xl bg-white shadow-sm" />
+          <div className="sticky top-0 z-30 flex h-16 min-w-0 items-center gap-3 border-b border-slate-200/80 bg-[#f6f8f4]/95 px-3 shadow-sm backdrop-blur">
+            <SidebarTrigger className="h-11 w-11 shrink-0 rounded-xl bg-white shadow-sm" />
             <div className="min-w-0">
               <p className="truncate text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">
                 Cao su CN386
@@ -339,7 +339,7 @@ function DashboardLayoutContent({
             </div>
           </div>
         ) : null}
-        <main className="min-h-screen p-3 pb-8 sm:p-4 md:p-8 lg:p-10">
+        <main className="min-h-screen min-w-0 max-w-full overflow-x-clip p-3 pb-8 sm:p-4 md:p-8 lg:p-10">
           <InstallAppBanner />
           {children}
         </main>

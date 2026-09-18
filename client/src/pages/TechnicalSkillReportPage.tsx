@@ -170,15 +170,15 @@ export default function TechnicalSkillReportPage() {
   };
 
   return (
-    <div className="page-enter">
+    <div className="page-enter min-w-0">
       <PageHeader
         eyebrow="Năng lực & sản xuất"
         title="Tổng hợp đánh giá tay nghề kỹ thuật"
         description="So sánh điểm đánh giá với sản lượng bình quân theo người và theo Đội để nhận diện điểm mạnh, khoảng cần đào tạo."
         action={
-          <div className="flex flex-wrap justify-end gap-2">
-            {canEnterEvaluation ? <Button onClick={openForm} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="mr-2 h-4 w-4" />Nhập đánh giá nhân công</Button> : null}
-            {me?.role === "admin" ? <Button onClick={openSkillImportForm} variant="outline" className="bg-white"><Plus className="mr-2 h-4 w-4" />Nhập tổng hợp theo mẫu</Button> : null}
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            {canEnterEvaluation ? <Button onClick={openForm} className="min-h-11 w-full bg-emerald-700 hover:bg-emerald-800 sm:w-auto"><Plus className="mr-2 h-4 w-4" />Nhập đánh giá nhân công</Button> : null}
+            {me?.role === "admin" ? <Button onClick={openSkillImportForm} variant="outline" className="min-h-11 w-full bg-white sm:w-auto"><Plus className="mr-2 h-4 w-4" />Nhập tổng hợp theo mẫu</Button> : null}
           </div>
         }
       />
@@ -187,12 +187,15 @@ export default function TechnicalSkillReportPage() {
         description={importedSkillSummary?.monthKey ? `Kỳ ${importedSkillSummary.monthKey}; dữ liệu đã import theo mẫu tổng hợp tay nghề.` : "Chưa có dữ liệu Import tổng hợp tay nghề."}
       >
         {importedTeams.length ? (
-          <div className="overflow-x-auto">
+          <>
+          <div className="grid gap-3 md:hidden">{importedTeams.map((team, index) => <div key={team.unit} className="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-3"><div className="flex min-w-0 items-start justify-between gap-3"><p className="min-w-0 break-words font-semibold text-slate-800">{team.unit}</p><Badge className="shrink-0 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">#{index + 1}</Badge></div><div className="mt-3 grid grid-cols-2 gap-3 text-sm"><Metric label="Quân số" value={String(team.workerCount)} tone="sky" /><Metric label="Xuất sắc" value={`${team.exceptionalPercent.toFixed(2)}%`} tone="emerald" /><Metric label="Giỏi" value={`${team.goodPercent.toFixed(2)}%`} tone="emerald" /><Metric label="Khá" value={`${team.fairPercent.toFixed(2)}%`} tone="emerald" /><Metric label="XS+G+K" value={`${team.favorablePercent.toFixed(2)}%`} tone="emerald" /><Metric label="Hao dăm" value={String(team.haoDamWorkers)} tone="amber" /><Metric label="So tháng trước" value={team.haoDamChangePercent == null ? "—" : `${team.haoDamChangePercent.toFixed(2)}%`} tone="violet" /></div></div>)}</div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[980px] text-left text-sm">
               <thead><tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-400"><th className="px-3 py-3">Đội</th><th className="px-3 py-3 text-right">Quân số</th><th className="px-3 py-3 text-right">Xuất sắc %</th><th className="px-3 py-3 text-right">Giỏi %</th><th className="px-3 py-3 text-right">Khá %</th><th className="px-3 py-3 text-right">XS+G+K %</th><th className="px-3 py-3 text-right">Xếp hạng</th><th className="px-3 py-3 text-right">Hao dăm</th><th className="px-3 py-3 text-right">So tháng trước</th></tr></thead>
               <tbody>{importedTeams.map((team, index) => <tr key={team.unit} className="border-b border-slate-100"><td className="px-3 py-3 font-semibold">{team.unit}</td><td className="px-3 py-3 text-right">{team.workerCount}</td><td className="px-3 py-3 text-right">{team.exceptionalPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{team.goodPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{team.fairPercent.toFixed(2)}%</td><td className="px-3 py-3 text-right font-semibold text-emerald-700">{team.favorablePercent.toFixed(2)}%</td><td className="px-3 py-3 text-right">{index + 1}</td><td className="px-3 py-3 text-right">{team.haoDamWorkers}</td><td className="px-3 py-3 text-right">{team.haoDamChangePercent == null ? "—" : `${team.haoDamChangePercent.toFixed(2)}%`}</td></tr>)}</tbody>
             </table>
           </div>
+          </>
         ) : <EmptyState title="Chưa có dữ liệu Import" description="Dùng mẫu Tổng hợp tay nghề và hao dăm trong Import Excel để nạp dữ liệu." />}
       </Panel>
       <Panel
@@ -205,7 +208,7 @@ export default function TechnicalSkillReportPage() {
             <select
               value={periodLabel}
               onChange={event => setPeriodLabel(event.target.value)}
-              className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"
+              className="mt-2 h-11 w-full min-w-0 rounded-md border border-input bg-white px-3 text-sm"
             >
               <option value="">Kỳ mới nhất</option>
               {(summary?.availablePeriods ?? []).map(period => (
@@ -220,7 +223,7 @@ export default function TechnicalSkillReportPage() {
             <select
               value={unitFilter}
               onChange={event => setUnitFilter(event.target.value)}
-              className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"
+              className="mt-2 h-11 w-full min-w-0 rounded-md border border-input bg-white px-3 text-sm"
             >
               <option value="">Tất cả Đội</option>
               {(summary?.teams ?? []).map(team => (
@@ -230,7 +233,7 @@ export default function TechnicalSkillReportPage() {
               ))}
             </select>
           </div>
-          <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="min-w-0 break-words rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             <span className="font-semibold">Cách đọc:</span> điểm cao thể hiện
             năng lực tốt; sản lượng/người dùng để so sánh bối cảnh, không thay
             thế đánh giá chất lượng.
@@ -273,7 +276,7 @@ export default function TechnicalSkillReportPage() {
           title="So sánh giữa các Đội"
           description={`Kỳ: ${selectedPeriod}. Cột xanh là điểm tay nghề, cột vàng là kg sản lượng bình quân/người.`}
         >
-          <div className="h-80">
+          <div className="h-72 min-w-0 sm:h-80">
             {isLoading ? (
               <div className="grid h-full place-items-center text-sm text-slate-400">
                 Đang tổng hợp…
@@ -289,7 +292,7 @@ export default function TechnicalSkillReportPage() {
                     vertical={false}
                     stroke="#dbe8df"
                   />
-                  <XAxis dataKey="unit" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="unit" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
                   <YAxis
                     yAxisId="score"
                     domain={[0, 100]}
@@ -373,7 +376,8 @@ export default function TechnicalSkillReportPage() {
           title="Chi tiết so sánh theo nhân công"
           description="Hiển thị đúng các trường trong mẫu: Lỗi kỹ thuật, Kết quả đánh giá, Năng suất và Hao dăm."
         >
-          <div className="overflow-x-auto">
+          <div className="grid gap-3 md:hidden">{rows.map(row => <div key={row.workerId} className="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-3"><div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><p className="break-words font-semibold text-slate-800">{row.name}</p><p className="break-words text-xs text-slate-500">{row.employeeCode || "Chưa có mã"} · {row.unit}</p></div><span className="shrink-0 text-xs text-slate-500">{row.evaluationDate ? formatDate(new Date(row.evaluationDate)) : "—"}</span></div><div className="mt-3 grid grid-cols-2 gap-3 text-sm"><Metric label="Lỗi kỹ thuật" value={row.technicalScore === 0 ? (row.note?.match(/Lỗi kỹ thuật: ([^·]+)/)?.[1] || "Có") : "—"} tone="amber" /><Metric label="Kết quả" value={skillLevelFromScore(row.qualityScore)} tone="emerald" /><Metric label="Năng suất" value={row.productivityScore == null ? "—" : row.productivityScore.toFixed(1)} tone="sky" /><Metric label="Hao dăm" value={row.safetyScore === 0 ? "Có" : row.safetyScore == null ? "—" : "Không"} tone="amber" /><Metric label="Tổng hợp" value={row.overallScore == null ? "Chưa đánh giá" : `${row.overallScore.toFixed(1)}/100`} tone="emerald" /><Metric label="Kg/người" value={formatQuantity(row.productionPerWorker)} tone="violet" /></div></div>)}</div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[980px] text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-400">
@@ -434,7 +438,7 @@ export default function TechnicalSkillReportPage() {
         </Panel>
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogContent className="w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Nhập kết quả đánh giá tay nghề</DialogTitle>
             <DialogDescription>
@@ -447,7 +451,7 @@ export default function TechnicalSkillReportPage() {
               <select
                 value={workerId}
                 onChange={event => setWorkerId(event.target.value)}
-                className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-2 h-11 w-full min-w-0 rounded-md border border-input bg-white px-3 text-sm"
               >
                 <option value="">Chọn nhân công</option>
                 {workers.map(worker => (
@@ -480,9 +484,9 @@ export default function TechnicalSkillReportPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div><Label>Lỗi kỹ thuật <span className="font-normal text-slate-400">(không bắt buộc)</span></Label><Input value={technicalIssue} onChange={event => setTechnicalIssue(event.target.value)} placeholder="Chỉ nhập khi có lỗi kỹ thuật" className="mt-2" /></div>
-              <div><Label>Kết quả đánh giá</Label><select value={skillLevel} onChange={event => setSkillLevel(event.target.value as SkillLevel)} className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn mức tay nghề</option>{skillLevels.map(level => <option key={level} value={level}>{level}</option>)}</select></div>
+              <div><Label>Kết quả đánh giá</Label><select value={skillLevel} onChange={event => setSkillLevel(event.target.value as SkillLevel)} className="mt-2 h-11 w-full min-w-0 rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn mức tay nghề</option>{skillLevels.map(level => <option key={level} value={level}>{level}</option>)}</select></div>
               <div><Label>Năng suất</Label><Input type="number" min="0" max="100" step="0.1" value={productivity} onChange={event => setProductivity(event.target.value)} placeholder="0–100" className="mt-2" /></div>
-              <div><Label>Hao dăm</Label><select value={scrapingLoss} onChange={event => setScrapingLoss(event.target.value as "Có" | "Không")} className="mt-2 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn Có/Không</option><option value="Có">Có</option><option value="Không">Không</option></select></div>
+              <div><Label>Hao dăm</Label><select value={scrapingLoss} onChange={event => setScrapingLoss(event.target.value as "Có" | "Không")} className="mt-2 h-11 w-full min-w-0 rounded-md border border-input bg-white px-3 text-sm"><option value="">Chọn Có/Không</option><option value="Có">Có</option><option value="Không">Không</option></select></div>
             </div>
             <div>
               <Label>Nhận xét / khuyến nghị đào tạo</Label>
@@ -493,18 +497,19 @@ export default function TechnicalSkillReportPage() {
                 className="mt-2"
               />
             </div>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
+                className="min-h-11 w-full sm:w-auto"
               >
                 Hủy
               </Button>
               <Button
                 type="submit"
                 disabled={saveEvaluation.isPending}
-                className="bg-emerald-700 hover:bg-emerald-800"
+                className="min-h-11 w-full bg-emerald-700 hover:bg-emerald-800 sm:w-auto"
               >
                 {saveEvaluation.isPending ? "Đang lưu…" : "Lưu đánh giá"}
               </Button>
@@ -513,7 +518,7 @@ export default function TechnicalSkillReportPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={skillImportOpen} onOpenChange={setSkillImportOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Nhập tổng hợp tay nghề và Hao dăm</DialogTitle>
             <DialogDescription>Biểu mẫu này khớp với file Import: mỗi dòng là một Đội trong một tháng, gồm quân số, 5 mức tay nghề, Hao dăm hiện tại và tháng trước. Chênh lệch được tính tự động theo công thức số thợ hiện tại chia số thợ tháng trước nhân 100 rồi trừ 100.</DialogDescription>
@@ -527,7 +532,7 @@ export default function TechnicalSkillReportPage() {
               {importedSkillFields.map(([key, label]) => <div key={key}><Label>{label}</Label><Input type="number" min="0" step="1" value={skillImportForm[key]} onChange={event => setSkillImportForm(current => ({ ...current, [key]: event.target.value }))} placeholder="0" className="mt-2" /></div>)}
             </div>
             <div><Label>Ghi chú</Label><Textarea value={skillImportForm.note} onChange={event => setSkillImportForm(current => ({ ...current, note: event.target.value }))} placeholder="Ghi chú đối chiếu nếu có" className="mt-2" /></div>
-            <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setSkillImportOpen(false)}>Hủy</Button><Button type="submit" disabled={saveImportedSkill.isPending} className="bg-emerald-700 hover:bg-emerald-800">{saveImportedSkill.isPending ? "Đang lưu…" : "Lưu tổng hợp"}</Button></div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Button type="button" variant="outline" onClick={() => setSkillImportOpen(false)} className="min-h-11 w-full sm:w-auto">Hủy</Button><Button type="submit" disabled={saveImportedSkill.isPending} className="min-h-11 w-full bg-emerald-700 hover:bg-emerald-800 sm:w-auto">{saveImportedSkill.isPending ? "Đang lưu…" : "Lưu tổng hợp"}</Button></div>
           </form>
         </DialogContent>
       </Dialog>
