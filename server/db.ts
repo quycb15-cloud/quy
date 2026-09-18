@@ -3009,6 +3009,22 @@ export async function getLatexProductionManagement(
           row.unit === unit
       )
       .reduce((sum, row) => sum + row.totalImport, 0);
+    const currentTotalExport = periodExports
+      .filter(
+        row =>
+          getYear(row.recordDate) === selectedYear &&
+          (selectedMonth === 0 || getMonth(row.recordDate) === selectedMonth) &&
+          row.unit === unit
+      )
+      .reduce((sum, row) => sum + row.totalExport, 0);
+    const previousTotalExport = periodExports
+      .filter(
+        row =>
+          getYear(row.recordDate) === previousYear &&
+          (previousMonth === 0 || getMonth(row.recordDate) === previousMonth) &&
+          row.unit === unit
+      )
+      .reduce((sum, row) => sum + row.totalExport, 0);
     return {
       unit,
       currentTotalImport,
@@ -3017,6 +3033,13 @@ export async function getLatexProductionManagement(
       changePercent:
         previousTotal > 0
           ? ((currentTotalImport - previousTotal) / previousTotal) * 100
+          : null,
+      currentTotalExport,
+      previousTotalExport,
+      exportChange: currentTotalExport - previousTotalExport,
+      exportChangePercent:
+        previousTotalExport > 0
+          ? ((currentTotalExport - previousTotalExport) / previousTotalExport) * 100
           : null,
     };
   });
