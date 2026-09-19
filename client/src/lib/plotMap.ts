@@ -5,6 +5,7 @@ import {
   type PlotBoundaryGeometry,
   type PlotMapStatus,
 } from "@shared/plotMap";
+import { polygonAreaHa } from "@shared/plotGeoJson";
 
 export type PlotMapRecord = {
   id: number;
@@ -12,6 +13,8 @@ export type PlotMapRecord = {
   name: string;
   unit: string;
   areaHa: number;
+  plantedYear?: number | null;
+  cultivar?: string | null;
   mapStatus?: PlotMapStatus | null;
   boundaryGeoJson?: string | null;
 };
@@ -67,6 +70,11 @@ export function findPlotByCode<T extends Pick<PlotMapRecord, "code" | "name">>(
 
 export function plotBoundaryFromRecord(plot: Pick<PlotMapRecord, "boundaryGeoJson">): PlotBoundaryGeometry | null {
   return parsePlotBoundaryGeoJson(plot.boundaryGeoJson);
+}
+
+export function calculatedPlotAreaHa(plot: Pick<PlotMapRecord, "boundaryGeoJson" | "areaHa">): number {
+  const boundary = plotBoundaryFromRecord(plot);
+  return boundary ? polygonAreaHa(boundary) : Number(plot.areaHa ?? 0);
 }
 
 export function getBoundaryBounds(

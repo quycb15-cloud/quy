@@ -21,6 +21,7 @@ import {
   type PlotProductionRecord,
 } from "@/lib/plotMap";
 import type { PlotBoundaryGeometry } from "@shared/plotMap";
+import { RUBBER_FARM_CENTER } from "@shared/plotGeoJson";
 import type { LatLngExpression, LatLngTuple, PathOptions } from "leaflet";
 import { Layers, MapPin, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -39,7 +40,7 @@ export type RubberFarmMapProps = {
   className?: string;
 };
 
-const DEFAULT_CENTER: LatLngExpression = [11.2, 106.7];
+const DEFAULT_CENTER: LatLngExpression = RUBBER_FARM_CENTER;
 const DEFAULT_ZOOM = 12;
 const FARM_FIT_OPTIONS = { padding: [32, 32] as [number, number], maxZoom: 16 };
 const PLOT_FIT_OPTIONS = { padding: [48, 48] as [number, number], maxZoom: 18 };

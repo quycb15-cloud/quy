@@ -91,3 +91,12 @@ pnpm build
 
 [1]: https://leafletjs.com/ "Leaflet — open-source JavaScript library for mobile-friendly interactive maps"
 [2]: https://operations.osmfoundation.org/policies/tiles/ "OpenStreetMap Foundation Tile Usage Policy"
+
+
+## GeoJSON khảo sát thực tế đã tích hợp
+
+Nguồn dùng chung `shared/plotGeoJson.ts` hiện chứa trực tiếp `FeatureCollection` do người dùng cung cấp với Mã lô `LÔ-NÔNG-TRƯỜNG-01`, Đội sản xuất số 1 và tâm bản đồ `[13.858, 107.239]`. Web hiển thị feature này ngay cả trước khi bản ghi được lưu trong CSDL; nút **Lưu vào danh mục để sửa thông tin** mở biểu mẫu quản trị, cho phép nhập Giống cây và Năm trồng. Mobile có thêm tab **Vườn**, dùng `react-native-webview` để hiển thị Leaflet/OpenStreetMap, popup polygon và biểu mẫu lưu cùng khối khảo sát.
+
+Diện tích được tính bằng công thức geodesic trên bán kính Trái Đất WGS84 xấp xỉ, có trừ các ring lỗ bên trong và trả về Hecta. Với đúng tọa độ đã cung cấp, kết quả hiện tại là **10.657,265 ha**. Đây là diện tích toán học của Polygon đầu vào; vì hình dạng tọa độ trải rộng và có các cạnh chéo, cần đối chiếu lại dữ liệu trắc địa nếu kết quả khác diện tích hồ sơ thực địa. Khi tạo hoặc sửa lô có GeoJSON, API server sẽ bỏ qua `areaHa` nhập tay và tự ghi kết quả tính từ Polygon.
+
+Để dựng Mobile, cài dependency theo `mobile/package.json` và chạy `pnpm install --frozen-lockfile` trong thư mục `mobile`. `react-native-webview` chỉ là lớp nhúng giao diện; dữ liệu nền vẫn là Leaflet mã nguồn mở và tile OpenStreetMap, không sử dụng Google Maps.

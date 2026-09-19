@@ -199,6 +199,14 @@ describe("rubberRouter authorization and business procedures", () => {
     await expect(caller.rubber.plots.create({ code: "VA-MAP-02", name: "Lô sai", unit: "Đội 1", areaHa: 12.5, boundaryGeoJson: '{"type":"Point","coordinates":[106.7,11.2]}' })).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
+  it("tự ghi diện tích Hecta tính từ Polygon, không dùng số nhập lệch", async () => {
+    const caller = appRouter.createCaller(makeContext("admin"));
+    const boundaryGeoJson = JSON.stringify({ type: "Polygon", coordinates: [[[107.194512, 13.784531], [107.195034, 13.867622], [107.196884, 13.853311], [107.194512, 13.784531]]] });
+    await caller.rubber.plots.create({ code: "VA-AREA-01", name: "Lô tính diện tích", unit: "Đội 1", areaHa: 1, boundaryGeoJson });
+    expect(dbMocks.createPlot).toHaveBeenCalledWith(expect.objectContaining({ areaHa: expect.any(Number) }), 1);
+    expect(dbMocks.createPlot.mock.calls.at(-1)?.[0].areaHa).toBeGreaterThan(0);
+  });
+
   it("ghi nhật ký khi admin cập nhật vườn", async () => {
     const caller = appRouter.createCaller(makeContext("admin"));
     await expect(caller.rubber.plots.update({ id: 8, data: { code: "VA-01", name: "Vườn A", unit: "Đội 1", areaHa: 13 } })).resolves.toEqual({ success: true });

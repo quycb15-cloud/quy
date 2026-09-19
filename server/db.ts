@@ -380,6 +380,8 @@ export type PlotPayload = {
   name: string;
   unit: string;
   gardenType?: "A" | "B" | "C" | null;
+  plantedYear?: number | null;
+  cultivar?: string | null;
   mapStatus?: "tapping" | "immature" | "suspended";
   boundaryGeoJson?: string | null;
   tappingDay?: number | null;
