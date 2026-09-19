@@ -6,6 +6,7 @@ import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
 import { summarizeWorkforceByTeam } from "../workforceSummary";
 import { getVietnamMonthKey } from "../workforceSnapshotTime";
+import { PLOT_MAP_STATUSES, serializePlotBoundary } from "@shared/plotMap";
 
 const requiredText = (label: string, max = 240) =>
   z.string().trim().min(1, `${label} là bắt buộc`).max(max);
@@ -15,12 +16,30 @@ const quantity = z.coerce
   .min(0, "Số lượng không được âm")
   .max(99999999);
 
+const plotBoundaryInput = z
+  .string()
+  .trim()
+  .max(100_000, "Ranh giới GeoJSON không được vượt quá 100 KB")
+  .optional()
+  .nullable()
+  .superRefine((value, context) => {
+    if (!value) return;
+    if (serializePlotBoundary(value)) return;
+    context.addIssue({
+      code: "custom",
+      message: "Ranh giới phải là GeoJSON Polygon hoặc MultiPolygon hợp lệ",
+    });
+  })
+  .transform(value => (value ? serializePlotBoundary(value) : null));
+
 const plotInput = z
   .object({
     code: requiredText("Mã vườn", 48),
     name: requiredText("Tên vườn", 160),
     unit: requiredText("Đơn vị", 120),
     gardenType: z.enum(["A", "B", "C"]).optional().nullable(),
+    mapStatus: z.enum(PLOT_MAP_STATUSES).optional().nullable().transform(value => value ?? "tapping"),
+    boundaryGeoJson: plotBoundaryInput,
     tappingDay: z.coerce
       .number()
       .int()
@@ -216,6 +235,8 @@ export const rubberRouter = router({
         metadata: {
           unit: input.unit,
           gardenType: input.gardenType ?? null,
+          mapStatus: input.mapStatus,
+          hasBoundary: Boolean(input.boundaryGeoJson),
           areaHa: input.areaHa,
         },
       });
@@ -233,6 +254,8 @@ export const rubberRouter = router({
           metadata: {
             unit: input.data.unit,
             gardenType: input.data.gardenType ?? null,
+            mapStatus: input.data.mapStatus,
+            hasBoundary: Boolean(input.data.boundaryGeoJson),
             areaHa: input.data.areaHa,
           },
         });

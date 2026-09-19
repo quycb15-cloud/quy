@@ -92,6 +92,10 @@ export const plantationPlots = mysqlTable(
     mapFileKey: varchar("mapFileKey", { length: 512 }),
     mapUrl: varchar("mapUrl", { length: 1024 }),
     mapUpdatedAt: timestamp("mapUpdatedAt"),
+    mapStatus: mysqlEnum("mapStatus", ["tapping", "immature", "suspended"])
+      .default("tapping")
+      .notNull(),
+    boundaryGeoJson: text("boundaryGeoJson"),
     plantedYear: int("plantedYear"),
     cultivar: varchar("cultivar", { length: 160 }),
     inventoryPits: int("inventoryPits"),

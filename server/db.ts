@@ -380,6 +380,8 @@ export type PlotPayload = {
   name: string;
   unit: string;
   gardenType?: "A" | "B" | "C" | null;
+  mapStatus?: "tapping" | "immature" | "suspended";
+  boundaryGeoJson?: string | null;
   tappingDay?: number | null;
   rowStart?: number | null;
   rowEnd?: number | null;
@@ -604,6 +606,8 @@ export async function createPlot(input: PlotPayload, userId: number) {
   if (!db) throw new Error("Cơ sở dữ liệu chưa sẵn sàng");
   await db.insert(plantationPlots).values({
     ...input,
+    mapStatus: input.mapStatus ?? "tapping",
+    boundaryGeoJson: input.boundaryGeoJson?.trim() || null,
     areaHa: asArea(input.areaHa),
     tappingDensity: input.tappingDensity == null ? null : asQuantity(input.tappingDensity),
     note: input.note?.trim() || null,
@@ -618,6 +622,8 @@ export async function updatePlot(id: number, input: PlotPayload) {
     .update(plantationPlots)
     .set({
       ...input,
+      mapStatus: input.mapStatus ?? "tapping",
+      boundaryGeoJson: input.boundaryGeoJson?.trim() || null,
       areaHa: asArea(input.areaHa),
       tappingDensity: input.tappingDensity == null ? null : asQuantity(input.tappingDensity),
       note: input.note?.trim() || null,
