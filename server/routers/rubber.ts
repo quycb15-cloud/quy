@@ -6,6 +6,8 @@ import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
 import { summarizeWorkforceByTeam } from "../workforceSummary";
 import { getVietnamMonthKey } from "../workforceSnapshotTime";
+import { PLOT_MAP_STATUSES, serializePlotBoundary } from "@shared/plotMap";
+import { areaHaFromGeoJson } from "@shared/plotGeoJson";
 
 const requiredText = (label: string, max = 240) =>
   z.string().trim().min(1, `${label} là bắt buộc`).max(max);
@@ -15,12 +17,32 @@ const quantity = z.coerce
   .min(0, "Số lượng không được âm")
   .max(99999999);
 
+const plotBoundaryInput = z
+  .string()
+  .trim()
+  .max(100_000, "Ranh giới GeoJSON không được vượt quá 100 KB")
+  .optional()
+  .nullable()
+  .superRefine((value, context) => {
+    if (!value) return;
+    if (serializePlotBoundary(value)) return;
+    context.addIssue({
+      code: "custom",
+      message: "Ranh giới phải là GeoJSON Polygon hoặc MultiPolygon hợp lệ",
+    });
+  })
+  .transform(value => (value ? serializePlotBoundary(value) : null));
+
 const plotInput = z
   .object({
     code: requiredText("Mã vườn", 48),
     name: requiredText("Tên vườn", 160),
     unit: requiredText("Đơn vị", 120),
     gardenType: z.enum(["A", "B", "C"]).optional().nullable(),
+    plantedYear: z.coerce.number().int().min(1900).max(2200).optional().nullable(),
+    cultivar: z.string().trim().max(160).optional().nullable(),
+    mapStatus: z.enum(PLOT_MAP_STATUSES).optional().nullable().transform(value => value ?? "tapping"),
+    boundaryGeoJson: plotBoundaryInput,
     tappingDay: z.coerce
       .number()
       .int()
@@ -208,7 +230,8 @@ export const rubberRouter = router({
       )
       .query(({ input }) => db.listPlotAllocationHistory(input?.unit)),
     create: adminProcedure.input(plotInput).mutation(async ({ input, ctx }) => {
-      await db.createPlot(input, ctx.user.id);
+      const data = { ...input, areaHa: areaHaFromGeoJson(input.boundaryGeoJson) ?? input.areaHa };
+      await db.createPlot(data, ctx.user.id);
       await db.logActivity(ctx.user.id, {
         eventType: "plot.create",
         entityType: "plot",
@@ -216,7 +239,9 @@ export const rubberRouter = router({
         metadata: {
           unit: input.unit,
           gardenType: input.gardenType ?? null,
-          areaHa: input.areaHa,
+          mapStatus: data.mapStatus,
+          hasBoundary: Boolean(data.boundaryGeoJson),
+          areaHa: data.areaHa,
         },
       });
       return { success: true };
@@ -224,16 +249,19 @@ export const rubberRouter = router({
     update: adminProcedure
       .input(z.object({ id: z.number().int().positive(), data: plotInput }))
       .mutation(async ({ input, ctx }) => {
-        await db.updatePlot(input.id, input.data);
+        const data = { ...input.data, areaHa: areaHaFromGeoJson(input.data.boundaryGeoJson) ?? input.data.areaHa };
+        await db.updatePlot(input.id, data);
         await db.logActivity(ctx.user.id, {
           eventType: "plot.update",
           entityType: "plot",
           entityId: input.id,
-          summary: `Cập nhật vườn ${input.data.code}`,
+          summary: `Cập nhật vườn ${data.code}`,
           metadata: {
-            unit: input.data.unit,
-            gardenType: input.data.gardenType ?? null,
-            areaHa: input.data.areaHa,
+            unit: data.unit,
+            gardenType: data.gardenType ?? null,
+            mapStatus: data.mapStatus,
+            hasBoundary: Boolean(data.boundaryGeoJson),
+            areaHa: data.areaHa,
           },
         });
         return { success: true };
