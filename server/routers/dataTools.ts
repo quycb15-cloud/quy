@@ -49,6 +49,13 @@ export const dataToolsRouter = router({
       return created;
     }),
     download: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => db.getDataBackupDownload(input.id)),
+    restore: adminProcedure
+      .input(z.object({ contentBase64: z.string().min(100).max(35_000_000) }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await db.restoreDataBackup({ contentBase64: input.contentBase64, userId: ctx.user.id });
+        await db.logActivity(ctx.user.id, { eventType: "data.backup.restore", entityType: "data_backup", summary: `Khôi phục dữ liệu từ file backup (${result.total} bản ghi)`, metadata: result });
+        return result;
+      }),
   }),
   warehouseLoss: protectedProcedure.input(z.object({ periodLabel: z.string().trim().max(80).optional(), monthLabel: z.string().trim().max(16).optional() }).optional()).query(async ({ input, ctx }) => { const profile = await requirePermission(ctx, "warehouse:read"); if (profile.fullAccess || !profile.scopeUnits.length) return db.getWarehouseLossByTeam(input?.periodLabel, input?.monthLabel); const [imports, exports] = await Promise.all([db.listTeamImports(), db.listTeamExports()]); const { aggregateWarehouseLoss } = await import("../warehouseLossMath"); return aggregateWarehouseLoss(filterByScope(imports, profile), filterByScope(exports, profile), input?.periodLabel, input?.monthLabel); }),
   import: router({

@@ -3,7 +3,7 @@ import type { TrpcContext } from "./_core/context";
 
 const dbMocks = vi.hoisted(() => ({
   getExcelDataSummary: vi.fn(), listTeamImports: vi.fn(), listTeamExports: vi.fn(), getWarehouseLossByTeam: vi.fn(), getInternalAccountByUserId: vi.fn(),
-  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpsertLatexProductionPlans: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), listWorkers: vi.fn(), logActivity: vi.fn(),
+  bulkUpsertExcelPlots: vi.fn(), validateExcelPlotRows: vi.fn(), bulkUpsertExcelWorkers: vi.fn(), bulkUpsertLatexProductionPlans: vi.fn(), validateExcelWorkerRows: vi.fn(), bulkUpdateWorkerCodes: vi.fn(), bulkUpdatePlotIndicators: vi.fn(), bulkUpsertTeamImports: vi.fn(), bulkUpsertTeamExports: vi.fn(), bulkUpsertWorkerPlotAllocations: vi.fn(), listWorkers: vi.fn(), logActivity: vi.fn(), restoreDataBackup: vi.fn(),
 }));
 
 vi.mock("./db", () => dbMocks);
@@ -132,6 +132,15 @@ describe("dataToolsRouter", () => {
     const rows = [{ unit: "Đội 2", workerName: "YIM RA", employeeCode: "NC-002", gardenType: "A" as const, plotCode: "LO-DOI-2-2012-7A", rowStart: 1, rowEnd: 12, areaHa: 2.35 }];
     await expect(appRouter.createCaller(context("admin")).dataTools.import.workerPlotAllocations({ rows })).resolves.toEqual({ success: true, imported: 1 });
     await expect(appRouter.createCaller(context("user")).dataTools.import.workerPlotAllocations({ rows })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("chỉ admin được khôi phục backup và ghi nhật ký thao tác", async () => {
+    dbMocks.restoreDataBackup.mockResolvedValue({ restored: { plots: 2 }, skipped: ["Tài khoản nội bộ"], total: 2 });
+    const contentBase64 = "A".repeat(120);
+    await expect(appRouter.createCaller(context("admin")).dataTools.backups.restore({ contentBase64 })).resolves.toMatchObject({ total: 2 });
+    expect(dbMocks.restoreDataBackup).toHaveBeenCalledWith({ contentBase64, userId: 1 });
+    expect(dbMocks.logActivity).toHaveBeenCalledWith(1, expect.objectContaining({ eventType: "data.backup.restore" }));
+    await expect(appRouter.createCaller(context("user")).dataTools.backups.restore({ contentBase64 })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
   it("nhận số cây cạo thập phân từ Excel và chuẩn hóa về số nguyên trước khi lưu", async () => {

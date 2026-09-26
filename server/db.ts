@@ -753,6 +753,8 @@ export async function bulkUpsertExcelPlots(
           tappingDensity:
             row.tappingDensity == null ? null : asQuantity(row.tappingDensity),
           plotRank: row.plotRank?.trim() || null,
+          mapStatus: row.mapStatus ?? "tapping",
+          boundaryGeoJson: row.boundaryGeoJson?.trim() || null,
         },
       });
 }
@@ -1873,6 +1875,9 @@ export async function createDataBackup(input: {
       "Năm trồng": row.plantedYear ?? "",
       Giống: row.cultivar ?? "",
       "Cây cạo": row.tappingTrees ?? "",
+      "Trạng thái bản đồ": row.mapStatus,
+      "Ranh giới GeoJSON": row.boundaryGeoJson ?? "",
+      "Ghi chú": row.note ?? "",
       "Ngày chỉ số": row.indicatorDate ?? "",
     }))
   );
@@ -2106,6 +2111,42 @@ export async function getDataBackupDownload(id: number) {
     fileName: row.fileName,
     url: await storageGetSignedUrl(row.storageKey),
   };
+}
+
+type BackupSheetRow = Record<string, unknown>;
+
+function backupSheetRows(book: XLSX.WorkBook, name: string): BackupSheetRow[] {
+  const sheet = book.Sheets[name];
+  return sheet ? XLSX.utils.sheet_to_json<BackupSheetRow>(sheet, { defval: "", raw: false }) : [];
+}
+
+function backupText(value: unknown) { return String(value ?? "").trim(); }
+function backupNumber(value: unknown) { const parsed = Number(String(value ?? "").replaceAll(",", "").trim()); return Number.isFinite(parsed) ? parsed : 0; }
+function backupDate(value: unknown) { const date = new Date(value as string | number | Date); if (Number.isNaN(date.getTime())) throw new Error(`Ngày trong file backup không hợp lệ: ${String(value)}`); return date; }
+
+/** Restores user-entered datasets by upsert; never restores credentials or deletes rows. */
+export async function restoreDataBackup(input: { contentBase64: string; userId: number }) {
+  const buffer = Buffer.from(input.contentBase64, "base64");
+  if (!buffer.length || buffer.length > 25 * 1024 * 1024) throw new Error("File backup rỗng hoặc vượt giới hạn 25 MB");
+  let book: XLSX.WorkBook;
+  try { book = XLSX.read(buffer, { type: "buffer", cellDates: true }); } catch { throw new Error("Không đọc được file backup. Hãy chọn file .xlsx được tạo từ chức năng Sao lưu dữ liệu."); }
+  if (!book.SheetNames.includes("Lô vườn") && !book.SheetNames.includes("Nhân công")) throw new Error("File không có sheet dữ liệu backup hợp lệ");
+  const restored: Record<string, number> = {};
+  const plots = backupSheetRows(book, "Lô vườn").filter(row => backupText(row["Mã lô"]));
+  if (plots.length) {
+    await bulkUpsertExcelPlots(plots.map(row => ({ code: backupText(row["Mã lô"]), name: backupText(row["Tên lô"]) || backupText(row["Mã lô"]), unit: backupText(row["Đội"]), gardenType: ["A", "B", "C"].includes(backupText(row["Loại vườn"])) ? backupText(row["Loại vườn"]) as "A" | "B" | "C" : null, areaHa: backupNumber(row["Diện tích (ha)"]), rowStart: backupNumber(row["Từ hàng"]) || null, rowEnd: backupNumber(row["Đến hàng"]) || null, plantedYear: backupNumber(row["Năm trồng"]) || null, cultivar: backupText(row["Giống"]) || null, tappingTrees: backupNumber(row["Cây cạo"]) || null, mapStatus: ["tapping", "immature", "suspended"].includes(backupText(row["Trạng thái bản đồ"])) ? backupText(row["Trạng thái bản đồ"]) as "tapping" | "immature" | "suspended" : "tapping", boundaryGeoJson: backupText(row["Ranh giới GeoJSON"]) || null, note: backupText(row["Ghi chú"]) || null })), input.userId);
+    restored.plots = plots.length;
+  }
+  const workerRows = backupSheetRows(book, "Nhân công").filter(row => backupText(row["Tên"]));
+  if (workerRows.length) {
+    await bulkUpsertExcelWorkers(workerRows.map(row => ({ unit: backupText(row["Đội"]), name: backupText(row["Tên"]), employeeCode: backupText(row["Mã số"]) || null, phoneticName: backupText(row["Tên phiên âm"]) || null, gender: backupText(row["Giới tính"]) === "Nữ" ? "female" : "male", phone: backupText(row["Số điện thoại"]) || null, status: backupText(row["Trạng thái"]) === "inactive" || backupText(row["Trạng thái làm việc"]) === "Đã nghỉ" ? "inactive" : "active", roleTitle: backupText(row["Chức danh"]) || "Công nhân khai thác", note: backupText(row["Ghi chú"]) || null })), input.userId);
+    restored.workers = workerRows.length;
+  }
+  const imports = backupSheetRows(book, "Nhập mủ đội").filter(row => backupText(row["Đội"]));
+  if (imports.length) { await bulkUpsertTeamImports(imports.map(row => ({ unit: backupText(row["Đội"]), gardenName: backupText(row["Vườn"]), periodLabel: backupText(row["Đợt"]), recordDate: backupDate(row["Ngày"]), frozenLatex: backupNumber(row["Mủ đông tạp (kg)"]), latexThread: backupNumber(row["Mủ dây (kg)"]), note: null })), input.userId); restored.teamImports = imports.length; }
+  const exports = backupSheetRows(book, "Xuất mủ đội").filter(row => backupText(row["Đội"]));
+  if (exports.length) { await bulkUpsertTeamExports(exports.map(row => ({ unit: backupText(row["Đội"]), periodLabel: backupText(row["Đợt"]), recordDate: backupDate(row["Ngày"]), frozenContaminatedLatex: backupNumber(row["Mủ đông tạp (kg)"]), latexThread: backupNumber(row["Mủ dây (kg)"]), note: null })), input.userId); restored.teamExports = exports.length; }
+  return { restored, skipped: ["Tài khoản nội bộ", "Nhật ký hoạt động", "Khóa kỳ sản lượng lô", "Snapshot nhân công"], total: Object.values(restored).reduce((sum, value) => sum + value, 0) };
 }
 
 export async function getDataBackupScheduleByTaskUid(taskUid: string) {
